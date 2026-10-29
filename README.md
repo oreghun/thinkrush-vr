@@ -113,15 +113,13 @@ The full list is in [CLAUDE.md](CLAUDE.md). In short:
 - No external services, analytics, ads or payments. Free to play.
 - Assets are code-generated or CC0 only. No brand names, logos or real people.
   The starter's chime (`public/audio/chime.wav`) is synthesized by
-  `scripts/generate-chime.mjs`, and every model is built in code.
+  `scripts/generate-chime.mjs`, and every model is built in code, including
+  the VR hands and controllers (`src/input-visuals.ts`), which IWSDK would
+  otherwise download from a CDN.
 - Keep the build under 20 MB. The build fails above that.
 
 ## Known gaps
 
-- In VR, IWSDK loads its hand and controller 3D models from the jsDelivr CDN.
-  Those models are MIT-licensed, not CC0, and the request reaches an outside
-  server. Before release, swap in code-generated hand visuals so the game makes
-  no outside requests.
 - IWSDK is at 1.1.0-rc.2, a release candidate. That is what `@iwsdk/create@latest`
   installs today. Upgrade to 1.1.0 once it ships.
 
@@ -134,6 +132,7 @@ public/ui/                UIKitML panels
 src/index.ts              entry point: creates the world, registers systems
 src/i18n/                 en.json, sw.json and the t() helper
 src/ui-text.ts            fills UIKitML text from src/i18n
+src/input-visuals.ts      code-built hands and controllers for VR
 src/assets.ts             asset manifest; models are built in src/scene-assets/
 scripts/                  content check, build size check, chime generator
 iwsdk.config.json         IWSDK settings: XR mode, hand tracking, features

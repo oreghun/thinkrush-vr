@@ -8,6 +8,7 @@
 import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { onLanguageChange, t } from './i18n/index.js';
+import { installCodeInputVisuals } from './input-visuals.js';
 import { OrbSystem } from './orb.js';
 import { PanelSystem } from './panel.js';
 import { UITextSystem } from './ui-text.js';
@@ -22,6 +23,7 @@ World.create(
   document.getElementById('scene-container') as HTMLDivElement,
   projectOptions,
 ).then((world) => {
+  installCodeInputVisuals(world);
   world.registerSystem(UITextSystem);
   world.registerSystem(OrbSystem);
   world.registerSystem(PanelSystem);
