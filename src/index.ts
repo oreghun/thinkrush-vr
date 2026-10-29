@@ -9,9 +9,9 @@ import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { onLanguageChange, t } from './i18n/index.js';
 import { installCodeInputVisuals } from './input-visuals.js';
-import { OrbSystem } from './orb.js';
 import { PanelSystem } from './panel.js';
 import { UITextSystem } from './ui-text.js';
+import { VisualPuzzleSystem } from './visual-puzzle.js';
 
 const updateTitle = () => {
   document.title = t('app.title');
@@ -25,6 +25,6 @@ World.create(
 ).then((world) => {
   installCodeInputVisuals(world);
   world.registerSystem(UITextSystem);
-  world.registerSystem(OrbSystem);
   world.registerSystem(PanelSystem);
+  world.registerSystem(VisualPuzzleSystem);
 });

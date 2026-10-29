@@ -11,12 +11,11 @@ import {
   createSideboardSet,
 } from './scene-assets/decor.scene-asset.js';
 import {
-  createGraphiteCube,
-  createGraphiteGem,
-  createGraphiteKnot,
-  createGraphiteOrb,
-  createGraphiteRing,
-  createPlinth,
+  createAnswerTray,
+  createPuzzleTable,
+  createPuzzleTile,
+} from './scene-assets/puzzle.scene-asset.js';
+import {
   createStage,
   createStudioFloor,
 } from './scene-assets/studio.scene-asset.js';
@@ -32,16 +31,12 @@ const uikitml = (fileName: string, name: string) => ({
 export default defineAssets({
   'studio-floor': createStudioFloor(),
   stage: createStage(),
-  plinth: createPlinth(),
-  'graphite-cube': createGraphiteCube(),
-  'graphite-gem': createGraphiteGem(),
-  'graphite-knot': createGraphiteKnot(),
-  'graphite-orb': createGraphiteOrb(),
-  'graphite-ring': createGraphiteRing(),
   'gallery-set': createGallerySet(),
   'sideboard-set': createSideboardSet(),
+  'puzzle-table': createPuzzleTable(),
+  'answer-tray': createAnswerTray(),
+  'puzzle-tile': createPuzzleTile(),
   'welcome-panel': uikitml('welcome.uikitml', 'Welcome Panel'),
-  'label-grab': uikitml('label-grab.uikitml', 'Grab Label'),
-  'label-select': uikitml('label-select.uikitml', 'Select Label'),
-  'label-spin': uikitml('label-spin.uikitml', 'Spin Label'),
+  'puzzle-panel': uikitml('puzzle-panel.uikitml', 'Puzzle Panel'),
+  'tile-label': uikitml('tile-label.uikitml', 'Tile Label'),
 });

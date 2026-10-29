@@ -17,9 +17,11 @@ tracking turned on in the headset's settings, put the controllers down and the
 game switches to your hands. On a computer, the same link shows a 3D preview
 you can click around in.
 
-> Status: foundation only. The live build is the IWSDK starter scene (three
-> practice stations and a welcome panel) with ThinkRush's language and content
-> setup. There is no gameplay yet.
+> Status: one playable puzzle. You sit at a table with four tiles and drop the
+> odd one out on the tray before the 60-second timer runs out. The timer only
+> runs inside VR. It always uses the first visual puzzle in
+> `content/puzzles.json`; runs, RUSH, voice answers and the other puzzle types
+> come next.
 
 ## Run it locally
 
@@ -120,7 +122,7 @@ The full list is in [CLAUDE.md](CLAUDE.md). In short:
 - Hands-first: everything works without controllers, menus included.
 - No external services, analytics, ads or payments. Free to play.
 - Assets are code-generated or CC0 only. No brand names, logos or real people.
-  The starter's chime (`public/audio/chime.wav`) is synthesized by
+  The answer chime (`public/audio/chime.wav`) is synthesized by
   `scripts/generate-chime.mjs`, and every model is built in code, including
   the VR hands and controllers (`src/input-visuals.ts`), which IWSDK would
   otherwise download from a CDN.
@@ -141,6 +143,8 @@ src/index.ts              entry point: creates the world, registers systems
 src/i18n/                 en.json, sw.json and the t() helper
 src/ui-text.ts            fills UIKitML text from src/i18n
 src/input-visuals.ts      code-built hands and controllers for VR
+src/visual-puzzle.ts      the visual puzzle: tiles, tray, timer, feedback
+src/puzzles.ts            typed access to content/puzzles.json
 src/assets.ts             asset manifest; models are built in src/scene-assets/
 scripts/                  content check, build size check, chime generator
 iwsdk.config.json         IWSDK settings: XR mode, hand tracking, features

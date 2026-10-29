@@ -57,303 +57,210 @@
       }
     },
     {
-      "id": "grab-plinth",
-      "name": "Grab Plinth",
+      "id": "puzzle-table",
+      "name": "Puzzle Table",
       "content": {
         "type": "asset",
-        "asset": "plinth",
+        "asset": "puzzle-table",
         "castShadow": true,
         "receiveShadow": true
       },
       "transform": {
-        "position": [-0.9543, 0.035, -1.1214],
-        "rotationDeg": [0, 30, 0]
+        "position": [0, 0.035, -0.41]
+      },
+      "components": {
+        "PuzzleBoard": {
+          "status": "playing",
+          "secondsLeft": 60,
+          "wrongAnswers": 0
+        }
       },
       "children": [
         {
-          "id": "grab-plinth-contact",
+          "id": "puzzle-table-contact",
           "name": "Contact Shadow",
           "transform": {
             "position": [0, 0.002, 0]
           },
           "components": {
             "ContactShadow": {
-              "size": [0.8, 0.8],
-              "height": 0.0016
+              "size": [0.9, 0.55],
+              "height": 0.0018
             }
-          }
-        },
-        {
-          "id": "graphite-cube",
-          "name": "Graphite Cube",
-          "content": {
-            "type": "asset",
-            "asset": "graphite-cube",
-            "castShadow": true,
-            "receiveShadow": true
-          },
-          "transform": {
-            "position": [-0.25, 0.998, -0.03],
-            "rotationDeg": [0, 20, 0],
-            "scale": 1.2
-          },
-          "components": {
-            "RayInteractable": {},
-            "DistanceGrabbable": {
-              "movementMode": "MoveFromTarget"
-            }
-          }
-        },
-        {
-          "id": "graphite-cube-contact",
-          "name": "Contact Shadow",
-          "transform": {
-            "position": [-0.25, 0.921, -0.03]
-          },
-          "components": {
-            "ContactShadow": {
-              "size": [0.26, 0.26],
-              "height": 0.00052
-            }
-          }
-        },
-        {
-          "id": "graphite-gem",
-          "name": "Graphite Gem",
-          "content": {
-            "type": "asset",
-            "asset": "graphite-gem",
-            "castShadow": true,
-            "receiveShadow": true
-          },
-          "transform": {
-            "position": [0, 1.006, -0.03],
-            "rotationDeg": [15, 0, 10],
-            "scale": 1.2
-          },
-          "components": {
-            "RayInteractable": {},
-            "DistanceGrabbable": {
-              "movementMode": "MoveFromTarget"
-            }
-          }
-        },
-        {
-          "id": "graphite-gem-contact",
-          "name": "Contact Shadow",
-          "transform": {
-            "position": [0, 0.921, -0.03]
-          },
-          "components": {
-            "ContactShadow": {
-              "size": [0.24, 0.24],
-              "height": 0.00048
-            }
-          }
-        },
-        {
-          "id": "graphite-knot",
-          "name": "Graphite Knot",
-          "content": {
-            "type": "asset",
-            "asset": "graphite-knot",
-            "castShadow": true,
-            "receiveShadow": true
-          },
-          "transform": {
-            "position": [0.25, 1.02, -0.03],
-            "rotationDeg": [0, -30, 0],
-            "scale": 0.74
-          },
-          "components": {
-            "RayInteractable": {},
-            "DistanceGrabbable": {
-              "movementMode": "MoveFromTarget"
-            }
-          }
-        },
-        {
-          "id": "graphite-knot-contact",
-          "name": "Contact Shadow",
-          "transform": {
-            "position": [0.25, 0.921, -0.03]
-          },
-          "components": {
-            "ContactShadow": {
-              "size": [0.26, 0.26],
-              "height": 0.00052
-            }
-          }
-        },
-        {
-          "id": "grab-label",
-          "name": "Grab Label",
-          "content": {
-            "type": "asset",
-            "asset": "label-grab"
-          },
-          "transform": {
-            "position": [0, 0.94, 0.358],
-            "rotationDeg": [-32, 0, 0],
-            "scale": 0.12
           }
         }
       ]
     },
     {
-      "id": "select-plinth",
-      "name": "Select Plinth",
+      "id": "answer-tray",
+      "name": "Answer Tray",
       "content": {
         "type": "asset",
-        "asset": "plinth",
+        "asset": "answer-tray",
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [0, 0.68, -0.29]
+      },
+      "components": {
+        "AudioSource": {
+          "src": "./audio/chime.wav",
+          "maxInstances": 3,
+          "playbackMode": "fade-restart"
+        }
+      }
+    },
+    {
+      "id": "puzzle-tile-1",
+      "name": "Puzzle Tile 1",
+      "content": {
+        "type": "asset",
+        "asset": "puzzle-tile",
         "castShadow": true,
         "receiveShadow": true
       },
       "transform": {
-        "position": [0, 0.035, -1.5]
+        "position": [-0.255, 0.725, -0.5]
+      },
+      "components": {
+        "OneHandGrabbable": {},
+        "PuzzleTile": {
+          "slot": 0,
+          "correct": false
+        }
       },
       "children": [
         {
-          "id": "select-plinth-contact",
-          "name": "Contact Shadow",
-          "transform": {
-            "position": [0, 0.002, 0]
-          },
-          "components": {
-            "ContactShadow": {
-              "size": [0.8, 0.8],
-              "height": 0.0016
-            }
-          }
-        },
-        {
-          "id": "graphite-orb",
-          "name": "Graphite Orb",
-          "metadata": {
-            "iwsdk.validation": {
-              "allowFloating": true
-            }
-          },
+          "id": "puzzle-tile-1-label",
+          "name": "Tile 1 Label",
           "content": {
             "type": "asset",
-            "asset": "graphite-orb",
-            "castShadow": true,
-            "receiveShadow": true
+            "asset": "tile-label"
           },
           "transform": {
-            "position": [0, 1.12, -0.02]
-          },
-          "components": {
-            "AudioSource": {
-              "src": "./audio/chime.wav",
-              "maxInstances": 3,
-              "playbackMode": "fade-restart"
-            },
-            "RayInteractable": {},
-            "Orb": {}
-          }
-        },
-        {
-          "id": "graphite-orb-contact",
-          "name": "Contact Shadow",
-          "transform": {
-            "position": [0, 0.921, -0.02]
-          },
-          "components": {
-            "ContactShadow": {
-              "size": [0.26, 0.26],
-              "height": 0.00052
-            }
-          }
-        },
-        {
-          "id": "select-label",
-          "name": "Select Label",
-          "content": {
-            "type": "asset",
-            "asset": "label-select"
-          },
-          "transform": {
-            "position": [0, 0.94, 0.358],
-            "rotationDeg": [-32, 0, 0],
-            "scale": 0.12
+            "position": [0, 0, 0.0185],
+            "scale": 0.115
           }
         }
       ]
     },
     {
-      "id": "spin-plinth",
-      "name": "Spin Plinth",
+      "id": "puzzle-tile-2",
+      "name": "Puzzle Tile 2",
       "content": {
         "type": "asset",
-        "asset": "plinth",
+        "asset": "puzzle-tile",
         "castShadow": true,
         "receiveShadow": true
       },
       "transform": {
-        "position": [0.9543, 0.035, -1.1214],
-        "rotationDeg": [0, -30, 0]
+        "position": [-0.085, 0.725, -0.5]
+      },
+      "components": {
+        "OneHandGrabbable": {},
+        "PuzzleTile": {
+          "slot": 1,
+          "correct": false
+        }
       },
       "children": [
         {
-          "id": "spin-plinth-contact",
-          "name": "Contact Shadow",
-          "transform": {
-            "position": [0, 0.002, 0]
-          },
-          "components": {
-            "ContactShadow": {
-              "size": [0.8, 0.8],
-              "height": 0.0016
-            }
-          }
-        },
-        {
-          "id": "graphite-ring",
-          "name": "Graphite Ring",
+          "id": "puzzle-tile-2-label",
+          "name": "Tile 2 Label",
           "content": {
             "type": "asset",
-            "asset": "graphite-ring",
-            "castShadow": true,
-            "receiveShadow": true
+            "asset": "tile-label"
           },
           "transform": {
-            "position": [0, 1.165, -0.02]
-          },
-          "components": {
-            "RayInteractable": {},
-            "DistanceGrabbable": {
-              "movementMode": "RotateAtSource"
-            }
-          }
-        },
-        {
-          "id": "graphite-ring-contact",
-          "name": "Contact Shadow",
-          "transform": {
-            "position": [0, 0.921, -0.02]
-          },
-          "components": {
-            "ContactShadow": {
-              "size": [0.4, 0.4],
-              "height": 0.0008
-            }
-          }
-        },
-        {
-          "id": "spin-label",
-          "name": "Spin Label",
-          "content": {
-            "type": "asset",
-            "asset": "label-spin"
-          },
-          "transform": {
-            "position": [0, 0.94, 0.358],
-            "rotationDeg": [-32, 0, 0],
-            "scale": 0.12
+            "position": [0, 0, 0.0185],
+            "scale": 0.115
           }
         }
       ]
+    },
+    {
+      "id": "puzzle-tile-3",
+      "name": "Puzzle Tile 3",
+      "content": {
+        "type": "asset",
+        "asset": "puzzle-tile",
+        "castShadow": true,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [0.085, 0.725, -0.5]
+      },
+      "components": {
+        "OneHandGrabbable": {},
+        "PuzzleTile": {
+          "slot": 2,
+          "correct": false
+        }
+      },
+      "children": [
+        {
+          "id": "puzzle-tile-3-label",
+          "name": "Tile 3 Label",
+          "content": {
+            "type": "asset",
+            "asset": "tile-label"
+          },
+          "transform": {
+            "position": [0, 0, 0.0185],
+            "scale": 0.115
+          }
+        }
+      ]
+    },
+    {
+      "id": "puzzle-tile-4",
+      "name": "Puzzle Tile 4",
+      "content": {
+        "type": "asset",
+        "asset": "puzzle-tile",
+        "castShadow": true,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [0.255, 0.725, -0.5]
+      },
+      "components": {
+        "OneHandGrabbable": {},
+        "PuzzleTile": {
+          "slot": 3,
+          "correct": false
+        }
+      },
+      "children": [
+        {
+          "id": "puzzle-tile-4-label",
+          "name": "Tile 4 Label",
+          "content": {
+            "type": "asset",
+            "asset": "tile-label"
+          },
+          "transform": {
+            "position": [0, 0, 0.0185],
+            "scale": 0.115
+          }
+        }
+      ]
+    },
+    {
+      "id": "puzzle-panel",
+      "name": "Puzzle Panel",
+      "content": {
+        "type": "asset",
+        "asset": "puzzle-panel"
+      },
+      "transform": {
+        "position": [0, 1.02, -0.86],
+        "rotationDeg": [-12, 0, 0],
+        "scale": 0.13
+      },
+      "components": {
+        "RayInteractable": {}
+      }
     },
     {
       "id": "welcome-panel",
