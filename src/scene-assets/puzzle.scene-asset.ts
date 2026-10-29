@@ -2,7 +2,8 @@ import {
   createSceneMaterial,
   createScenePrimitiveObject,
   Group,
-  type Mesh,
+  Mesh,
+  SphereGeometry,
 } from '@iwsdk/core';
 
 /**
@@ -164,4 +165,9 @@ export function createPuzzleTile(): Mesh {
     },
     graphiteMaterial,
   );
+}
+
+/** Floating answer orb, origin at its center; its label floats in front. */
+export function createAnswerOrb(radius = 0.055): Mesh {
+  return new Mesh(new SphereGeometry(radius, 32, 24), graphiteMaterial);
 }

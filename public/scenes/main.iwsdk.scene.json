@@ -247,6 +247,105 @@
       ]
     },
     {
+      "id": "answer-orb-1",
+      "name": "Answer Orb 1",
+      "content": {
+        "type": "asset",
+        "asset": "answer-orb",
+        "castShadow": true
+      },
+      "transform": {
+        "position": [-0.26, 0.9, -0.44]
+      },
+      "components": {
+        "RayInteractable": {},
+        "AnswerOrb": {
+          "slot": 0,
+          "correct": false
+        }
+      },
+      "children": [
+        {
+          "id": "answer-orb-1-label",
+          "name": "Orb 1 Label",
+          "content": {
+            "type": "asset",
+            "asset": "orb-label"
+          },
+          "transform": {
+            "position": [0, 0, 0.062],
+            "scale": 0.12
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-orb-2",
+      "name": "Answer Orb 2",
+      "content": {
+        "type": "asset",
+        "asset": "answer-orb",
+        "castShadow": true
+      },
+      "transform": {
+        "position": [0, 0.9, -0.44]
+      },
+      "components": {
+        "RayInteractable": {},
+        "AnswerOrb": {
+          "slot": 1,
+          "correct": false
+        }
+      },
+      "children": [
+        {
+          "id": "answer-orb-2-label",
+          "name": "Orb 2 Label",
+          "content": {
+            "type": "asset",
+            "asset": "orb-label"
+          },
+          "transform": {
+            "position": [0, 0, 0.062],
+            "scale": 0.12
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-orb-3",
+      "name": "Answer Orb 3",
+      "content": {
+        "type": "asset",
+        "asset": "answer-orb",
+        "castShadow": true
+      },
+      "transform": {
+        "position": [0.26, 0.9, -0.44]
+      },
+      "components": {
+        "RayInteractable": {},
+        "AnswerOrb": {
+          "slot": 2,
+          "correct": false
+        }
+      },
+      "children": [
+        {
+          "id": "answer-orb-3-label",
+          "name": "Orb 3 Label",
+          "content": {
+            "type": "asset",
+            "asset": "orb-label"
+          },
+          "transform": {
+            "position": [0, 0, 0.062],
+            "scale": 0.12
+          }
+        }
+      ]
+    },
+    {
       "id": "puzzle-panel",
       "name": "Puzzle Panel",
       "content": {

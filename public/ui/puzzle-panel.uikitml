@@ -1,8 +1,9 @@
 <!--
   The puzzle panel above the table. Ids that are message keys get their text
   from src/i18n via src/ui-text.ts; src/visual-puzzle.ts fills the others
-  (prompt, timer, status, detail), colors the timer and status for each
-  state, and shows Play again when a round ends. "..." is only a placeholder.
+  (prompt, question, timer, status, detail), colors the timer and status
+  for each state, and shows Next puzzle when a round ends. "..." is only a
+  placeholder.
 -->
 <style>
   .panel-root {
@@ -40,13 +41,24 @@
 
   .prompt {
     color: #1c1d20;
-    font-size: 28px;
+    font-size: 23px;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.3;
   }
 
   .prompt:dark {
     color: #fafaf7;
+  }
+
+  .question {
+    color: #6b5a00;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .question:dark {
+    color: #f5d90a;
   }
 
   .status {
@@ -83,13 +95,14 @@
       <span id="puzzle-timer" class="timer">...</span>
     </div>
     <div id="puzzle-prompt" class="prompt">...</div>
+    <div id="puzzle-question" class="question" style="display: none">...</div>
     <div id="puzzle-status" class="status">...</div>
     <div id="puzzle-detail" class="detail">...</div>
   </div>
   <Button id="puzzle-restart" class="button" style="display: none">
     <ButtonIcon>
-      <RotateCcw></RotateCcw>
+      <ArrowRight></ArrowRight>
     </ButtonIcon>
-    <ButtonLabel id="puzzle.playAgain" class="button-label">...</ButtonLabel>
+    <ButtonLabel id="puzzle.next" class="button-label">...</ButtonLabel>
   </Button>
 </Panel>

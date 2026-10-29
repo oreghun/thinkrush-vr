@@ -11,6 +11,7 @@ import {
   createSideboardSet,
 } from './scene-assets/decor.scene-asset.js';
 import {
+  createAnswerOrb,
   createAnswerTray,
   createPuzzleTable,
   createPuzzleTile,
@@ -36,8 +37,10 @@ export default defineAssets({
   'puzzle-table': createPuzzleTable(),
   'answer-tray': createAnswerTray(),
   'puzzle-tile': createPuzzleTile(),
+  'answer-orb': createAnswerOrb(),
   'welcome-panel': uikitml('welcome.uikitml', 'Welcome Panel'),
   'puzzle-panel': uikitml('puzzle-panel.uikitml', 'Puzzle Panel'),
   'tile-label': uikitml('tile-label.uikitml', 'Tile Label'),
+  'orb-label': uikitml('orb-label.uikitml', 'Orb Label'),
   'voice-check': uikitml('voice-check.uikitml', 'Voice Check'),
 });

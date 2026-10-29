@@ -15,6 +15,8 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
   },
   secondsLeft: { type: Types.Float32, default: 60 },
   wrongAnswers: { type: Types.Int8, default: 0 },
+  // Which puzzle from content/puzzles.json is being played.
+  puzzleIndex: { type: Types.Int16, default: 0 },
 });
 
 /**
@@ -22,6 +24,15 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
  * (0-3); correct is set at the start of each round, after shuffling.
  */
 export const PuzzleTile = createComponent('PuzzleTile', {
+  slot: { type: Types.Int8, default: 0 },
+  correct: { type: Types.Boolean, default: false },
+});
+
+/**
+ * A floating answer orb for riddle, proverb and mafumbo puzzles. slot is its
+ * place in the row (0-2); correct is set each round, after shuffling.
+ */
+export const AnswerOrb = createComponent('AnswerOrb', {
   slot: { type: Types.Int8, default: 0 },
   correct: { type: Types.Boolean, default: false },
 });

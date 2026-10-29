@@ -12,7 +12,7 @@ import { installCodeInputVisuals } from './input-visuals.js';
 import { PanelSystem } from './panel.js';
 import { UITextSystem } from './ui-text.js';
 import { VoiceCheckSystem } from './voice-check.js';
-import { VisualPuzzleSystem } from './visual-puzzle.js';
+import { PuzzleSystem } from './puzzle.js';
 
 const updateTitle = () => {
   document.title = t('app.title');
@@ -27,6 +27,6 @@ World.create(
   installCodeInputVisuals(world);
   world.registerSystem(UITextSystem);
   world.registerSystem(PanelSystem);
-  world.registerSystem(VisualPuzzleSystem);
+  world.registerSystem(PuzzleSystem);
   world.registerSystem(VoiceCheckSystem);
 });
