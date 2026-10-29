@@ -1,4 +1,5 @@
 import { createComponent, Types } from '@iwsdk/core';
+import { PuzzleCategory } from './categories.js';
 
 export const PuzzleStatus = {
   Playing: 'playing',
@@ -34,6 +35,12 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
   // Run totals; both stay 0 outside a run.
   score: { type: Types.Int16, default: 0 },
   solved: { type: Types.Int8, default: 0 },
+  // Which part of the bank Next and runs draw from.
+  category: {
+    type: Types.Enum,
+    enum: PuzzleCategory,
+    default: PuzzleCategory.All,
+  },
 });
 
 /**

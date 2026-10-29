@@ -19,15 +19,17 @@ you can click around in.
 
 > Status: all 21 puzzles are playable, one at a time. Visual puzzles use the
 > four tiles and the tray; riddles and mafumbo use three answer orbs you point
-> at and pinch. Next puzzle (always available) steps through the whole bank,
-> and the 60-second timer only runs inside VR. In VR, pinch the bar under any
-> panel to move it where you like; on a flat screen, drag empty space to look
-> around. A voice check panel to the right tests whether your device can
-> recognize speech on the device itself (see "Voice input" below). Press
-> Start a 3-minute run for a scored dash through shuffled puzzles: solving
-> auto-advances, Skip costs only time, points scale with difficulty, and
-> your best score stays on your device. RUSH and puzzle categories come
-> next.
+> at and pinch. Next puzzle (always available) steps through the bank, and a
+> Category button narrows browsing and runs to one puzzle type. The
+> 60-second practice timer only runs inside VR; a run's 3-minute clock also
+> ticks on the flat page, so desktop runs end properly. In VR, pinch the bar
+> under any panel (on a screen, mouse-drag it) to move the panel where you
+> like; on a flat screen, drag empty space to look around. A voice check
+> panel to the right tests whether your device can recognize speech on the
+> device itself (see "Voice input" below). Press Start a 3-minute run for a
+> scored dash through shuffled puzzles: solving auto-advances, Skip costs
+> only time, points scale with difficulty, and your best score stays on your
+> device. RUSH and the pattern puzzles come next.
 
 ## Run it locally
 

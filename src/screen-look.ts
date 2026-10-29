@@ -1,4 +1,4 @@
-import { createSystem, Euler, VisibilityState } from '@iwsdk/core';
+import { createSystem, Euler, Hovered, VisibilityState } from '@iwsdk/core';
 
 // Radians of rotation per pixel of drag, and how far the view may tilt.
 const SENSITIVITY = 0.004;
@@ -9,7 +9,9 @@ const PITCH_LIMIT = 1.2;
  * finger turns the camera from the fixed seat, phone-viewer style. It only
  * ever runs outside an immersive session; in VR the headset is the camera.
  */
-export class ScreenLookSystem extends createSystem({}) {
+export class ScreenLookSystem extends createSystem({
+  hovered: { required: [Hovered] },
+}) {
   private readonly euler = new Euler(0, 0, 0, 'YXZ');
   private pointerId?: number;
   private lastX = 0;
@@ -23,7 +25,10 @@ export class ScreenLookSystem extends createSystem({}) {
     const down = (event: PointerEvent) => {
       if (
         this.pointerId !== undefined ||
-        this.world.visibilityState.peek() !== VisibilityState.NonImmersive
+        this.world.visibilityState.peek() !== VisibilityState.NonImmersive ||
+        // Only empty space turns the view; a press that starts on a button,
+        // orb, tile or grab bar belongs to that thing alone.
+        this.queries.hovered.entities.size > 0
       ) {
         return;
       }
