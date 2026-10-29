@@ -52,8 +52,8 @@ const stoneMaterial = createSceneMaterial({
         { frequency: [240, 240], amplitude: 0.3 },
       ],
       ramp: [
-        { at: 0, color: '#A59E93' },
-        { at: 1, color: '#B0A99E' },
+        { at: 0, color: '#168F91' },
+        { at: 1, color: '#35B7AE' },
       ],
       // Tiled twice: a quarter of the pixels to generate, same grain size.
       sampler: { repeat: [2, 2] },
@@ -88,13 +88,13 @@ function pixelTexture(size: number, pixels: Uint8Array): DataTexture {
 }
 
 /**
- * One tile of the floor lattice: a faint diamond through the middle of each
- * edge on warm clay. Each texel takes its distance to the diamond and covers
+ * One tile of the floor lattice: a restrained blue-slate diamond over deep
+ * indigo. Each texel takes its distance to the diamond and covers
  * a 2.5 px line, so it needs no DOM.
  */
 function createLatticeTexture(size = 512): DataTexture {
-  const clay = [0xea, 0xe6, 0xdf];
-  const line = [151, 155, 166];
+  const clay = [0x18, 0x20, 0x3f];
+  const line = [62, 94, 132];
   const half = size / 2;
   const pixels = new Uint8Array(size * size * 4);
   for (let y = 0; y < size; y += 1) {
@@ -102,7 +102,7 @@ function createLatticeTexture(size = 512): DataTexture {
       const distance =
         Math.abs(Math.abs(x + 0.5 - half) + Math.abs(y + 0.5 - half) - half) /
         Math.SQRT2;
-      const alpha = 0.26 * Math.min(1, Math.max(0, 1.25 + 0.5 - distance));
+      const alpha = 0.2 * Math.min(1, Math.max(0, 1.25 + 0.5 - distance));
       const index = (y * size + x) * 4;
       for (let channel = 0; channel < 3; channel += 1) {
         pixels[index + channel] = Math.round(
@@ -116,7 +116,7 @@ function createLatticeTexture(size = 512): DataTexture {
 }
 
 /**
- * Square clay floor with a faint diamond lattice. The scene's DomeFade on
+ * Square indigo floor with a faint diamond lattice. The scene's DomeFade on
  * this node blends it into the sky with distance, so it has no visible edge.
  */
 export function createStudioFloor(size = 36): Group {
