@@ -17,9 +17,12 @@ tracking turned on in the headset's settings, put the controllers down and the
 game switches to your hands. On a computer, the same link shows a 3D preview
 you can click around in.
 
-> Status: all 21 puzzles are playable, one at a time. Visual puzzles use the
-> four tiles and the tray; riddles and mafumbo use three answer orbs you point
-> at and pinch. Next puzzle (always available) steps through the bank, and a
+> Status: 30 English draft puzzles are playable, one at a time: ten visual
+> puzzles, ten riddles, and ten mafumbo stories. Visual puzzles use the four
+> tiles and the tray; riddles and mafumbo use three answer orbs you point at
+> and pinch. Ten Swahili methali drafts are kept separately in
+> `content/methali-drafts.json` for fluent-language review and are not loaded
+> into gameplay yet. Next puzzle (always available) steps through the bank, and a
 > Category button narrows browsing and runs to one puzzle type. The
 > 60-second practice timer only runs inside VR; a run's 3-minute clock also
 > ticks on the flat page, so desktop runs end properly. In VR, pinch the bar
