@@ -47,8 +47,11 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 - The first puzzle is the tutorial. No walls of text.
 - Palm-up gesture opens pause and settings. Pause when the XR session loses visibility.
 - No passthrough in v1: fully virtual scene.
-- Art direction: Kenyan / pan-African. Patterns inspired by kitenge and kanga,
-  generated procedurally in code, never copied from specific existing designs.
+- Art direction: Kenyan / pan-African heart, readable to anyone. Patterns are
+  generated procedurally in code in several families (kitenge/kanga-inspired as
+  the signature, beadwork, geometric tessellation, weave, plain abstract), never
+  copied from specific existing designs. Solving a puzzle must never require
+  cultural knowledge: prompts say "Complete the pattern", not the fabric's name.
 
 ## Bilingual structure
 
@@ -83,6 +86,63 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 
 - Small pull requests, one feature each. Keep main deployable at all times.
 - Explain anything the owner must do by hand (settings, accounts, testing on device).
+
+## Session log (state for the next session)
+
+Whoever works on the repo updates this section when a PR merges or a
+decision changes. Newest facts win.
+
+As of 2026-10-29, PRs 1-6 merged (6 = answer orbs):
+
+Live on main
+
+- Foundation: IWSDK 1.1.0-rc.2 scaffold, Pages deploy on every push to main,
+  en/sw i18n behind t(key), content/puzzles.json (21 English drafts) with
+  validators wired into every build.
+- Playable: every puzzle in the bank, one at a time. Visual puzzles use the
+  four grabbable tiles and the tray; riddles/proverbs/mafumbo use the three
+  answer orbs; "Next puzzle" steps through the bank and wraps. The unused
+  set (tiles or orbs) stows below the floor. 60 s timer runs only while the
+  XR session is visible.
+- Hands and controllers are code-built (src/input-visuals.ts); the app makes
+  no outside requests at runtime.
+- Voice: on-device-only Web Speech wrapper (src/voice.ts) and a voice check
+  panel. Desktop Chrome verified: English downloads then recognizes
+  on-device; Swahili (sw-KE) is unavailable in Chrome. Quest Browser still
+  untested - the owner runs "Check this device" on the headset and reports.
+
+Decisions
+
+- Pattern puzzle (next big type): universal "Complete the pattern" mechanic;
+  procedurally generated families (kanga/kitenge signature, beadwork,
+  tessellation, weave, abstract); planned content fields: type "pattern" plus
+  a family field. Not built yet.
+- Competition strategy: polish two mechanics (patterns + orbs) over adding
+  more; RUSH is the demo video's face; verify with iwsdk-glasses-test and
+  claim Meta VR Glasses readiness; keep the first 60 seconds tutorial-free.
+- Mafumbo stories are long for a headset: plan for RUSH to reveal them in
+  two or three beats. Owner may rework options so the correct answer is not
+  always the longest.
+
+Next up (in order)
+
+1. Run loop: about 3-minute runs mixing puzzle types, score; then streaks
+   and Daily Challenge (localStorage only).
+2. Pattern puzzle type (decision above).
+3. RUSH companion (glowing sphere with eyes, shrinks as time runs down) and
+   a sound/juice pass.
+4. Palm-up pause gesture; pause when the session loses visibility.
+   Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
+   real Quest 3, demo video. Cut order if time runs short: leaderboard,
+   misplaced-object puzzle variant, in-game voice answers, extra puzzle count.
+
+Working notes
+
+- Live verification happens in the IWSDK emulator: npx @iwsdk/cli dev up
+  --headless, then the xr/ecs/ui CLI commands. CI equals npm run typecheck
+  - npm test + npm run build (content rules and the 20 MB budget included).
+- The UIKitML panels reflow, so a button's world position moves with panel
+  content; query xr list-targets before aiming at it.
 
 ## IWSDK guidance
 

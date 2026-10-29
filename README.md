@@ -17,12 +17,12 @@ tracking turned on in the headset's settings, put the controllers down and the
 game switches to your hands. On a computer, the same link shows a 3D preview
 you can click around in.
 
-> Status: one playable puzzle. You sit at a table with four tiles and drop the
-> odd one out on the tray before the 60-second timer runs out. The timer only
-> runs inside VR. It always uses the first visual puzzle in
-> `content/puzzles.json`; runs, RUSH, voice answers and the other puzzle types
-> come next. A voice check panel to the right tests whether your device can
-> recognize speech on the device itself (see "Voice input" below).
+> Status: all 21 puzzles are playable, one at a time. Visual puzzles use the
+> four tiles and the tray; riddles and mafumbo use three answer orbs you point
+> at and pinch. Next puzzle steps through the whole bank, and the 60-second
+> timer only runs inside VR. A voice check panel to the right tests whether
+> your device can recognize speech on the device itself (see "Voice input"
+> below). Runs, scoring and RUSH come next.
 
 ## Run it locally
 
@@ -164,7 +164,7 @@ src/index.ts              entry point: creates the world, registers systems
 src/i18n/                 en.json, sw.json and the t() helper
 src/ui-text.ts            fills UIKitML text from src/i18n
 src/input-visuals.ts      code-built hands and controllers for VR
-src/visual-puzzle.ts      the visual puzzle: tiles, tray, timer, feedback
+src/puzzle.ts             gameplay: tiles, tray, answer orbs, timer, progression
 src/puzzles.ts            typed access to content/puzzles.json
 src/voice.ts              on-device-only speech recognition
 src/answer-match.ts       spoken-answer matching (tests in tests/)

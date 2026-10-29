@@ -1,0 +1,28 @@
+<!--
+  Label floating on the front of an answer orb. src/puzzle.ts sets orb-text
+  to one of the current puzzle's options; "..." is only a placeholder.
+  Plain divs keep these colors in both color schemes.
+-->
+<style>
+  .label {
+    width: 170px;
+    height: 92px;
+    align-items: center;
+    justify-content: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 12px;
+    background-color: #f1ece3;
+  }
+
+  .text {
+    color: #1d1e22;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+  }
+</style>
+<div class="label">
+  <span id="orb-text" class="text">...</span>
+</div>
