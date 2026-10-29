@@ -6,6 +6,12 @@
  */
 
 import { defineComponents } from '@iwsdk/core';
+import { MovablePanel } from './movable-panel-component.js';
 import { AnswerOrb, PuzzleBoard, PuzzleTile } from './puzzle-components.js';
 
-export default defineComponents([AnswerOrb, PuzzleBoard, PuzzleTile]);
+export default defineComponents([
+  AnswerOrb,
+  MovablePanel,
+  PuzzleBoard,
+  PuzzleTile,
+]);

@@ -346,52 +346,115 @@
       ]
     },
     {
-      "id": "puzzle-panel",
-      "name": "Puzzle Panel",
+      "id": "puzzle-handle",
+      "name": "Puzzle Panel Handle",
       "content": {
         "type": "asset",
-        "asset": "puzzle-panel"
+        "asset": "panel-handle"
       },
       "transform": {
-        "position": [0, 1.02, -0.86],
-        "rotationDeg": [-12, 0, 0],
-        "scale": 0.13
+        "position": [0, 0.72, -0.86]
       },
       "components": {
-        "RayInteractable": {}
-      }
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget",
+          "rotate": false
+        },
+        "MovablePanel": {}
+      },
+      "children": [
+        {
+          "id": "puzzle-panel",
+          "name": "Puzzle Panel",
+          "content": {
+            "type": "asset",
+            "asset": "puzzle-panel"
+          },
+          "transform": {
+            "position": [0, 0.3, 0],
+            "rotationDeg": [-12, 0, 0],
+            "scale": 0.13
+          },
+          "components": {
+            "RayInteractable": {}
+          }
+        }
+      ]
     },
     {
-      "id": "voice-check-panel",
-      "name": "Voice Check Panel",
+      "id": "voice-handle",
+      "name": "Voice Panel Handle",
       "content": {
         "type": "asset",
-        "asset": "voice-check"
+        "asset": "panel-handle"
       },
       "transform": {
-        "position": [0.62, 1.05, -0.62],
-        "rotationDeg": [0, -45, 0],
-        "scale": 0.11
+        "position": [0.62, 0.83, -0.62],
+        "rotationDeg": [0, -45, 0]
       },
       "components": {
-        "RayInteractable": {}
-      }
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget",
+          "rotate": false
+        },
+        "MovablePanel": {}
+      },
+      "children": [
+        {
+          "id": "voice-check-panel",
+          "name": "Voice Check Panel",
+          "content": {
+            "type": "asset",
+            "asset": "voice-check"
+          },
+          "transform": {
+            "position": [0, 0.22, 0],
+            "scale": 0.11
+          },
+          "components": {
+            "RayInteractable": {}
+          }
+        }
+      ]
     },
     {
-      "id": "welcome-panel",
-      "name": "Welcome Panel",
+      "id": "welcome-handle",
+      "name": "Welcome Panel Handle",
       "content": {
         "type": "asset",
-        "asset": "welcome-panel"
+        "asset": "panel-handle"
       },
       "transform": {
-        "position": [-0.62, 1.05, -0.62],
-        "rotationDeg": [0, 45, 0],
-        "scale": 0.11
+        "position": [-0.62, 0.83, -0.62],
+        "rotationDeg": [0, 45, 0]
       },
       "components": {
-        "RayInteractable": {}
-      }
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget",
+          "rotate": false
+        },
+        "MovablePanel": {}
+      },
+      "children": [
+        {
+          "id": "welcome-panel",
+          "name": "Welcome Panel",
+          "content": {
+            "type": "asset",
+            "asset": "welcome-panel"
+          },
+          "transform": {
+            "position": [0, 0.22, 0],
+            "scale": 0.11
+          },
+          "components": {
+            "RayInteractable": {}
+          }
+        }
+      ]
     },
     {
       "id": "gallery-set",

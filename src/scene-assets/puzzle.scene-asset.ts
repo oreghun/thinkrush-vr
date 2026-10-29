@@ -171,3 +171,18 @@ export function createPuzzleTile(): Mesh {
 export function createAnswerOrb(radius = 0.055): Mesh {
   return new Mesh(new SphereGeometry(radius, 32, 24), graphiteMaterial);
 }
+
+/** Grab bar that hangs under a floating panel so the panel can be moved. */
+export function createPanelHandle(): Mesh {
+  return createScenePrimitiveObject(
+    {
+      geometry: {
+        type: 'roundedBox',
+        size: [0.16, 0.024, 0.035],
+        radius: 0.01,
+        segments: 3,
+      },
+    },
+    graphiteMaterial,
+  );
+}
