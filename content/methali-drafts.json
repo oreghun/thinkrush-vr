@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "notes": "Swahili methali completion pack, draft 1. Kept separate from the English bank pending review by a fluent Swahili editor. Options are answer-first; the game can shuffle them.",
+  "puzzles": [
+    {
+      "id": "sw-methali-01",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Haraka haraka haina ____.",
+      "tiles": [],
+      "answer": "baraka",
+      "accepted": [
+        "baraka"
+      ],
+      "options": [
+        "baraka",
+        "njia",
+        "maana"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Neno linalohusiana na matokeo mema.",
+      "explanation": "Methali hii inashauri kuepuka pupa, kwa sababu kufanya jambo kwa haraka kupita kiasi kunaweza kuharibu matokeo.",
+      "subtitle_en": "Haste has no blessing.",
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-02",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Kidole kimoja hakivunji ____.",
+      "tiles": [],
+      "answer": "chawa",
+      "accepted": [
+        "chawa"
+      ],
+      "options": [
+        "chawa",
+        "gogo",
+        "mlima"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Kazi nyingine huhitaji ushirikiano.",
+      "explanation": "Methali hii inasisitiza kuwa ushirikiano husaidia kufanikisha kazi ngumu.",
+      "subtitle_en": "One finger cannot crush a louse.",
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-03",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Samaki mkunje angali ____.",
+      "tiles": [],
+      "answer": "mbichi",
+      "accepted": [
+        "mbichi"
+      ],
+      "options": [
+        "mbichi",
+        "mkavu",
+        "tayari"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Methali hii huzungumzia kufundisha mapema.",
+      "explanation": "Mtu hufundishwa au kuelekezwa vizuri akiwa bado mdogo na mwenye uwezo wa kujifunza.",
+      "subtitle_en": "Bend the fish while it is still fresh.",
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-04",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Asiyesikia la mkuu huvunjika ____.",
+      "tiles": [],
+      "answer": "guu",
+      "accepted": [
+        "guu"
+      ],
+      "options": [
+        "guu",
+        "mkono",
+        "moyo"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Sehemu ya mwili inayotajwa ni ya kutembelea.",
+      "explanation": "Kutokufuata ushauri mzuri kunaweza kuleta madhara yanayoweza kuepukika.",
+      "subtitle_en": "Who ignores wise counsel may break a leg.",
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-05",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Akiba ____.",
+      "tiles": [],
+      "answer": "haiozi",
+      "accepted": [
+        "haiozi"
+      ],
+      "options": [
+        "haiozi",
+        "hupotea",
+        "huisha"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Methali hii inahusu kuweka rasilimali kwa ajili ya baadaye.",
+      "explanation": "Kuweka akiba husaidia wakati wa mahitaji ya baadaye; akiba haipotezi thamani yake kwa sababu tu imehifadhiwa.",
+      "subtitle_en": "Savings do not rot.",
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-06",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Mchelea mwana kulia hulia ____.",
+      "tiles": [],
+      "answer": "yeye",
+      "accepted": [
+        "yeye"
+      ],
+      "options": [
+        "yeye",
+        "mtoto",
+        "kesho"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Mwisho wa methali unarudia mtu aliyeepuka kumrekebisha mtoto.",
+      "explanation": "Kuepuka kumwelekeza mtoto anapohitaji kurekebishwa kunaweza kusababisha matatizo makubwa baadaye.",
+      "subtitle_en": "Who fears a child's crying may end up crying themselves.",
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-07",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Bandu bandu humaliza ____.",
+      "tiles": [],
+      "answer": "gogo",
+      "accepted": [
+        "gogo"
+      ],
+      "options": [
+        "gogo",
+        "safari",
+        "kazi"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Kitu kigumu kinaweza kumalizika kwa hatua ndogo ndogo.",
+      "explanation": "Juhudi ndogo zinazofanywa kwa uthabiti zinaweza kukamilisha kazi kubwa.",
+      "subtitle_en": "Little by little finishes the log.",
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-08",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Mtaka cha mvunguni sharti ____.",
+      "tiles": [],
+      "answer": "ainame",
+      "accepted": [
+        "ainame"
+      ],
+      "options": [
+        "ainame",
+        "asimame",
+        "akimbie"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Mtu akitaka kitu kilicho chini ya kitanda, lazima afanye nini?",
+      "explanation": "Kupata unachotaka mara nyingi huhitaji juhudi, unyenyekevu na kuchukua hatua.",
+      "subtitle_en": "Who wants what is under the bed must bend down.",
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-09",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Umoja ni nguvu, utengano ni ____.",
+      "tiles": [],
+      "answer": "udhaifu",
+      "accepted": [
+        "udhaifu"
+      ],
+      "options": [
+        "udhaifu",
+        "furaha",
+        "utajiri"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Kinyume cha nguvu ni nini?",
+      "explanation": "Watu wanaposhirikiana huwa na nguvu zaidi; migawanyiko huwadhoofisha.",
+      "subtitle_en": "Unity is strength; division is weakness.",
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "sw-methali-10",
+      "lang": "sw",
+      "type": "methali",
+      "prompt": "Penye nia pana ____.",
+      "tiles": [],
+      "answer": "njia",
+      "accepted": [
+        "njia"
+      ],
+      "options": [
+        "njia",
+        "maji",
+        "jua"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Nia ikiwapo, mtu anaweza kupata njia ya kufanikisha jambo.",
+      "explanation": "Azma na juhudi vinaweza kusaidia kupata suluhisho au njia ya kufikia lengo.",
+      "subtitle_en": "Where there is a will, there is a way.",
+      "difficulty": 1,
+      "status": "draft"
+    }
+  ]
+}
