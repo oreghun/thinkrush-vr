@@ -205,6 +205,13 @@ export class PuzzleSystem extends createSystem({
     this.elements.category?.addEventListener('click', category);
 
     this.cleanupFuncs.push(
+      () => this.tileModels.forEach((model, slot) => {
+        if (model) {
+          this.tileBySlot[slot]?.object3D?.remove(model);
+          disposePuzzleObject(model);
+          this.tileModels[slot] = undefined;
+        }
+      }),
       () => this.elements.next?.removeEventListener('click', next),
       () => this.elements.run?.removeEventListener('click', run),
       () => this.elements.exit?.removeEventListener('click', exit),
