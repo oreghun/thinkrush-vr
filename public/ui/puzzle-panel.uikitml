@@ -1,8 +1,10 @@
 <!--
   The puzzle panel above the table. Ids that are message keys get their text
-  from src/i18n via src/ui-text.ts; src/visual-puzzle.ts fills the others
-  (prompt, question, timer, status, detail), colors the timer and status
-  for each state, and shows Next puzzle when a round ends. "..." is only a
+  from src/i18n via src/ui-text.ts; src/puzzle.ts fills the others (prompt,
+  question, score, timer, status, detail and the button labels), colors the
+  timer and status for each state, and shows the buttons that fit the mode:
+  practice offers Start run and Next puzzle, a run offers Skip, and the
+  run-over summary offers Run again and Back to practice. "..." is only a
   placeholder.
 -->
 <style>
@@ -92,6 +94,7 @@
   <div class="panel-content">
     <div class="header">
       <span id="puzzle.eyebrow" class="eyebrow">...</span>
+      <span id="puzzle-score" class="timer" style="display: none">...</span>
       <span id="puzzle-timer" class="timer">...</span>
     </div>
     <div id="puzzle-prompt" class="prompt">...</div>
@@ -99,10 +102,22 @@
     <div id="puzzle-status" class="status">...</div>
     <div id="puzzle-detail" class="detail">...</div>
   </div>
+  <Button id="puzzle-run" class="button">
+    <ButtonIcon>
+      <Play></Play>
+    </ButtonIcon>
+    <ButtonLabel id="puzzle-run-label" class="button-label">...</ButtonLabel>
+  </Button>
   <Button id="puzzle-restart" class="button">
     <ButtonIcon>
       <ArrowRight></ArrowRight>
     </ButtonIcon>
-    <ButtonLabel id="puzzle.next" class="button-label">...</ButtonLabel>
+    <ButtonLabel id="puzzle-next-label" class="button-label">...</ButtonLabel>
+  </Button>
+  <Button id="puzzle-exit" class="button" style="display: none">
+    <ButtonIcon>
+      <RotateCcw></RotateCcw>
+    </ButtonIcon>
+    <ButtonLabel id="puzzle-exit-label" class="button-label">...</ButtonLabel>
   </Button>
 </Panel>
