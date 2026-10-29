@@ -54,9 +54,18 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 
 - All interface text lives in src/i18n/en.json and src/i18n/sw.json, accessed through t(key).
   Never hard-code UI strings.
-- Puzzles live in content/puzzles.json with fields:
-  id, lang (en|sw), type (visual|riddle|proverb|mafumbo), prompt, answer,
-  options (3 choices for the answer orbs), hint, subtitle_en (required when lang is sw), difficulty.
+- Puzzles live in content/puzzles.json, an object with a "puzzles" array. Fields:
+  id, lang (en|sw), type (visual|riddle|proverb|mafumbo), prompt,
+  question (mafumbo only: asked after the story), answer,
+  accepted (extra spoken answers that count as correct),
+  options (3 choices for the answer orbs, listed answer-first; shuffle them in game),
+  tiles (visual only: the 4 objects on the table; options is empty),
+  answer_mode (grab | voice+orbs | orbs), hint, explanation (shown after answering),
+  subtitle_en (required when lang is sw), difficulty (1-5), status (draft | tested).
+- Voice answers are matched against the answer plus accepted, case-insensitive,
+  ignoring "a", "an" and "the". Orbs are always shown, even in voice+orbs mode.
+- Write all text with plain ASCII punctuation (straight quotes, no long dashes):
+  the game font has no other characters. `npm run validate` checks this.
 - Swahili content is written by the project owner. Do not write, translate or
   invent Swahili puzzles or text; leave clearly marked placeholders instead.
 
