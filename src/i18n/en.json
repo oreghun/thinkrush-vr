@@ -50,5 +50,10 @@
   "voice.noSpeech": "I did not hear anything. Try again.",
   "voice.micDenied": "Microphone access is blocked.",
   "voice.noMic": "No microphone found.",
-  "voice.error": "Speech recognition stopped:"
+  "voice.error": "Speech recognition stopped:",
+  "welcome.worldHeading": "CHOOSE YOUR WORLD",
+  "welcome.world.visual": "Object Studio - Visual puzzles",
+  "welcome.world.riddle": "Riddle Garden - Riddles",
+  "welcome.world.proverb": "Wisdom Courtyard - Proverbs",
+  "welcome.world.mafumbo": "Mystery Chamber - Mafumbo"
 }

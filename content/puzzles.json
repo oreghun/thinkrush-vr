@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "notes": "English puzzle bank, draft 2. Options are listed answer-first; the game shuffles them. Visual puzzles use tiles instead of options. Swahili methali are maintained separately in content/methali-drafts.json pending language review.",
+  "notes": "English puzzle bank, draft 3. Ten entries each for visual association, riddles, proverbs, and mafumbo. Options are listed answer-first and shuffled by the game. New content remains draft pending editorial review.",
   "puzzles": [
     {
       "id": "en-visual-01",
@@ -627,6 +627,196 @@
       "explanation": "Trust works best when informed by evidence, context, and willingness to revise a judgement. A useful principle is not the same as an absolute rule.",
       "subtitle_en": null,
       "difficulty": 3,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-01",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: A stitch in time saves ____.",
+      "answer": "nine",
+      "accepted": [],
+      "options": [
+        "nine",
+        "time",
+        "thread"
+      ],
+      "answer_mode": "orbs",
+      "hint": "It is a number.",
+      "explanation": "Fixing a small problem early can prevent a much bigger problem later.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-02",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: Actions speak louder than ____.",
+      "answer": "words",
+      "accepted": [],
+      "options": [
+        "words",
+        "voices",
+        "promises"
+      ],
+      "answer_mode": "orbs",
+      "hint": "What people do can be more revealing than what they say.",
+      "explanation": "What someone does often shows their intentions more clearly than their promises.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-03",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: Don't count your chickens before they ____.",
+      "answer": "hatch",
+      "accepted": [],
+      "options": [
+        "hatch",
+        "feed",
+        "fly"
+      ],
+      "answer_mode": "orbs",
+      "hint": "The eggs must open first.",
+      "explanation": "Do not assume a hoped-for result is certain before it actually happens.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-04",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: Where there's a will, there's a ____.",
+      "answer": "way",
+      "accepted": [],
+      "options": [
+        "way",
+        "wish",
+        "wall"
+      ],
+      "answer_mode": "orbs",
+      "hint": "Determination can help you find one.",
+      "explanation": "Determination and effort can help people find a way through a difficult problem.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-05",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: Two heads are better than ____.",
+      "answer": "one",
+      "accepted": [],
+      "options": [
+        "one",
+        "three",
+        "none"
+      ],
+      "answer_mode": "orbs",
+      "hint": "It compares one thinker with a pair.",
+      "explanation": "Working together can produce better ideas than working alone.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-06",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: The early bird catches the ____.",
+      "answer": "worm",
+      "accepted": [],
+      "options": [
+        "worm",
+        "rain",
+        "nest"
+      ],
+      "answer_mode": "orbs",
+      "hint": "A bird's breakfast.",
+      "explanation": "Getting started early can give you an advantage.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-07",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: Every cloud has a silver ____.",
+      "answer": "lining",
+      "accepted": [],
+      "options": [
+        "lining",
+        "edge",
+        "shadow"
+      ],
+      "answer_mode": "orbs",
+      "hint": "Look for the hopeful side of a difficult situation.",
+      "explanation": "Even a difficult situation can contain something positive.",
+      "subtitle_en": null,
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-08",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: You can't judge a book by its ____.",
+      "answer": "cover",
+      "accepted": [],
+      "options": [
+        "cover",
+        "pages",
+        "title"
+      ],
+      "answer_mode": "orbs",
+      "hint": "The outside does not tell the whole story.",
+      "explanation": "Appearances alone do not tell you what something or someone is really like.",
+      "subtitle_en": null,
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-09",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: Practice makes ____.",
+      "answer": "perfect",
+      "accepted": [],
+      "options": [
+        "perfect",
+        "quick",
+        "easy"
+      ],
+      "answer_mode": "orbs",
+      "hint": "Repeating a skill helps you improve.",
+      "explanation": "Regular practice helps people become more skilled, even if perfection is not guaranteed.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-proverb-10",
+      "lang": "en",
+      "type": "proverb",
+      "prompt": "Complete the proverb: Look before you ____.",
+      "answer": "leap",
+      "accepted": [],
+      "options": [
+        "leap",
+        "speak",
+        "sleep"
+      ],
+      "answer_mode": "orbs",
+      "hint": "Think before taking a big step.",
+      "explanation": "Consider the possible consequences before acting.",
+      "subtitle_en": null,
+      "difficulty": 1,
       "status": "draft"
     }
   ]

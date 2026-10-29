@@ -50,5 +50,10 @@
   "voice.noSpeech": "",
   "voice.micDenied": "",
   "voice.noMic": "",
-  "voice.error": ""
+  "voice.error": "",
+  "welcome.worldHeading": "",
+  "welcome.world.visual": "",
+  "welcome.world.riddle": "",
+  "welcome.world.proverb": "",
+  "welcome.world.mafumbo": ""
 }

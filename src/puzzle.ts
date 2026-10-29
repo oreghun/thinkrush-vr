@@ -108,6 +108,11 @@ export class PuzzleSystem extends createSystem({
   private readonly tileBySlot: Entity[] = [];
   private readonly tileLabels: (UIKitMLAsset | undefined)[] = [];
   private readonly tileModels: (import('@iwsdk/core').Group | undefined)[] = [];
+  private readonly worldMaterials: Array<{
+    material: MeshStandardMaterial;
+    baseColor: number;
+    role: 'floor' | 'stage';
+  }> = [];
   private readonly tileHomes: Vector3[] = [];
   private readonly tileRotations: Quaternion[] = [];
   private readonly orbBySlot: Entity[] = [];
@@ -187,6 +192,7 @@ export class PuzzleSystem extends createSystem({
     this.trayRest.copy(this.tray.object3D!.position);
     this.trayRest.y += TRAY_REST_HEIGHT;
     this.trayMaterials.push(...cloneMaterials(this.tray));
+    this.captureWorldMaterials();
 
     const panel = this.world.getSceneObject<UIKitMLAsset>('puzzle-panel');
     this.elements = {
@@ -209,6 +215,33 @@ export class PuzzleSystem extends createSystem({
     const run = () => this.startRun();
     const exit = () => this.exitToPractice();
     const category = () => this.cycleCategory();
+
+    // The welcome hub offers direct entry into each puzzle world. Selecting
+    // a world filters both practice browsing and the three-minute run draw.
+    const welcomePanel = this.world.getSceneObject<UIKitMLAsset>('welcome-panel');
+    const worldButtons: Array<[string, Category]> = [
+      ['world-visual', PuzzleCategory.Visual],
+      ['world-riddle', PuzzleCategory.Riddle],
+      ['world-proverb', PuzzleCategory.Proverb],
+      ['world-mafumbo', PuzzleCategory.Mafumbo],
+    ];
+    const worldCleanup = worldButtons.flatMap(([id, selectedCategory]) => {
+      const button = welcomePanel?.getElementById(id);
+      if (!button) return [];
+      const selectWorld = () => {
+        const board = this.board;
+        if (!board) return;
+        const available = categoryIndices(PUZZLES, selectedCategory);
+        if (available.length === 0) return;
+        board.setValue(PuzzleBoard, 'mode', PuzzleMode.Practice);
+        board.setValue(PuzzleBoard, 'category', selectedCategory);
+        this.startRound(available[0]);
+        button.setProperties({ borderColor: CATEGORY_ACCENTS[selectedCategory] });
+      };
+      button.addEventListener('click', selectWorld);
+      return [() => button.removeEventListener('click', selectWorld)];
+    });
+
     this.elements.next?.addEventListener('click', next);
     this.elements.run?.addEventListener('click', run);
     this.elements.exit?.addEventListener('click', exit);
@@ -226,6 +259,7 @@ export class PuzzleSystem extends createSystem({
       () => this.elements.run?.removeEventListener('click', run),
       () => this.elements.exit?.removeEventListener('click', exit),
       () => this.elements.category?.removeEventListener('click', category),
+      ...worldCleanup,
       this.queries.pressedOrbs.subscribe('qualify', (orb) => {
         this.onOrbPressed(orb);
       }),
@@ -332,6 +366,7 @@ export class PuzzleSystem extends createSystem({
     const puzzle = PUZZLES[wrapped];
     this.puzzle = puzzle;
     this.isVisual = puzzle.type === 'visual';
+    this.applyWorldTheme(this.category());
     board.setValue(PuzzleBoard, 'puzzleIndex', wrapped);
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
     if (this.mode() !== PuzzleMode.Run) {
@@ -426,6 +461,58 @@ export class PuzzleSystem extends createSystem({
   private category(): Category {
     return (this.board?.getValue(PuzzleBoard, 'category') ??
       PuzzleCategory.All) as Category;
+  }
+
+  /**
+   * Capture per-instance copies of the shared floor and stage materials so
+   * each selected category can tint its environment without changing the
+   * source asset or other placements.
+   */
+  private captureWorldMaterials(): void {
+    const targets: Array<[string, 'floor' | 'stage']> = [
+      ['studio-floor', 'floor'],
+      ['stage', 'stage'],
+    ];
+    for (const [id, role] of targets) {
+      const entity = this.world.getSceneEntity(id);
+      if (!entity?.object3D) continue;
+      entity.object3D.traverse((object) => {
+        if (!(object instanceof Mesh)) return;
+        const original = Array.isArray(object.material)
+          ? object.material
+          : [object.material];
+        const copies = original.map((source) => {
+          if (!(source instanceof MeshStandardMaterial)) return source;
+          const material = source.clone();
+          this.worldMaterials.push({
+            material,
+            baseColor: source.color.getHex(),
+            role,
+          });
+          return material;
+        });
+        object.material = Array.isArray(object.material) ? copies : copies[0];
+      });
+    }
+  }
+
+  /** A restrained color mood for each world; the table and puzzle stay familiar. */
+  private applyWorldTheme(category: Category): void {
+    const themes: Record<Category, { floor: string; stage: string }> = {
+      [PuzzleCategory.All]: { floor: '#18203F', stage: '#D9A440' },
+      [PuzzleCategory.Visual]: { floor: '#202A50', stage: '#D9A440' },
+      [PuzzleCategory.Riddle]: { floor: '#172E43', stage: '#35B7AE' },
+      [PuzzleCategory.Proverb]: { floor: '#382A32', stage: '#E8A06A' },
+      [PuzzleCategory.Mafumbo]: { floor: '#27213F', stage: '#B9A7FF' },
+    };
+    const theme = themes[category] ?? themes[PuzzleCategory.All];
+    for (const entry of this.worldMaterials) {
+      entry.material.color.set(entry.baseColor);
+      entry.material.color.multiplyScalar(1);
+      entry.material.color.set(
+        entry.role === 'floor' ? theme.floor : theme.stage,
+      );
+    }
   }
 
   /** The Category button: next non-empty category, All always included. */
