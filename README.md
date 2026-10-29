@@ -20,7 +20,9 @@ you can click around in.
 > Status: all 21 puzzles are playable, one at a time. Visual puzzles use the
 > four tiles and the tray; riddles and mafumbo use three answer orbs you point
 > at and pinch. Next puzzle (always available) steps through the whole bank,
-> and the 60-second timer only runs inside VR. A voice check panel to the right tests whether
+> and the 60-second timer only runs inside VR. In VR, pinch the bar under any
+> panel to move it where you like; on a flat screen, drag empty space to look
+> around. A voice check panel to the right tests whether
 > your device can recognize speech on the device itself (see "Voice input"
 > below). Runs, scoring and RUSH come next.
 
@@ -165,6 +167,8 @@ src/i18n/                 en.json, sw.json and the t() helper
 src/ui-text.ts            fills UIKitML text from src/i18n
 src/input-visuals.ts      code-built hands and controllers for VR
 src/puzzle.ts             gameplay: tiles, tray, answer orbs, timer, progression
+src/movable-panel.ts      panels hang from grab bars and can be re-placed
+src/screen-look.ts        drag-to-look camera for flat screens
 src/puzzles.ts            typed access to content/puzzles.json
 src/voice.ts              on-device-only speech recognition
 src/answer-match.ts       spoken-answer matching (tests in tests/)

@@ -13,6 +13,7 @@ import {
 import {
   createAnswerOrb,
   createAnswerTray,
+  createPanelHandle,
   createPuzzleTable,
   createPuzzleTile,
 } from './scene-assets/puzzle.scene-asset.js';
@@ -38,6 +39,7 @@ export default defineAssets({
   'answer-tray': createAnswerTray(),
   'puzzle-tile': createPuzzleTile(),
   'answer-orb': createAnswerOrb(),
+  'panel-handle': createPanelHandle(),
   'welcome-panel': uikitml('welcome.uikitml', 'Welcome Panel'),
   'puzzle-panel': uikitml('puzzle-panel.uikitml', 'Puzzle Panel'),
   'tile-label': uikitml('tile-label.uikitml', 'Tile Label'),

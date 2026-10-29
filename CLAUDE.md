@@ -92,9 +92,9 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-29, PRs 1-7 merged (6 = answer orbs, 7 = Next always visible,
+As of 2026-10-29, PRs 1-8 merged (6 answer orbs; 7 Next always visible,
 because on the desktop page the timer never runs and tiles need hands, so a
-round there never ends):
+round there never ends; 8 movable panels and drag-to-look):
 
 Live on main
 
@@ -108,6 +108,12 @@ Live on main
   XR session is visible.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
+- Each panel hangs from a graphite grab bar: DistanceGrabbable with
+  MoveFromTarget, rotation locked so the single-sided panel keeps facing the
+  player, position clamped near the table by MovablePanelSystem. On flat
+  screens, ScreenLookSystem turns the camera when empty space is dragged;
+  it never runs in an immersive session (comfort), and we deliberately do
+  not rotate the world in VR.
 - Voice: on-device-only Web Speech wrapper (src/voice.ts) and a voice check
   panel. Desktop Chrome verified: English downloads then recognizes
   on-device; Swahili (sw-KE) is unavailable in Chrome. Quest Browser still
@@ -145,6 +151,10 @@ Working notes
   - npm test + npm run build (content rules and the 20 MB budget included).
 - The UIKitML panels reflow, so a button's world position moves with panel
   content; query xr list-targets before aiming at it.
+- Script edits must assert their match: one silent no-op left MovablePanel
+  out of components.ts and every scene load failed with "not present in the
+  active component catalog". Components must be declared in system-free
+  modules or the catalog build drops them.
 
 ## IWSDK guidance
 
