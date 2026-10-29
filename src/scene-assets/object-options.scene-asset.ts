@@ -192,6 +192,22 @@ function makeScale(root: Group) {
   box(root,materials.cream,[0,0.017,0],[0.025,0.002,0.019]);
   sphere(root,materials.turquoise,[0,0.02,0],[0.006,0.002,0.004],8);
 }
+function makeMegaphone(root: Group) {
+  cylinder(root,materials.cream,[0,0.023,0],0.007,0.018,0.045,12,[0,0,-Math.PI/2]);
+  cylinder(root,materials.turquoise,[-0.026,0.023,0],0.007,0.007,0.01,10,[0,0,Math.PI/2]);
+}
+function makeTrumpet(root: Group) {
+  cylinder(root,materials.amber,[-0.006,0.023,0],0.005,0.005,0.035,10,[0,0,Math.PI/2]);
+  cylinder(root,materials.amber,[0.018,0.023,0],0.009,0.005,0.022,10,[0,0,Math.PI/2]);
+  cylinder(root,materials.amber,[0.03,0.023,0],0.014,0.009,0.004,12,[0,0,Math.PI/2]);
+  for(let i=0;i<3;i++) cylinder(root,materials.cream,[-0.005+i*0.009,0.031,0],0.003,0.003,0.008,8);
+}
+function makeLoudspeaker(root: Group) {
+  box(root,materials.dark,[0,0.022,0],[0.035,0.046,0.025]);
+  sphere(root,materials.turquoise,[0,0.025,0.014],[0.012,0.014,0.003],12);
+  sphere(root,materials.amber,[0,0.025,0.017],[0.004,0.005,0.002],8);
+}
+
 function makeBlueprint(root: Group) {
   box(root,materials.blue,[0,0.008,0],[0.06,0.004,0.042]);
   box(root,materials.cream,[0,0.011,0],[0.001,0.001,0.034]);
@@ -222,6 +238,9 @@ function makeDefault(root: Group,label: string) {
   if(lower.includes('paper clip')) return makePaperClip(root);
   if(lower.includes('nail')) return makeNail(root);
   if(lower.includes('screw')) return makeScrew(root);
+  if(lower.includes('megaphone')) return makeMegaphone(root);
+  if(lower.includes('trumpet')) return makeTrumpet(root);
+  if(lower.includes('loudspeaker')) return makeLoudspeaker(root);
   if(lower.includes('thermometer')) return makeThermometer(root);
   if(lower.includes('ruler')) return makeRuler(root);
   if(lower.includes('telescope')) return makeTelescope(root);
