@@ -1,0 +1,17 @@
+{
+  "app.title": "ThinkRush VR",
+  "language.en": "English",
+  "language.sw": "Swahili",
+  "welcome.eyebrow": "THINKRUSH VR",
+  "welcome.heading": "Welcome to ThinkRush",
+  "welcome.body1": "Stay seated and use your hands.",
+  "welcome.body2": "Puzzles are coming soon.",
+  "welcome.enterVR": "Enter VR",
+  "welcome.exitVR": "Exit to Browser",
+  "station.grab.title": "Grab",
+  "station.grab.how": "Pinch and hold to move it",
+  "station.select.title": "Select",
+  "station.select.how": "Point at the orb, then pinch",
+  "station.spin.title": "Spin",
+  "station.spin.how": "Pinch and hold to turn it"
+}

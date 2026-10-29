@@ -1,0 +1,26 @@
+[
+  {
+    "id": "en-riddle-placeholder-01",
+    "placeholder": true,
+    "lang": "en",
+    "type": "riddle",
+    "prompt": "What has hands but cannot clap?",
+    "answer": "A clock",
+    "options": ["A clock", "A glove", "A tree"],
+    "hint": "It hangs on a wall and ticks.",
+    "subtitle_en": null,
+    "difficulty": 1
+  },
+  {
+    "id": "en-proverb-placeholder-01",
+    "placeholder": true,
+    "lang": "en",
+    "type": "proverb",
+    "prompt": "Complete the proverb: Many hands make...",
+    "answer": "light work",
+    "options": ["light work", "loud noise", "long days"],
+    "hint": "Sharing a job makes it easier.",
+    "subtitle_en": null,
+    "difficulty": 1
+  }
+]

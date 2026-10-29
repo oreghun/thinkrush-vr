@@ -1,0 +1,28 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import { World } from '@iwsdk/core';
+import projectOptions from 'virtual:iwsdk-project';
+import { onLanguageChange, t } from './i18n/index.js';
+import { OrbSystem } from './orb.js';
+import { PanelSystem } from './panel.js';
+import { UITextSystem } from './ui-text.js';
+
+const updateTitle = () => {
+  document.title = t('app.title');
+};
+updateTitle();
+onLanguageChange(updateTitle);
+
+World.create(
+  document.getElementById('scene-container') as HTMLDivElement,
+  projectOptions,
+).then((world) => {
+  world.registerSystem(UITextSystem);
+  world.registerSystem(OrbSystem);
+  world.registerSystem(PanelSystem);
+});
