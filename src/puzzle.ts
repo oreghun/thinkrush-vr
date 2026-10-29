@@ -28,6 +28,7 @@ import {
   PuzzleTile,
 } from './puzzle-components.js';
 import { type Puzzle, PUZZLES } from './puzzles.js';
+import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 
 const ROUND_SECONDS = 60;
 const RUN_SECONDS = 180;
@@ -96,6 +97,7 @@ export class PuzzleSystem extends createSystem({
   private tray?: Entity;
   private readonly tileBySlot: Entity[] = [];
   private readonly tileLabels: (UIKitMLAsset | undefined)[] = [];
+  private readonly tileModels: (import('@iwsdk/core').Group | undefined)[] = [];
   private readonly tileHomes: Vector3[] = [];
   private readonly tileRotations: Quaternion[] = [];
   private readonly orbBySlot: Entity[] = [];
@@ -160,6 +162,8 @@ export class PuzzleSystem extends createSystem({
       this.tileHomes[slot] = tile.object3D!.position.clone();
       this.tileRotations[slot] = tile.object3D!.quaternion.clone();
       this.tileLabels[slot] = findUIKitML(tile);
+      // The visual mode uses recognizable object miniatures, not printed names.
+      if (this.tileLabels[slot]) this.tileLabels[slot]!.visible = false;
     }
     for (const orb of this.queries.orbs.entities) {
       const slot = orb.getValue(AnswerOrb, 'slot') ?? 0;
@@ -201,6 +205,13 @@ export class PuzzleSystem extends createSystem({
     this.elements.category?.addEventListener('click', category);
 
     this.cleanupFuncs.push(
+      () => this.tileModels.forEach((model, slot) => {
+        if (model) {
+          this.tileBySlot[slot]?.object3D?.remove(model);
+          disposePuzzleObject(model);
+          this.tileModels[slot] = undefined;
+        }
+      }),
       () => this.elements.next?.removeEventListener('click', next),
       () => this.elements.run?.removeEventListener('click', run),
       () => this.elements.exit?.removeEventListener('click', exit),
@@ -324,10 +335,25 @@ export class PuzzleSystem extends createSystem({
 
     const tileLabels = this.isVisual ? shuffled(puzzle.tiles ?? []) : [];
     this.tileBySlot.forEach((tile, slot) => {
-      tile.setValue(PuzzleTile, 'correct', tileLabels[slot] === puzzle.answer);
+      const label = tileLabels[slot] ?? '';
+      tile.setValue(PuzzleTile, 'correct', label === puzzle.answer);
+      // Names remain in the puzzle data for answer matching, but never appear
+      // on the table. Each visible tile gets a low-poly object miniature.
       this.tileLabels[slot]
         ?.getElementById('tile-text')
-        ?.setProperties({ text: tileLabels[slot] ?? '' });
+        ?.setProperties({ text: '' });
+      const previousModel = this.tileModels[slot];
+      if (previousModel) {
+        tile.object3D!.remove(previousModel);
+        disposePuzzleObject(previousModel);
+        this.tileModels[slot] = undefined;
+      }
+      if (this.isVisual && label) {
+        const model = createPuzzleObject(label);
+        model.position.set(0, 0.052, 0.032);
+        tile.object3D!.add(model);
+        this.tileModels[slot] = model;
+      }
       this.place(tile, this.tileHomes[slot], this.isVisual);
       tile.object3D!.quaternion.copy(this.tileRotations[slot]);
     });
