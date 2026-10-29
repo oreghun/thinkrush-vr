@@ -86,24 +86,32 @@ lists how many Swahili strings are still empty.
 
 ## Puzzle content
 
-Puzzles live in `content/puzzles.json`, an array of objects:
+Puzzles live in `content/puzzles.json`: an object with a `puzzles` list,
+plus optional `version` and `notes`. Each puzzle has:
 
-| Field         | Value                                                            |
-| ------------- | ---------------------------------------------------------------- |
-| `id`          | Unique string, e.g. `sw-riddle-001`                              |
-| `lang`        | `en` or `sw`                                                     |
-| `type`        | `visual`, `riddle`, `proverb` or `mafumbo`                       |
-| `prompt`      | The puzzle text                                                  |
-| `answer`      | The correct answer; must be one of `options`                     |
-| `options`     | Exactly 3 different strings, one per answer orb                  |
-| `hint`        | A short hint                                                     |
-| `subtitle_en` | English subtitle; required when `lang` is `sw`, otherwise `null` |
-| `difficulty`  | `1` (easy), `2` (medium) or `3` (hard)                           |
-| `placeholder` | Optional. `true` marks sample content to replace before release  |
+| Field         | Value                                                                        |
+| ------------- | ---------------------------------------------------------------------------- |
+| `id`          | Unique string, e.g. `en-riddle-01`                                           |
+| `lang`        | `en` or `sw`                                                                 |
+| `type`        | `visual`, `riddle`, `proverb` or `mafumbo`                                   |
+| `prompt`      | The puzzle text (for mafumbo, the story)                                     |
+| `question`    | Mafumbo only: asked after the story                                          |
+| `answer`      | The correct answer                                                           |
+| `accepted`    | Extra spoken answers that count as correct, or `[]`                          |
+| `options`     | 3 different answers for the orbs, correct one first (the game shuffles them) |
+| `tiles`       | Visual only: the 4 objects on the table, one of them the answer              |
+| `answer_mode` | `grab` (visual), `voice+orbs` or `orbs`                                      |
+| `hint`        | A short hint                                                                 |
+| `explanation` | Shown after answering                                                        |
+| `subtitle_en` | English subtitle; required when `lang` is `sw`, otherwise `null`             |
+| `difficulty`  | `1` (easiest) to `5` (hardest)                                               |
+| `status`      | `draft` or `tested`                                                          |
 
-The two English puzzles there now are placeholders. `npm run validate` (and
-every build) rejects unknown fields, duplicate ids, a missing `subtitle_en` on
-Swahili puzzles, and the other rules above.
+Visual puzzles use `tiles` with `options: []` and `answer_mode: "grab"`; the
+other types use 3 `options` and no `tiles`. Text must use plain ASCII
+punctuation (straight quotes, no long dashes), because the game font has no
+other characters. `npm run validate` (and every build) checks all of this, plus
+unique ids and the `subtitle_en` rule, and names the field to fix.
 
 ## Project rules
 
