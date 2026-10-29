@@ -6,6 +6,15 @@ export const PuzzleStatus = {
   TimeUp: 'timeUp',
 } as const;
 
+export const PuzzleMode = {
+  /** Browse the bank one puzzle at a time, 60 s each, no score. */
+  Practice: 'practice',
+  /** A 3-minute run: mixed puzzles, auto-advance on solve, score. */
+  Run: 'run',
+  /** The run ended; the panel shows the summary. */
+  RunOver: 'runOver',
+} as const;
+
 /** The state of the current round, kept on the puzzle table. */
 export const PuzzleBoard = createComponent('PuzzleBoard', {
   status: {
@@ -17,6 +26,14 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
   wrongAnswers: { type: Types.Int8, default: 0 },
   // Which puzzle from content/puzzles.json is being played.
   puzzleIndex: { type: Types.Int16, default: 0 },
+  mode: {
+    type: Types.Enum,
+    enum: PuzzleMode,
+    default: PuzzleMode.Practice,
+  },
+  // Run totals; both stay 0 outside a run.
+  score: { type: Types.Int16, default: 0 },
+  solved: { type: Types.Int8, default: 0 },
 });
 
 /**

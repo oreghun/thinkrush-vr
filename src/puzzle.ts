@@ -16,12 +16,19 @@ import { onLanguageChange, t } from './i18n/index.js';
 import {
   AnswerOrb,
   PuzzleBoard,
+  PuzzleMode,
   PuzzleStatus,
   PuzzleTile,
 } from './puzzle-components.js';
 import { type Puzzle, PUZZLES } from './puzzles.js';
 
 const ROUND_SECONDS = 60;
+const RUN_SECONDS = 180;
+// A solve scores its difficulty (1-5) times this.
+const POINTS_PER_DIFFICULTY = 10;
+// How long the Correct feedback stays up before a run auto-advances.
+const SOLVE_BEAT_SECONDS = 2.5;
+const BEST_SCORE_KEY = 'thinkrush.bestScore';
 // A tile released within this distance of the tray's center, and not far
 // above it, counts as dropped on the tray.
 const TRAY_DROP_RADIUS = 0.1;
@@ -46,14 +53,20 @@ const TIMER_COLORS = { normal: '#fafaf7', low: '#f5b14a' };
 const ORB_GLOW = { correct: '#1d5c2a', wrong: '#8a5a00', idle: '#000000' };
 
 type Status = (typeof PuzzleStatus)[keyof typeof PuzzleStatus];
+type Mode = (typeof PuzzleMode)[keyof typeof PuzzleMode];
 type UIElement = ReturnType<UIKitMLAsset['getElementById']>;
 
 /**
  * Plays through content/puzzles.json at the table, one puzzle at a time.
  * Visual puzzles use the four grabbable tiles and the tray; riddles,
  * proverbs and mafumbo use the three answer orbs. The half of the set that
- * is not in use waits below the floor. Next puzzle advances through the
- * bank, and the timer only runs while the XR session is visible.
+ * is not in use waits below the floor. Timers only run while the XR session
+ * is visible.
+ *
+ * Two modes: practice (the default) browses the bank with Next puzzle, 60 s
+ * each; a run gives 3 minutes for as many mixed puzzles as possible, with
+ * auto-advance on solve, Skip, difficulty-scaled scoring, and a best score
+ * remembered in localStorage.
  */
 export class PuzzleSystem extends createSystem({
   boards: { required: [PuzzleBoard] },
@@ -81,16 +94,38 @@ export class PuzzleSystem extends createSystem({
   private readonly trayMaterials: MeshStandardMaterial[] = [];
   private trayGlowing = false;
   private shownSeconds = -1;
+  // The shuffled draw order of the current run, and where we are in it.
+  private runOrder: number[] = [];
+  private runPointer = 0;
+  // Seconds of Correct feedback left before a run auto-advances.
+  private advanceIn = 0;
   private elements: Record<
-    'prompt' | 'question' | 'timer' | 'status' | 'detail' | 'next',
+    | 'prompt'
+    | 'question'
+    | 'score'
+    | 'timer'
+    | 'status'
+    | 'detail'
+    | 'run'
+    | 'runLabel'
+    | 'next'
+    | 'nextLabel'
+    | 'exit'
+    | 'exitLabel',
     UIElement
   > = {
     prompt: null,
     question: null,
+    score: null,
     timer: null,
     status: null,
     detail: null,
+    run: null,
+    runLabel: null,
     next: null,
+    nextLabel: null,
+    exit: null,
+    exitLabel: null,
   };
 
   init(): void {
@@ -124,19 +159,28 @@ export class PuzzleSystem extends createSystem({
     this.elements = {
       prompt: panel?.getElementById('puzzle-prompt') ?? null,
       question: panel?.getElementById('puzzle-question') ?? null,
+      score: panel?.getElementById('puzzle-score') ?? null,
       timer: panel?.getElementById('puzzle-timer') ?? null,
       status: panel?.getElementById('puzzle-status') ?? null,
       detail: panel?.getElementById('puzzle-detail') ?? null,
+      run: panel?.getElementById('puzzle-run') ?? null,
+      runLabel: panel?.getElementById('puzzle-run-label') ?? null,
       next: panel?.getElementById('puzzle-restart') ?? null,
+      nextLabel: panel?.getElementById('puzzle-next-label') ?? null,
+      exit: panel?.getElementById('puzzle-exit') ?? null,
+      exitLabel: panel?.getElementById('puzzle-exit-label') ?? null,
     };
-    const next = () =>
-      this.startRound(
-        (this.board?.getValue(PuzzleBoard, 'puzzleIndex') ?? 0) + 1,
-      );
+    const next = () => this.onNextPressed();
+    const run = () => this.startRun();
+    const exit = () => this.exitToPractice();
     this.elements.next?.addEventListener('click', next);
+    this.elements.run?.addEventListener('click', run);
+    this.elements.exit?.addEventListener('click', exit);
 
     this.cleanupFuncs.push(
       () => this.elements.next?.removeEventListener('click', next),
+      () => this.elements.run?.removeEventListener('click', run),
+      () => this.elements.exit?.removeEventListener('click', exit),
       this.queries.pressedOrbs.subscribe('qualify', (orb) => {
         this.onOrbPressed(orb);
       }),
@@ -157,21 +201,40 @@ export class PuzzleSystem extends createSystem({
       return;
     }
 
-    if (
-      this.status() === PuzzleStatus.Playing &&
-      this.world.visibilityState.peek() === VisibilityState.Visible
-    ) {
+    const mode = this.mode();
+    const visible =
+      this.world.visibilityState.peek() === VisibilityState.Visible;
+    // In practice the clock is per puzzle and stops when the round ends; in
+    // a run it is the global run clock and keeps going through the solve
+    // feedback beat.
+    const clockRunning =
+      mode === PuzzleMode.Run
+        ? true
+        : mode === PuzzleMode.Practice &&
+          this.status() === PuzzleStatus.Playing;
+    if (visible && clockRunning) {
       const left = Math.max(
         0,
         (board.getValue(PuzzleBoard, 'secondsLeft') ?? 0) - delta,
       );
       board.setValue(PuzzleBoard, 'secondsLeft', left);
       if (left === 0) {
-        board.setValue(PuzzleBoard, 'status', PuzzleStatus.TimeUp);
-        this.revealCorrectOrb();
-        this.render();
+        if (mode === PuzzleMode.Run) {
+          this.endRun();
+        } else {
+          board.setValue(PuzzleBoard, 'status', PuzzleStatus.TimeUp);
+          this.revealCorrectOrb();
+          this.render();
+        }
       } else {
         this.renderTimer();
+      }
+    }
+
+    if (visible && this.advanceIn > 0) {
+      this.advanceIn -= delta;
+      if (this.advanceIn <= 0 && this.mode() === PuzzleMode.Run) {
+        this.advanceRun();
       }
     }
 
@@ -224,8 +287,12 @@ export class PuzzleSystem extends createSystem({
     this.isVisual = puzzle.type === 'visual';
     board.setValue(PuzzleBoard, 'puzzleIndex', wrapped);
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
-    board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
+    if (this.mode() !== PuzzleMode.Run) {
+      // A run keeps its global clock; practice restarts the per-puzzle one.
+      board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
+    }
     board.setValue(PuzzleBoard, 'wrongAnswers', 0);
+    this.advanceIn = 0;
     this.settling.clear();
     this.orbFlash.clear();
 
@@ -258,10 +325,9 @@ export class PuzzleSystem extends createSystem({
     }
     const slot = orb.getValue(AnswerOrb, 'slot') ?? 0;
     if (orb.getValue(AnswerOrb, 'correct')) {
-      board.setValue(PuzzleBoard, 'status', PuzzleStatus.Solved);
       this.orbFlash.delete(slot);
       this.setOrbGlow(slot, ORB_GLOW.correct);
-      AudioUtils.play(this.tray!);
+      this.onSolved();
     } else {
       const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
       board.setValue(PuzzleBoard, 'wrongAnswers', wrong + 1);
@@ -280,8 +346,7 @@ export class PuzzleSystem extends createSystem({
       this.isOverTray(tile.object3D!.position)
     ) {
       if (tile.getValue(PuzzleTile, 'correct')) {
-        board.setValue(PuzzleBoard, 'status', PuzzleStatus.Solved);
-        AudioUtils.play(this.tray!);
+        this.onSolved();
       } else {
         const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
         board.setValue(PuzzleBoard, 'wrongAnswers', wrong + 1);
@@ -289,6 +354,92 @@ export class PuzzleSystem extends createSystem({
       this.render();
     }
     this.settling.add(tile);
+  }
+
+  private mode(): Mode {
+    return (this.board?.getValue(PuzzleBoard, 'mode') ??
+      PuzzleMode.Practice) as Mode;
+  }
+
+  /** Marks the round solved; in a run it also scores and queues the next. */
+  private onSolved(): void {
+    const board = this.board!;
+    board.setValue(PuzzleBoard, 'status', PuzzleStatus.Solved);
+    AudioUtils.play(this.tray!);
+    if (this.mode() === PuzzleMode.Run && this.puzzle) {
+      board.setValue(
+        PuzzleBoard,
+        'score',
+        (board.getValue(PuzzleBoard, 'score') ?? 0) +
+          this.puzzle.difficulty * POINTS_PER_DIFFICULTY,
+      );
+      board.setValue(
+        PuzzleBoard,
+        'solved',
+        (board.getValue(PuzzleBoard, 'solved') ?? 0) + 1,
+      );
+      this.advanceIn = SOLVE_BEAT_SECONDS;
+    }
+  }
+
+  private onNextPressed(): void {
+    if (this.mode() === PuzzleMode.Run) {
+      this.advanceRun();
+    } else if (this.mode() === PuzzleMode.Practice) {
+      this.startRound(
+        (this.board?.getValue(PuzzleBoard, 'puzzleIndex') ?? 0) + 1,
+      );
+    }
+  }
+
+  /** Starts (or restarts) a 3-minute run over the whole bank, shuffled. */
+  private startRun(): void {
+    const board = this.board;
+    if (!board || this.mode() === PuzzleMode.Run) {
+      return;
+    }
+    board.setValue(PuzzleBoard, 'mode', PuzzleMode.Run);
+    board.setValue(PuzzleBoard, 'score', 0);
+    board.setValue(PuzzleBoard, 'solved', 0);
+    board.setValue(PuzzleBoard, 'secondsLeft', RUN_SECONDS);
+    // The draw order; a category filter can narrow this list later.
+    this.runOrder = shuffled(PUZZLES.map((_, index) => index));
+    this.runPointer = 0;
+    this.startRound(this.runOrder[0]);
+  }
+
+  /** The next puzzle of the run, reshuffling when the bank is exhausted. */
+  private advanceRun(): void {
+    this.advanceIn = 0;
+    this.runPointer += 1;
+    if (this.runPointer >= this.runOrder.length) {
+      this.runOrder = shuffled(this.runOrder);
+      this.runPointer = 0;
+    }
+    this.startRound(this.runOrder[this.runPointer]);
+  }
+
+  /** Ends the run and shows the summary, remembering the best score. */
+  private endRun(): void {
+    const board = this.board!;
+    this.advanceIn = 0;
+    board.setValue(PuzzleBoard, 'mode', PuzzleMode.RunOver);
+    board.setValue(PuzzleBoard, 'secondsLeft', 0);
+    this.revealCorrectOrb();
+    const score = board.getValue(PuzzleBoard, 'score') ?? 0;
+    if (score > readBestScore()) {
+      writeBestScore(score);
+    }
+    this.render();
+  }
+
+  private exitToPractice(): void {
+    const board = this.board;
+    if (!board || this.mode() !== PuzzleMode.RunOver) {
+      return;
+    }
+    board.setValue(PuzzleBoard, 'mode', PuzzleMode.Practice);
+    this.startRound(board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0);
   }
 
   /** Teaches the answer when time runs out on an orb puzzle. */
@@ -371,14 +522,24 @@ export class PuzzleSystem extends createSystem({
       return;
     }
     const status = this.status();
+    const mode = this.mode();
     const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
+    const score = board.getValue(PuzzleBoard, 'score') ?? 0;
 
     let statusText = this.isVisual
       ? t('puzzle.instructions')
       : t('puzzle.instructionsOrbs');
     let statusColor = STATUS_COLORS.playing;
     let detail = '';
-    if (status === PuzzleStatus.Solved) {
+    if (mode === PuzzleMode.RunOver) {
+      const solved = board.getValue(PuzzleBoard, 'solved') ?? 0;
+      statusText = t('puzzle.runOver');
+      statusColor = STATUS_COLORS.timeUp;
+      detail =
+        `${t('puzzle.score')}: ${score}. ` +
+        `${t('puzzle.solvedLabel')}: ${solved}. ` +
+        `${t('puzzle.best')}: ${Math.max(score, readBestScore())}.`;
+    } else if (status === PuzzleStatus.Solved) {
       statusText = t('puzzle.correct');
       statusColor = STATUS_COLORS.solved;
       detail = puzzle.explanation;
@@ -405,9 +566,35 @@ export class PuzzleSystem extends createSystem({
       text: detail || ' ',
       display: detail ? 'flex' : 'none',
     });
-    // Always available: on the desktop page the timer never runs and tiles
-    // need hands to drag, so a hidden Next would strand the first puzzle.
-    this.elements.next?.setProperties({ display: 'flex' });
+    this.elements.score?.setProperties({
+      text: `${t('puzzle.score')}: ${score}`,
+      display: mode === PuzzleMode.Practice ? 'none' : 'flex',
+    });
+    // Start run doubles as Run again on the summary.
+    this.elements.run?.setProperties({
+      display: mode === PuzzleMode.Run ? 'none' : 'flex',
+    });
+    this.elements.runLabel?.setProperties({
+      text:
+        mode === PuzzleMode.RunOver
+          ? t('puzzle.runAgain')
+          : t('puzzle.startRun'),
+    });
+    // Next is always available in practice: on the desktop page the timer
+    // never runs and tiles need hands, so a round there never ends. In a
+    // run the same button is Skip; on the summary it hides.
+    this.elements.next?.setProperties({
+      display: mode === PuzzleMode.RunOver ? 'none' : 'flex',
+    });
+    this.elements.nextLabel?.setProperties({
+      text: mode === PuzzleMode.Run ? t('puzzle.skip') : t('puzzle.next'),
+    });
+    this.elements.exit?.setProperties({
+      display: mode === PuzzleMode.RunOver ? 'flex' : 'none',
+    });
+    this.elements.exitLabel?.setProperties({
+      text: t('puzzle.backToPractice'),
+    });
     this.shownSeconds = -1;
     this.renderTimer();
   }
@@ -456,6 +643,24 @@ function cloneMaterials(entity: Entity): MeshStandardMaterial[] {
     }
   });
   return clones;
+}
+
+/** The saved best run score, or 0 when there is none or storage is blocked. */
+function readBestScore(): number {
+  try {
+    const value = Number(localStorage.getItem(BEST_SCORE_KEY));
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeBestScore(score: number): void {
+  try {
+    localStorage.setItem(BEST_SCORE_KEY, String(score));
+  } catch {
+    // Storage can be blocked (private mode); the best then lasts this visit.
+  }
 }
 
 function shuffled<T>(items: readonly T[]): T[] {

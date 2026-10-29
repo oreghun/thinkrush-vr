@@ -92,9 +92,10 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-29, PRs 1-8 merged (6 answer orbs; 7 Next always visible,
+As of 2026-10-29, PRs 1-9 merged (6 answer orbs; 7 Next always visible,
 because on the desktop page the timer never runs and tiles need hands, so a
-round there never ends; 8 movable panels and drag-to-look):
+round there never ends; 8 movable panels and drag-to-look; 9 the 3-minute
+run loop):
 
 Live on main
 
@@ -108,6 +109,11 @@ Live on main
   XR session is visible.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
+- Run mode: Start a 3-minute run draws the whole bank shuffled,
+  auto-advances 2.5 s after a solve, Skip costs only time, a solve scores
+  difficulty x 10, the summary shows score/solved/best, and the best run
+  score is kept in localStorage (thinkrush.bestScore). Practice stays the
+  default browsing mode with the per-puzzle 60 s timer.
 - Each panel hangs from a graphite grab bar: DistanceGrabbable with
   MoveFromTarget, rotation locked so the single-sided panel keeps facing the
   player, position clamped near the table by MovablePanelSystem. On flat
@@ -121,6 +127,17 @@ Live on main
 
 Decisions
 
+- Comfort contract: nothing may move or rotate the player's viewpoint in VR
+  except their own head. No locomotion, no snap turns, no world rotation, no
+  camera animation, no screen shake (juice goes on objects, never on the
+  view); avoid full-field particle bursts; the floor and horizon stay
+  static; ScreenLookSystem runs only outside immersive sessions. The other
+  half of comfort is frame rate: 60 fps gets verified on a real Quest 3 in
+  Week 3.
+- Category picker (owner request, next PR): a Category button on the puzzle
+  panel cycling All plus each puzzle type that has content (proverbs stay
+  hidden until the methali arrive), filtering both practice browsing and
+  runs. Player-facing names come from i18n; no separate menu screen.
 - Pattern puzzle (next big type): universal "Complete the pattern" mechanic;
   procedurally generated families (kanga/kitenge signature, beadwork,
   tessellation, weave, abstract); planned content fields: type "pattern" plus
@@ -134,12 +151,12 @@ Decisions
 
 Next up (in order)
 
-1. Run loop: about 3-minute runs mixing puzzle types, score; then streaks
-   and Daily Challenge (localStorage only).
+1. Category picker (decision above).
 2. Pattern puzzle type (decision above).
 3. RUSH companion (glowing sphere with eyes, shrinks as time runs down) and
    a sound/juice pass.
-4. Palm-up pause gesture; pause when the session loses visibility.
+4. Streaks and the Daily Challenge (localStorage only).
+5. Palm-up pause gesture; pause when the session loses visibility.
    Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
    real Quest 3, demo video. Cut order if time runs short: leaderboard,
    misplaced-object puzzle variant, in-game voice answers, extra puzzle count.

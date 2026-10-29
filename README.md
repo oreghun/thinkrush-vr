@@ -22,9 +22,12 @@ you can click around in.
 > at and pinch. Next puzzle (always available) steps through the whole bank,
 > and the 60-second timer only runs inside VR. In VR, pinch the bar under any
 > panel to move it where you like; on a flat screen, drag empty space to look
-> around. A voice check panel to the right tests whether
-> your device can recognize speech on the device itself (see "Voice input"
-> below). Runs, scoring and RUSH come next.
+> around. A voice check panel to the right tests whether your device can
+> recognize speech on the device itself (see "Voice input" below). Press
+> Start a 3-minute run for a scored dash through shuffled puzzles: solving
+> auto-advances, Skip costs only time, points scale with difficulty, and
+> your best score stays on your device. RUSH and puzzle categories come
+> next.
 
 ## Run it locally
 
