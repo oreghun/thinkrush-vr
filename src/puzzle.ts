@@ -372,7 +372,6 @@ export class PuzzleSystem extends createSystem({
     }
     const status = this.status();
     const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
-    const roundOver = status !== PuzzleStatus.Playing;
 
     let statusText = this.isVisual
       ? t('puzzle.instructions')
@@ -406,9 +405,9 @@ export class PuzzleSystem extends createSystem({
       text: detail || ' ',
       display: detail ? 'flex' : 'none',
     });
-    this.elements.next?.setProperties({
-      display: roundOver ? 'flex' : 'none',
-    });
+    // Always available: on the desktop page the timer never runs and tiles
+    // need hands to drag, so a hidden Next would strand the first puzzle.
+    this.elements.next?.setProperties({ display: 'flex' });
     this.shownSeconds = -1;
     this.renderTimer();
   }

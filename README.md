@@ -19,8 +19,8 @@ you can click around in.
 
 > Status: all 21 puzzles are playable, one at a time. Visual puzzles use the
 > four tiles and the tray; riddles and mafumbo use three answer orbs you point
-> at and pinch. Next puzzle steps through the whole bank, and the 60-second
-> timer only runs inside VR. A voice check panel to the right tests whether
+> at and pinch. Next puzzle (always available) steps through the whole bank,
+> and the 60-second timer only runs inside VR. A voice check panel to the right tests whether
 > your device can recognize speech on the device itself (see "Voice input"
 > below). Runs, scoring and RUSH come next.
 
