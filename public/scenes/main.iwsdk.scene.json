@@ -263,6 +263,22 @@
       }
     },
     {
+      "id": "voice-check-panel",
+      "name": "Voice Check Panel",
+      "content": {
+        "type": "asset",
+        "asset": "voice-check"
+      },
+      "transform": {
+        "position": [0.62, 1.05, -0.62],
+        "rotationDeg": [0, -45, 0],
+        "scale": 0.11
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    },
+    {
       "id": "welcome-panel",
       "name": "Welcome Panel",
       "content": {
@@ -270,9 +286,9 @@
         "asset": "welcome-panel"
       },
       "transform": {
-        "position": [0, 2.3, -5.15],
-        "rotationDeg": [-6, 0, 0],
-        "scale": 0.46
+        "position": [-0.62, 1.05, -0.62],
+        "rotationDeg": [0, 45, 0],
+        "scale": 0.11
       },
       "components": {
         "RayInteractable": {}

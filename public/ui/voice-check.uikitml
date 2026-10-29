@@ -1,0 +1,97 @@
+<!--
+  Week 1 voice check, to the right of the puzzle panel: whether this device
+  can recognize speech without an online service, and a try-out with the
+  first voice riddle. Nothing speech-related runs until the player presses
+  the check button. Ids that are message keys get their text from src/i18n
+  via src/ui-text.ts; src/voice-check.ts fills and colors the others and
+  shows the buttons that apply. "..." is only a placeholder.
+-->
+<style>
+  .panel-root {
+    flex-direction: column;
+    width: 420px;
+  }
+
+  .panel-content {
+    flex-direction: column;
+    gap: 7px;
+    padding: 22px;
+  }
+
+  .eyebrow {
+    color: #6b5a00;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+  }
+
+  .eyebrow:dark {
+    color: #f5d90a;
+  }
+
+  .support {
+    color: #3a3b40;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .support:dark {
+    color: #dddfe3;
+  }
+
+  .riddle {
+    color: #1c1d20;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-top: 6px;
+  }
+
+  .riddle:dark {
+    color: #fafaf7;
+  }
+
+  .result {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .button {
+    justify-content: flex-start;
+    margin-left: 22px;
+    margin-right: 22px;
+    margin-bottom: 22px;
+  }
+
+  .button-label {
+    transform-translate-y: 1px;
+  }
+</style>
+<Panel class="panel-root">
+  <div class="panel-content">
+    <span id="voice.eyebrow" class="eyebrow">...</span>
+    <div id="voice-support-en" class="support">...</div>
+    <div id="voice-support-sw" class="support">...</div>
+    <div id="voice-riddle" class="riddle">...</div>
+    <div id="voice-result" class="result">...</div>
+  </div>
+  <Button id="voice-check" class="button">
+    <ButtonIcon>
+      <AudioLines></AudioLines>
+    </ButtonIcon>
+    <ButtonLabel id="voice.check" class="button-label">...</ButtonLabel>
+  </Button>
+  <Button id="voice-listen" class="button" style="display: none">
+    <ButtonIcon>
+      <Mic></Mic>
+    </ButtonIcon>
+    <ButtonLabel id="voice.listen" class="button-label">...</ButtonLabel>
+  </Button>
+  <Button id="voice-download" class="button" style="display: none">
+    <ButtonIcon>
+      <Download></Download>
+    </ButtonIcon>
+    <ButtonLabel id="voice.download" class="button-label">...</ButtonLabel>
+  </Button>
+</Panel>

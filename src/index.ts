@@ -11,6 +11,7 @@ import { onLanguageChange, t } from './i18n/index.js';
 import { installCodeInputVisuals } from './input-visuals.js';
 import { PanelSystem } from './panel.js';
 import { UITextSystem } from './ui-text.js';
+import { VoiceCheckSystem } from './voice-check.js';
 import { VisualPuzzleSystem } from './visual-puzzle.js';
 
 const updateTitle = () => {
@@ -27,4 +28,5 @@ World.create(
   world.registerSystem(UITextSystem);
   world.registerSystem(PanelSystem);
   world.registerSystem(VisualPuzzleSystem);
+  world.registerSystem(VoiceCheckSystem);
 });

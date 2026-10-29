@@ -39,4 +39,5 @@ export default defineAssets({
   'welcome-panel': uikitml('welcome.uikitml', 'Welcome Panel'),
   'puzzle-panel': uikitml('puzzle-panel.uikitml', 'Puzzle Panel'),
   'tile-label': uikitml('tile-label.uikitml', 'Tile Label'),
+  'voice-check': uikitml('voice-check.uikitml', 'Voice Check'),
 });
