@@ -99,7 +99,7 @@
     <div id="puzzle-status" class="status">...</div>
     <div id="puzzle-detail" class="detail">...</div>
   </div>
-  <Button id="puzzle-restart" class="button" style="display: none">
+  <Button id="puzzle-restart" class="button">
     <ButtonIcon>
       <ArrowRight></ArrowRight>
     </ButtonIcon>

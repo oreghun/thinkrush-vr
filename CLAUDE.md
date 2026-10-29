@@ -92,7 +92,9 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-29, PRs 1-6 merged (6 = answer orbs):
+As of 2026-10-29, PRs 1-7 merged (6 = answer orbs, 7 = Next always visible,
+because on the desktop page the timer never runs and tiles need hands, so a
+round there never ends):
 
 Live on main
 
