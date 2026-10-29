@@ -74,3 +74,11 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 
 - Small pull requests, one feature each. Keep main deployable at all times.
 - Explain anything the owner must do by hand (settings, accounts, testing on device).
+
+## IWSDK guidance
+
+The IWSDK creator generated AGENTS.md (plus scoped copies in src/ and public/,
+and rules and skills under .claude/). They explain how the SDK and its dev
+tooling work, not this game; the rules above take precedence.
+
+@AGENTS.md
