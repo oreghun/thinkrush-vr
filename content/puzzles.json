@@ -1,13 +1,18 @@
 {
   "version": 1,
-  "notes": "English puzzle bank, draft 1. Options are listed answer-first; the game shuffles them. Visual puzzles use tiles instead of options. Methali (Swahili) are added separately after review.",
+  "notes": "English puzzle bank, draft 2. Options are listed answer-first; the game shuffles them. Visual puzzles use tiles instead of options. Swahili methali are maintained separately in content/methali-drafts.json pending language review.",
   "puzzles": [
     {
       "id": "en-visual-01",
       "lang": "en",
       "type": "visual",
       "prompt": "Grab the odd one out.",
-      "tiles": ["thermometer", "ruler", "weighing scale", "telescope"],
+      "tiles": [
+        "thermometer",
+        "ruler",
+        "weighing scale",
+        "telescope"
+      ],
       "answer": "telescope",
       "accepted": [],
       "options": [],
@@ -23,7 +28,12 @@
       "lang": "en",
       "type": "visual",
       "prompt": "Grab the odd one out.",
-      "tiles": ["seed", "egg", "blueprint", "house"],
+      "tiles": [
+        "seed",
+        "egg",
+        "blueprint",
+        "house"
+      ],
       "answer": "house",
       "accepted": [],
       "options": [],
@@ -39,7 +49,12 @@
       "lang": "en",
       "type": "visual",
       "prompt": "Grab the odd one out.",
-      "tiles": ["footprint", "fingerprint", "tyre track", "shadow"],
+      "tiles": [
+        "footprint",
+        "fingerprint",
+        "tyre track",
+        "shadow"
+      ],
       "answer": "shadow",
       "accepted": [],
       "options": [],
@@ -55,7 +70,12 @@
       "lang": "en",
       "type": "visual",
       "prompt": "Which one plays a different role?",
-      "tiles": ["key", "password", "fingerprint", "padlock"],
+      "tiles": [
+        "key",
+        "password",
+        "fingerprint",
+        "padlock"
+      ],
       "answer": "padlock",
       "accepted": [],
       "options": [],
@@ -71,7 +91,12 @@
       "lang": "en",
       "type": "visual",
       "prompt": "Grab the odd one out.",
-      "tiles": ["kite", "sail", "parachute", "umbrella"],
+      "tiles": [
+        "kite",
+        "sail",
+        "parachute",
+        "umbrella"
+      ],
       "answer": "umbrella",
       "accepted": [],
       "options": [],
@@ -87,7 +112,12 @@
       "lang": "en",
       "type": "visual",
       "prompt": "Grab the odd one out.",
-      "tiles": ["piano", "computer keyboard", "typewriter", "keyring"],
+      "tiles": [
+        "piano",
+        "computer keyboard",
+        "typewriter",
+        "keyring"
+      ],
       "answer": "keyring",
       "accepted": [],
       "options": [],
@@ -103,7 +133,12 @@
       "lang": "en",
       "type": "visual",
       "prompt": "Grab the odd one out.",
-      "tiles": ["iron nail", "paper clip", "wooden block", "steel screw"],
+      "tiles": [
+        "iron nail",
+        "paper clip",
+        "wooden block",
+        "steel screw"
+      ],
       "answer": "wooden block",
       "accepted": [],
       "options": [],
@@ -120,8 +155,16 @@
       "type": "riddle",
       "prompt": "I can show you every face in a room, but I have never seen one. I can show you a stain on your shirt, but I cannot see it myself. What am I?",
       "answer": "a mirror",
-      "accepted": ["mirror", "a mirror", "looking glass"],
-      "options": ["a mirror", "a window", "a camera"],
+      "accepted": [
+        "mirror",
+        "a mirror",
+        "looking glass"
+      ],
+      "options": [
+        "a mirror",
+        "a window",
+        "a camera"
+      ],
       "answer_mode": "voice+orbs",
       "hint": "You look into me every morning.",
       "explanation": "A mirror reflects every face without seeing any of them.",
@@ -135,8 +178,16 @@
       "type": "riddle",
       "prompt": "A traveller crosses a muddy field. The more he takes, the more he leaves behind. What does he take?",
       "answer": "steps",
-      "accepted": ["steps", "footsteps", "step"],
-      "options": ["steps", "photographs", "mud"],
+      "accepted": [
+        "steps",
+        "footsteps",
+        "step"
+      ],
+      "options": [
+        "steps",
+        "photographs",
+        "mud"
+      ],
       "answer_mode": "voice+orbs",
       "hint": "Look behind him.",
       "explanation": "Every step he takes leaves a footprint behind.",
@@ -150,8 +201,15 @@
       "type": "riddle",
       "prompt": "I repeat what you give me, but I never remember it. I may sound like a person, yet I have no mouth. The farther away you stand, the longer you wait for me. What am I?",
       "answer": "an echo",
-      "accepted": ["echo", "an echo"],
-      "options": ["an echo", "a parrot", "a radio"],
+      "accepted": [
+        "echo",
+        "an echo"
+      ],
+      "options": [
+        "an echo",
+        "a parrot",
+        "a radio"
+      ],
       "answer_mode": "voice+orbs",
       "hint": "Shout into a valley.",
       "explanation": "An echo is your own sound returning, and it takes longer the farther it travels.",
@@ -165,8 +223,15 @@
       "type": "riddle",
       "prompt": "The moment you tell everyone what I am, I stop being what I am. I can protect a kingdom or destroy a friendship. What am I?",
       "answer": "a secret",
-      "accepted": ["secret", "a secret"],
-      "options": ["a secret", "a promise", "a map"],
+      "accepted": [
+        "secret",
+        "a secret"
+      ],
+      "options": [
+        "a secret",
+        "a promise",
+        "a map"
+      ],
       "answer_mode": "voice+orbs",
       "hint": "Whisper it.",
       "explanation": "Once a secret is shared with everyone, it is no longer a secret.",
@@ -181,7 +246,11 @@
       "prompt": "I can open doors without touching them. I can close a door that is already open. I can make a stranger welcome and a friend unwelcome. What am I?",
       "answer": "a reputation",
       "accepted": [],
-      "options": ["a reputation", "a key", "the wind"],
+      "options": [
+        "a reputation",
+        "a key",
+        "the wind"
+      ],
       "answer_mode": "orbs",
       "hint": "People hear about me before they meet you.",
       "explanation": "Your reputation changes who trusts you before you even arrive. The wind can close a door, but it cannot make anyone welcome.",
@@ -196,7 +265,11 @@
       "prompt": "I build walls between people without bricks. I can tear those walls down without tools. I travel around the world without moving. What am I?",
       "answer": "a belief",
       "accepted": [],
-      "options": ["a belief", "a border", "a river"],
+      "options": [
+        "a belief",
+        "a border",
+        "a river"
+      ],
       "answer_mode": "orbs",
       "hint": "I live in the mind.",
       "explanation": "Beliefs divide people, bring them together, and spread everywhere without going anywhere.",
@@ -212,7 +285,11 @@
       "question": "What did the village really sell?",
       "answer": "control over its own water",
       "accepted": [],
-      "options": ["control over its own water", "its fountain", "its farmland"],
+      "options": [
+        "control over its own water",
+        "its fountain",
+        "its farmland"
+      ],
       "answer_mode": "orbs",
       "hint": "Who decides the price now?",
       "explanation": "The village traded long-term control of something essential for short-term money.",
@@ -228,7 +305,11 @@
       "question": "What defeated the kingdom before the enemy arrived?",
       "answer": "refusing to hear the truth",
       "accepted": [],
-      "options": ["refusing to hear the truth", "too few soldiers", "the painter's flattery"],
+      "options": [
+        "refusing to hear the truth",
+        "too few soldiers",
+        "the painter's flattery"
+      ],
       "answer_mode": "orbs",
       "hint": "What did the mirrors really show?",
       "explanation": "By silencing bad news, the king could no longer see or fix real problems.",
@@ -244,7 +325,11 @@
       "question": "What stopped either runner from winning?",
       "answer": "measuring success only against each other",
       "accepted": [],
-      "options": ["measuring success only against each other", "not training hard enough", "cheap shoes"],
+      "options": [
+        "measuring success only against each other",
+        "not training hard enough",
+        "cheap shoes"
+      ],
       "answer_mode": "orbs",
       "hint": "Where was their finish line?",
       "explanation": "Neither runner defined success beyond beating the other, so neither could ever finish.",
@@ -260,7 +345,11 @@
       "question": "What was the engineer's mistake?",
       "answer": "putting appearance before foundations",
       "accepted": [],
-      "options": ["putting appearance before foundations", "building in the rainy season", "choosing the wrong river"],
+      "options": [
+        "putting appearance before foundations",
+        "building in the rainy season",
+        "choosing the wrong river"
+      ],
       "answer_mode": "orbs",
       "hint": "What did the town never see?",
       "explanation": "Work that looks impressive is not the same as work that holds up.",
@@ -276,7 +365,11 @@
       "question": "What was really keeping the prisoner in his cell?",
       "answer": "waiting for permission to act",
       "accepted": [],
-      "options": ["waiting for permission to act", "the locked door", "the cruel guard"],
+      "options": [
+        "waiting for permission to act",
+        "the locked door",
+        "the cruel guard"
+      ],
       "answer_mode": "orbs",
       "hint": "Who was holding the key?",
       "explanation": "The opportunity was in front of him; his belief that he needed permission kept him inside.",
@@ -292,7 +385,11 @@
       "question": "What was wrong with the town's system?",
       "answer": "it rewarded steps, not useful work",
       "accepted": [],
-      "options": ["it rewarded steps, not useful work", "it paid people too little", "the river was too far"],
+      "options": [
+        "it rewarded steps, not useful work",
+        "it paid people too little",
+        "the river was too far"
+      ],
       "answer_mode": "orbs",
       "hint": "What did the girl bring home?",
       "explanation": "When you reward what is counted instead of what is achieved, people chase the count.",
@@ -308,7 +405,11 @@
       "question": "What had the farmer mistaken for value?",
       "answer": "looks, instead of what it produced",
       "accepted": [],
-      "options": ["looks, instead of what it produced", "fruit, instead of shade", "size, instead of age"],
+      "options": [
+        "looks, instead of what it produced",
+        "fruit, instead of shade",
+        "size, instead of age"
+      ],
       "answer_mode": "orbs",
       "hint": "Which tree did the drought test?",
       "explanation": "What looks best is not always what matters most.",
@@ -324,12 +425,208 @@
       "question": "What was the man's real problem?",
       "answer": "he kept filling his time instead of protecting it",
       "accepted": [],
-      "options": ["he kept filling his time instead of protecting it", "the clock was broken", "he needed two extra hours"],
+      "options": [
+        "he kept filling his time instead of protecting it",
+        "the clock was broken",
+        "he needed two extra hours"
+      ],
       "answer_mode": "orbs",
       "hint": "Where did the extra hour go?",
       "explanation": "More time brings no freedom if new demands grow to fill it.",
       "subtitle_en": null,
       "difficulty": 5,
+      "status": "draft"
+    },
+    {
+      "id": "en-visual-08",
+      "lang": "en",
+      "type": "visual",
+      "prompt": "Which item is not normally used to carry a message?",
+      "tiles": [
+        "envelope",
+        "message bottle",
+        "USB drive",
+        "frying pan"
+      ],
+      "answer": "frying pan",
+      "accepted": [],
+      "options": [],
+      "answer_mode": "grab",
+      "hint": "Three of these can carry a written or digital message.",
+      "explanation": "An envelope, a message bottle, and a USB drive are all used to carry information. A frying pan is used for cooking.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-visual-09",
+      "lang": "en",
+      "type": "visual",
+      "prompt": "Which object mainly converts incoming energy rather than storing energy for later use?",
+      "tiles": [
+        "battery",
+        "candle",
+        "dry seed",
+        "solar panel"
+      ],
+      "answer": "solar panel",
+      "accepted": [],
+      "options": [],
+      "answer_mode": "grab",
+      "hint": "Think about which one needs sunlight to make something else.",
+      "explanation": "A battery, candle, and seed store energy in chemical form. A solar panel converts incoming light into electrical energy.",
+      "subtitle_en": null,
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "en-visual-10",
+      "lang": "en",
+      "type": "visual",
+      "prompt": "Grab the odd one out.",
+      "tiles": [
+        "megaphone",
+        "trumpet",
+        "loudspeaker",
+        "telescope"
+      ],
+      "answer": "telescope",
+      "accepted": [],
+      "options": [],
+      "answer_mode": "grab",
+      "hint": "Three are used with sound; one is used to observe distant things.",
+      "explanation": "A megaphone, trumpet, and loudspeaker produce, amplify, or direct sound. A telescope is an optical instrument.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-riddle-07",
+      "lang": "en",
+      "type": "riddle",
+      "prompt": "A clock takes five seconds to strike six. At the same pace, how many seconds will it take to strike twelve?",
+      "answer": "11 seconds",
+      "accepted": [
+        "11 seconds",
+        "11"
+      ],
+      "options": [
+        "11 seconds",
+        "10 seconds",
+        "12 seconds"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "Count the gaps between strikes, not the strikes themselves.",
+      "explanation": "Six strikes have five gaps between them. Twelve strikes have eleven gaps, so they take eleven seconds.",
+      "subtitle_en": null,
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "en-riddle-08",
+      "lang": "en",
+      "type": "riddle",
+      "prompt": "A basket holds six mangoes. You take two mangoes out. How many mangoes do you have?",
+      "answer": "two",
+      "accepted": [
+        "two",
+        "2"
+      ],
+      "options": [
+        "two",
+        "four",
+        "six"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "The question asks what you have taken.",
+      "explanation": "You took two mangoes, so you have two. The other four remain in the basket.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-riddle-09",
+      "lang": "en",
+      "type": "riddle",
+      "prompt": "A farmer has seventeen goats. All but nine leave the pen. How many goats remain?",
+      "answer": "nine",
+      "accepted": [
+        "nine",
+        "9"
+      ],
+      "options": [
+        "nine",
+        "eight",
+        "seventeen"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "\"All but nine\" means every goat except nine.",
+      "explanation": "All the goats except nine leave, so nine goats remain.",
+      "subtitle_en": null,
+      "difficulty": 1,
+      "status": "draft"
+    },
+    {
+      "id": "en-riddle-10",
+      "lang": "en",
+      "type": "riddle",
+      "prompt": "Two mothers and two daughters share three mandazi. Each person gets exactly one. What is the smallest number of people who could be there?",
+      "answer": "three people",
+      "accepted": [
+        "three people",
+        "three",
+        "3"
+      ],
+      "options": [
+        "three people",
+        "two people",
+        "four people"
+      ],
+      "answer_mode": "voice+orbs",
+      "hint": "One person can be both a mother and a daughter.",
+      "explanation": "There are three generations: a grandmother, her daughter, and her granddaughter. The middle person is both a daughter and a mother.",
+      "subtitle_en": null,
+      "difficulty": 2,
+      "status": "draft"
+    },
+    {
+      "id": "en-mafumbo-09",
+      "lang": "en",
+      "type": "mafumbo",
+      "prompt": "A traveller carried two maps. One showed every tiny path but was hard to read while walking. The other showed only the main roads and made the journey easy. When the traveller entered a forest, the simple map became useless, while the detailed one helped. Which map was the better map?",
+      "question": "What is the hidden lesson?",
+      "answer": "Neither map is always better; the right map depends on the task and situation.",
+      "accepted": [],
+      "options": [
+        "Neither map is always better; the right map depends on the task and situation.",
+        "The most detailed map is always best.",
+        "Simple maps are always best."
+      ],
+      "answer_mode": "orbs",
+      "hint": "What changed when the traveller entered the forest?",
+      "explanation": "A tool should fit the decision being made. Simplicity helps with orientation, while detail matters when navigating complexity. Good judgement includes adapting when the situation changes.",
+      "subtitle_en": null,
+      "difficulty": 3,
+      "status": "draft"
+    },
+    {
+      "id": "en-mafumbo-10",
+      "lang": "en",
+      "type": "mafumbo",
+      "prompt": "A leader asked three advisers how to choose whom to trust. The first said, \"Trust everyone; suspicion wastes time.\" The second said, \"Trust nobody; people always disappoint you.\" The third asked to see the evidence, check what each person had done, and review the decision as new facts appeared. The leader chose the third adviser, but did not promise to agree with them every time.",
+      "question": "What is the hidden lesson?",
+      "answer": "Good judgement means checking evidence and adapting trust to the situation, not trusting everyone or nobody.",
+      "accepted": [],
+      "options": [
+        "Good judgement means checking evidence and adapting trust to the situation, not trusting everyone or nobody.",
+        "Always trust the first person who speaks.",
+        "Never trust anyone."
+      ],
+      "answer_mode": "orbs",
+      "hint": "The third adviser offers a method, not an extreme rule.",
+      "explanation": "Trust works best when informed by evidence, context, and willingness to revise a judgement. A useful principle is not the same as an absolute rule.",
+      "subtitle_en": null,
+      "difficulty": 3,
       "status": "draft"
     }
   ]
