@@ -12,7 +12,14 @@ import {
   Visibility,
   VisibilityState,
 } from '@iwsdk/core';
-import { onLanguageChange, t } from './i18n/index.js';
+import {
+  type Category,
+  categoryIndices,
+  nextCategory,
+  nextIndexInCategory,
+  PuzzleCategory,
+} from './categories.js';
+import { type MessageKey, onLanguageChange, t } from './i18n/index.js';
 import {
   AnswerOrb,
   PuzzleBoard,
@@ -51,6 +58,14 @@ const STATUS_COLORS = {
 };
 const TIMER_COLORS = { normal: '#fafaf7', low: '#f5b14a' };
 const ORB_GLOW = { correct: '#1d5c2a', wrong: '#8a5a00', idle: '#000000' };
+
+const CATEGORY_LABEL_KEYS: Record<Category, MessageKey> = {
+  [PuzzleCategory.All]: 'category.all',
+  [PuzzleCategory.Visual]: 'category.visual',
+  [PuzzleCategory.Riddle]: 'category.riddle',
+  [PuzzleCategory.Proverb]: 'category.proverb',
+  [PuzzleCategory.Mafumbo]: 'category.mafumbo',
+};
 
 type Status = (typeof PuzzleStatus)[keyof typeof PuzzleStatus];
 type Mode = (typeof PuzzleMode)[keyof typeof PuzzleMode];
@@ -106,6 +121,8 @@ export class PuzzleSystem extends createSystem({
     | 'timer'
     | 'status'
     | 'detail'
+    | 'category'
+    | 'categoryLabel'
     | 'run'
     | 'runLabel'
     | 'next'
@@ -120,6 +137,8 @@ export class PuzzleSystem extends createSystem({
     timer: null,
     status: null,
     detail: null,
+    category: null,
+    categoryLabel: null,
     run: null,
     runLabel: null,
     next: null,
@@ -163,6 +182,8 @@ export class PuzzleSystem extends createSystem({
       timer: panel?.getElementById('puzzle-timer') ?? null,
       status: panel?.getElementById('puzzle-status') ?? null,
       detail: panel?.getElementById('puzzle-detail') ?? null,
+      category: panel?.getElementById('puzzle-category') ?? null,
+      categoryLabel: panel?.getElementById('puzzle-category-label') ?? null,
       run: panel?.getElementById('puzzle-run') ?? null,
       runLabel: panel?.getElementById('puzzle-run-label') ?? null,
       next: panel?.getElementById('puzzle-restart') ?? null,
@@ -173,14 +194,17 @@ export class PuzzleSystem extends createSystem({
     const next = () => this.onNextPressed();
     const run = () => this.startRun();
     const exit = () => this.exitToPractice();
+    const category = () => this.cycleCategory();
     this.elements.next?.addEventListener('click', next);
     this.elements.run?.addEventListener('click', run);
     this.elements.exit?.addEventListener('click', exit);
+    this.elements.category?.addEventListener('click', category);
 
     this.cleanupFuncs.push(
       () => this.elements.next?.removeEventListener('click', next),
       () => this.elements.run?.removeEventListener('click', run),
       () => this.elements.exit?.removeEventListener('click', exit),
+      () => this.elements.category?.removeEventListener('click', category),
       this.queries.pressedOrbs.subscribe('qualify', (orb) => {
         this.onOrbPressed(orb);
       }),
@@ -202,17 +226,19 @@ export class PuzzleSystem extends createSystem({
     }
 
     const mode = this.mode();
-    const visible =
-      this.world.visibilityState.peek() === VisibilityState.Visible;
-    // In practice the clock is per puzzle and stops when the round ends; in
-    // a run it is the global run clock and keeps going through the solve
-    // feedback beat.
+    const state = this.world.visibilityState.peek();
+    // A blurred XR session (headset menu, headset off) pauses everything.
+    // The practice timer also pauses outside VR, where tiles cannot be
+    // dragged; a run's clock ticks on the flat page too, or a desktop run
+    // would never end. Hidden browser tabs stop the frame loop anyway.
+    const awake = state !== VisibilityState.VisibleBlurred;
     const clockRunning =
       mode === PuzzleMode.Run
-        ? true
+        ? awake
         : mode === PuzzleMode.Practice &&
-          this.status() === PuzzleStatus.Playing;
-    if (visible && clockRunning) {
+          this.status() === PuzzleStatus.Playing &&
+          state === VisibilityState.Visible;
+    if (clockRunning) {
       const left = Math.max(
         0,
         (board.getValue(PuzzleBoard, 'secondsLeft') ?? 0) - delta,
@@ -231,7 +257,7 @@ export class PuzzleSystem extends createSystem({
       }
     }
 
-    if (visible && this.advanceIn > 0) {
+    if (awake && this.advanceIn > 0) {
       this.advanceIn -= delta;
       if (this.advanceIn <= 0 && this.mode() === PuzzleMode.Run) {
         this.advanceRun();
@@ -361,6 +387,28 @@ export class PuzzleSystem extends createSystem({
       PuzzleMode.Practice) as Mode;
   }
 
+  private category(): Category {
+    return (this.board?.getValue(PuzzleBoard, 'category') ??
+      PuzzleCategory.All) as Category;
+  }
+
+  /** The Category button: next non-empty category, All always included. */
+  private cycleCategory(): void {
+    const board = this.board;
+    if (!board || this.mode() !== PuzzleMode.Practice) {
+      return;
+    }
+    const category = nextCategory(PUZZLES, this.category());
+    board.setValue(PuzzleBoard, 'category', category);
+    const index = board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0;
+    if (categoryIndices(PUZZLES, category).includes(index)) {
+      // The current puzzle already fits; don't restart a round mid-solve.
+      this.render();
+    } else {
+      this.startRound(nextIndexInCategory(PUZZLES, category, index));
+    }
+  }
+
   /** Marks the round solved; in a run it also scores and queues the next. */
   private onSolved(): void {
     const board = this.board!;
@@ -387,7 +435,11 @@ export class PuzzleSystem extends createSystem({
       this.advanceRun();
     } else if (this.mode() === PuzzleMode.Practice) {
       this.startRound(
-        (this.board?.getValue(PuzzleBoard, 'puzzleIndex') ?? 0) + 1,
+        nextIndexInCategory(
+          PUZZLES,
+          this.category(),
+          this.board?.getValue(PuzzleBoard, 'puzzleIndex') ?? 0,
+        ),
       );
     }
   }
@@ -402,8 +454,8 @@ export class PuzzleSystem extends createSystem({
     board.setValue(PuzzleBoard, 'score', 0);
     board.setValue(PuzzleBoard, 'solved', 0);
     board.setValue(PuzzleBoard, 'secondsLeft', RUN_SECONDS);
-    // The draw order; a category filter can narrow this list later.
-    this.runOrder = shuffled(PUZZLES.map((_, index) => index));
+    // The run draws only from the chosen category.
+    this.runOrder = shuffled(categoryIndices(PUZZLES, this.category()));
     this.runPointer = 0;
     this.startRound(this.runOrder[0]);
   }
@@ -565,6 +617,12 @@ export class PuzzleSystem extends createSystem({
     this.elements.detail?.setProperties({
       text: detail || ' ',
       display: detail ? 'flex' : 'none',
+    });
+    this.elements.category?.setProperties({
+      display: mode === PuzzleMode.Practice ? 'flex' : 'none',
+    });
+    this.elements.categoryLabel?.setProperties({
+      text: `${t('puzzle.category')}: ${t(CATEGORY_LABEL_KEYS[this.category()])}`,
     });
     this.elements.score?.setProperties({
       text: `${t('puzzle.score')}: ${score}`,

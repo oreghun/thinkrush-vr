@@ -3,9 +3,9 @@
   from src/i18n via src/ui-text.ts; src/puzzle.ts fills the others (prompt,
   question, score, timer, status, detail and the button labels), colors the
   timer and status for each state, and shows the buttons that fit the mode:
-  practice offers Start run and Next puzzle, a run offers Skip, and the
-  run-over summary offers Run again and Back to practice. "..." is only a
-  placeholder.
+  practice offers Category, Start run and Next puzzle, a run offers Skip,
+  and the run-over summary offers Run again and Back to practice. "..." is
+  only a placeholder.
 -->
 <style>
   .panel-root {
@@ -102,6 +102,12 @@
     <div id="puzzle-status" class="status">...</div>
     <div id="puzzle-detail" class="detail">...</div>
   </div>
+  <Button id="puzzle-category" class="button">
+    <ButtonIcon>
+      <Layers></Layers>
+    </ButtonIcon>
+    <ButtonLabel id="puzzle-category-label" class="button-label">...</ButtonLabel>
+  </Button>
   <Button id="puzzle-run" class="button">
     <ButtonIcon>
       <Play></Play>
