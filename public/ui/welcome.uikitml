@@ -56,6 +56,39 @@
     margin-bottom: 22px;
   }
 
+  .world-heading {
+    color: #6b5a00;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .world-heading:dark {
+    color: #35b7ae;
+  }
+
+  .world-button {
+    justify-content: flex-start;
+    margin-left: 22px;
+    margin-right: 22px;
+    margin-bottom: 8px;
+  }
+
+  .world-visual:dark {
+    border-color: #f5d90a;
+  }
+
+  .world-riddle:dark {
+    border-color: #35b7ae;
+  }
+
+  .world-proverb:dark {
+    border-color: #e8a06a;
+  }
+
+  .world-mafumbo:dark {
+    border-color: #b9a7ff;
+  }
+
   .button-label {
     transform-translate-y: 1px;
   }
@@ -66,7 +99,20 @@
     <div id="welcome.heading" class="heading">...</div>
     <div id="welcome.body1" class="body">...</div>
     <div id="welcome.body2" class="body">...</div>
+    <div id="welcome.worldHeading" class="world-heading">...</div>
   </div>
+  <Button id="world-visual" class="world-button world-visual">
+    <ButtonLabel id="welcome.world.visual" class="button-label">...</ButtonLabel>
+  </Button>
+  <Button id="world-riddle" class="world-button world-riddle">
+    <ButtonLabel id="welcome.world.riddle" class="button-label">...</ButtonLabel>
+  </Button>
+  <Button id="world-proverb" class="world-button world-proverb">
+    <ButtonLabel id="welcome.world.proverb" class="button-label">...</ButtonLabel>
+  </Button>
+  <Button id="world-mafumbo" class="world-button world-mafumbo">
+    <ButtonLabel id="welcome.world.mafumbo" class="button-label">...</ButtonLabel>
+  </Button>
   <Button id="xr-button" class="button">
     <ButtonIcon>
       <RectangleGoggles></RectangleGoggles>
