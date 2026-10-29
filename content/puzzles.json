@@ -441,7 +441,7 @@
       "id": "en-visual-08",
       "lang": "en",
       "type": "visual",
-      "prompt": "Which item is not normally used to carry a message?",
+      "prompt": "Which item is not attracted by an ordinary magnet?",
       "tiles": [
         "iron nail",
         "steel screw",
@@ -560,7 +560,7 @@
         "seventeen"
       ],
       "answer_mode": "voice+orbs",
-      "hint": "“All but nine” means every goat except nine.",
+      "hint": "\"All but nine\" means every goat except nine.",
       "explanation": "All the goats except nine leave, so nine goats remain.",
       "subtitle_en": null,
       "difficulty": 1,
