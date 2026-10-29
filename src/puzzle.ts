@@ -3,6 +3,7 @@ import {
   createSystem,
   type Entity,
   Grabbed,
+  Material,
   Mesh,
   MeshStandardMaterial,
   Pressed,
@@ -98,6 +99,8 @@ export class PuzzleSystem extends createSystem({
   private readonly tileBySlot: Entity[] = [];
   private readonly tileLabels: (UIKitMLAsset | undefined)[] = [];
   private readonly tileModels: (import('@iwsdk/core').Group | undefined)[] = [];
+  private readonly tileBaseMaterials: (Material | Material[] | undefined)[] = [];
+  private readonly tileHiddenMaterials: (Material | Material[] | undefined)[] = [];
   private readonly tileHomes: Vector3[] = [];
   private readonly tileRotations: Quaternion[] = [];
   private readonly orbBySlot: Entity[] = [];
@@ -162,8 +165,28 @@ export class PuzzleSystem extends createSystem({
       this.tileHomes[slot] = tile.object3D!.position.clone();
       this.tileRotations[slot] = tile.object3D!.quaternion.clone();
       this.tileLabels[slot] = findUIKitML(tile);
-      // The visual mode uses recognizable object miniatures, not printed names.
+      // The tile stays as the invisible grabbable hit target. Only its printed
+      // slab is hidden, so the object miniature itself reads as the answer.
       if (this.tileLabels[slot]) this.tileLabels[slot]!.visible = false;
+      const tileMesh = tile.object3D;
+      if (tileMesh instanceof Mesh) {
+        this.tileBaseMaterials[slot] = tileMesh.material;
+        const hideMaterial = (material: Material): Material => {
+          const hidden = material.clone();
+          hidden.transparent = true;
+          hidden.opacity = 0;
+          hidden.depthWrite = false;
+          hidden.colorWrite = false;
+          hidden.needsUpdate = true;
+          return hidden;
+        };
+        this.tileHiddenMaterials[slot] = Array.isArray(tileMesh.material)
+          ? tileMesh.material.map(hideMaterial)
+          : hideMaterial(tileMesh.material);
+        tileMesh.material = this.tileHiddenMaterials[slot]!;
+        tileMesh.castShadow = false;
+        tileMesh.receiveShadow = false;
+      }
     }
     for (const orb of this.queries.orbs.entities) {
       const slot = orb.getValue(AnswerOrb, 'slot') ?? 0;
@@ -210,6 +233,18 @@ export class PuzzleSystem extends createSystem({
           this.tileBySlot[slot]?.object3D?.remove(model);
           disposePuzzleObject(model);
           this.tileModels[slot] = undefined;
+        }
+      }),
+      () => this.tileBySlot.forEach((tile, slot) => {
+        const tileMesh = tile.object3D;
+        const hidden = this.tileHiddenMaterials[slot];
+        const original = this.tileBaseMaterials[slot];
+        if (tileMesh instanceof Mesh && hidden && original) {
+          for (const material of Array.isArray(hidden) ? hidden : [hidden]) {
+            material.dispose();
+          }
+          tileMesh.material = original;
+          this.tileHiddenMaterials[slot] = undefined;
         }
       }),
       () => this.elements.next?.removeEventListener('click', next),
@@ -350,7 +385,9 @@ export class PuzzleSystem extends createSystem({
       }
       if (this.isVisual && label) {
         const model = createPuzzleObject(label);
-        model.position.set(0, 0.052, 0.032);
+        // The tile origin is its centre; its top surface is 1.75 cm above it.
+        // Keep the normalized miniature on the table, with no box behind it.
+        model.position.set(0, 0.0185, 0);
         tile.object3D!.add(model);
         this.tileModels[slot] = model;
       }
