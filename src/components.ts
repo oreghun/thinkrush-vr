@@ -6,6 +6,6 @@
  */
 
 import { defineComponents } from '@iwsdk/core';
-import { Orb } from './orb-component.js';
+import { PuzzleBoard, PuzzleTile } from './puzzle-components.js';
 
-export default defineComponents([Orb]);
+export default defineComponents([PuzzleBoard, PuzzleTile]);

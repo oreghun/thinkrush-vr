@@ -10,24 +10,19 @@ import {
   createScenePrimitiveObject,
   DataTexture,
   Group,
-  IcosahedronGeometry,
   LinearFilter,
   LinearMipmapLinearFilter,
-  Mesh,
   MeshStandardMaterial,
   RepeatWrapping,
   RGBAFormat,
-  SphereGeometry,
   SRGBColorSpace,
-  TorusKnotGeometry,
   UnsignedByteType,
 } from '@iwsdk/core';
 
 /**
- * Starter-only studio set, built in code so the starter downloads no extra
- * models: floor, stage, plinths and the graphite pieces you interact with.
- * Each one is registered in src/assets.ts and placed by the scene; it is safe
- * to delete them together with those asset entries and scene nodes.
+ * Studio set from the starter, built in code: the floor and the stage the
+ * puzzle table stands on. Each one is registered in src/assets.ts and placed
+ * by the scene.
  *
  * The rest of the look is authored in the scene with built-in components: the
  * sky is the level root's DomeGradient, the floor fades into it with the
@@ -70,43 +65,6 @@ const stoneMaterial = createSceneMaterial({
       seed: 8,
       bands: [{ frequency: [30, 30], amplitude: 1 }],
       range: [0.72, 0.8],
-    },
-  },
-});
-
-// Dark, glossy graphite marks everything you can interact with.
-const graphiteMaterial = createSceneMaterial({
-  id: 'studio-graphite',
-  model: 'physical',
-  baseColor: '#464950',
-  roughness: 0.38,
-  metalness: 0,
-  clearcoat: 0.6,
-  clearcoatRoughness: 0.15,
-  envMapIntensity: 2.6,
-  textures: {
-    roughness: {
-      type: 'procedural',
-      algorithm: 'periodic-fbm-v1',
-      resolution: [256, 256],
-      seed: 3,
-      bands: [
-        { frequency: [12, 12], amplitude: 0.6 },
-        { frequency: [48, 48], amplitude: 0.4 },
-      ],
-      range: [0.26, 0.52],
-    },
-    bump: {
-      type: 'procedural',
-      algorithm: 'periodic-fbm-v1',
-      resolution: [256, 256],
-      seed: 43,
-      bands: [
-        { frequency: [32, 32], amplitude: 0.6 },
-        { frequency: [96, 96], amplitude: 0.4 },
-      ],
-      scale: 0.04,
-      sampler: { repeat: [3, 3] },
     },
   },
 });
@@ -213,92 +171,4 @@ export function createStage(radius = 1.85): Group {
   const stage = new Group();
   stage.add(disc, inlay);
   return stage;
-}
-
-/** Pedestal: a warm stone slab on a tapered clay pillar with a turned foot. */
-export function createPlinth(height = 0.92, width = 0.8): Group {
-  const pillar = createScenePrimitiveObject(
-    {
-      geometry: {
-        type: 'lathe',
-        profile: [
-          [0.001, 0],
-          [0.16, 0],
-          [0.17, 0.018],
-          [0.16, 0.04],
-          [0.09, 0.085],
-          [0.066, 0.3],
-          [0.06, height - 0.12],
-          [0.11, height - 0.06],
-          [0.001, height - 0.055],
-        ],
-        segments: 64,
-      },
-    },
-    clayMaterial,
-  );
-  const top = createScenePrimitiveObject(
-    {
-      geometry: {
-        type: 'roundedBox',
-        size: [width, 0.055, width * 0.72],
-        radius: 0.022,
-        segments: 4,
-      },
-    },
-    stoneMaterial,
-  );
-  top.position.y = height - 0.0275;
-  const plinth = new Group();
-  plinth.add(pillar, top);
-  return plinth;
-}
-
-/** Rounded graphite cube with its origin at the center. */
-export function createGraphiteCube(size = 0.13): Mesh {
-  return createScenePrimitiveObject(
-    {
-      geometry: {
-        type: 'roundedBox',
-        size: [size, size, size],
-        radius: size * 0.12,
-        segments: 5,
-      },
-    },
-    graphiteMaterial,
-  );
-}
-
-/** Faceted graphite gem. */
-export function createGraphiteGem(radius = 0.085): Mesh {
-  return new Mesh(new IcosahedronGeometry(radius, 0), graphiteMaterial);
-}
-
-/** Graphite trefoil knot. */
-export function createGraphiteKnot(): Mesh {
-  return new Mesh(
-    new TorusKnotGeometry(0.1, 0.032, 200, 24, 2, 3),
-    graphiteMaterial,
-  );
-}
-
-/** Smooth graphite orb, the select-station target. */
-export function createGraphiteOrb(radius = 0.1): Mesh {
-  return new Mesh(new SphereGeometry(radius, 48, 32), graphiteMaterial);
-}
-
-/** Upright graphite ring. */
-export function createGraphiteRing(radius = 0.2): Mesh {
-  return createScenePrimitiveObject(
-    {
-      geometry: {
-        type: 'torus',
-        radius,
-        tube: 0.035,
-        radialSegments: 24,
-        tubularSegments: 96,
-      },
-    },
-    graphiteMaterial,
-  );
 }

@@ -8,10 +8,11 @@
   "welcome.body2": "",
   "welcome.enterVR": "",
   "welcome.exitVR": "",
-  "station.grab.title": "",
-  "station.grab.how": "",
-  "station.select.title": "",
-  "station.select.how": "",
-  "station.spin.title": "",
-  "station.spin.how": ""
+  "puzzle.eyebrow": "",
+  "puzzle.instructions": "",
+  "puzzle.correct": "",
+  "puzzle.wrong": "",
+  "puzzle.timeUp": "",
+  "puzzle.hint": "",
+  "puzzle.playAgain": ""
 }

@@ -5,13 +5,14 @@
   "welcome.eyebrow": "THINKRUSH VR",
   "welcome.heading": "Welcome to ThinkRush",
   "welcome.body1": "Stay seated and use your hands.",
-  "welcome.body2": "Puzzles are coming soon.",
+  "welcome.body2": "Solve the puzzle on the table.",
   "welcome.enterVR": "Enter VR",
   "welcome.exitVR": "Exit to Browser",
-  "station.grab.title": "Grab",
-  "station.grab.how": "Pinch and hold to move it",
-  "station.select.title": "Select",
-  "station.select.how": "Point at the orb, then pinch",
-  "station.spin.title": "Spin",
-  "station.spin.how": "Pinch and hold to turn it"
+  "puzzle.eyebrow": "PUZZLE",
+  "puzzle.instructions": "Pinch a tile and drop it on the tray.",
+  "puzzle.correct": "Correct!",
+  "puzzle.wrong": "Not quite. Try another tile.",
+  "puzzle.timeUp": "Time's up!",
+  "puzzle.hint": "Hint:",
+  "puzzle.playAgain": "Play again"
 }
