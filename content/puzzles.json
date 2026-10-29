@@ -560,7 +560,7 @@
         "seventeen"
       ],
       "answer_mode": "voice+orbs",
-      "hint": "“All but nine” means every goat except nine.",
+      "hint": "\"All but nine\" means every goat except nine.",
       "explanation": "All the goats except nine leave, so nine goats remain.",
       "subtitle_en": null,
       "difficulty": 1,
@@ -613,7 +613,7 @@
       "id": "en-mafumbo-10",
       "lang": "en",
       "type": "mafumbo",
-      "prompt": "A leader asked three advisers how to choose whom to trust. The first said, “Trust everyone; suspicion wastes time.” The second said, “Trust nobody; people always disappoint you.” The third asked to see the evidence, check what each person had done, and review the decision as new facts appeared. The leader chose the third adviser, but did not promise to agree with them every time.",
+      "prompt": "A leader asked three advisers how to choose whom to trust. The first said, \"Trust everyone; suspicion wastes time.\" The second said, \"Trust nobody; people always disappoint you.\" The third asked to see the evidence, check what each person had done, and review the decision as new facts appeared. The leader chose the third adviser, but did not promise to agree with them every time.",
       "question": "What is the hidden lesson?",
       "answer": "Good judgement means checking evidence and adapting trust to the situation, not trusting everyone or nobody.",
       "accepted": [],
