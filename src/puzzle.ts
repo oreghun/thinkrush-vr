@@ -68,6 +68,16 @@ const CATEGORY_LABEL_KEYS: Record<Category, MessageKey> = {
   [PuzzleCategory.Mafumbo]: 'category.mafumbo',
 };
 
+// Restrained Afro-vibrant accents: each puzzle family gets a recognizable
+// color cue while the shared studio, typography, and controls stay consistent.
+const CATEGORY_ACCENTS: Record<Category, string> = {
+  [PuzzleCategory.All]: '#F5D90A',
+  [PuzzleCategory.Visual]: '#F5D90A',
+  [PuzzleCategory.Riddle]: '#35B7AE',
+  [PuzzleCategory.Proverb]: '#E8A06A',
+  [PuzzleCategory.Mafumbo]: '#B9A7FF',
+};
+
 type Status = (typeof PuzzleStatus)[keyof typeof PuzzleStatus];
 type Mode = (typeof PuzzleMode)[keyof typeof PuzzleMode];
 type UIElement = ReturnType<UIKitMLAsset['getElementById']>;
@@ -607,7 +617,8 @@ export class PuzzleSystem extends createSystem({
     let statusText = this.isVisual
       ? t('puzzle.instructions')
       : t('puzzle.instructionsOrbs');
-    let statusColor = STATUS_COLORS.playing;
+    const accent = CATEGORY_ACCENTS[puzzle.type as Category] ?? CATEGORY_ACCENTS[PuzzleCategory.All];
+    let statusColor = accent;
     let detail = '';
     if (mode === PuzzleMode.RunOver) {
       const solved = board.getValue(PuzzleBoard, 'solved') ?? 0;
@@ -635,6 +646,7 @@ export class PuzzleSystem extends createSystem({
     this.elements.question?.setProperties({
       text: puzzle.question ?? ' ',
       display: puzzle.question ? 'flex' : 'none',
+      color: accent,
     });
     this.elements.status?.setProperties({
       text: statusText,
@@ -649,6 +661,7 @@ export class PuzzleSystem extends createSystem({
     });
     this.elements.categoryLabel?.setProperties({
       text: `${t('puzzle.category')}: ${t(CATEGORY_LABEL_KEYS[this.category()])}`,
+      color: CATEGORY_ACCENTS[this.category()],
     });
     this.elements.score?.setProperties({
       text: `${t('puzzle.score')}: ${score}`,
