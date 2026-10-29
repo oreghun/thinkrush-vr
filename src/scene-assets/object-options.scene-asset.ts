@@ -1,4 +1,5 @@
 import {
+  Box3,
   BoxGeometry,
   ConeGeometry,
   CylinderGeometry,
@@ -7,6 +8,7 @@ import {
   MeshStandardMaterial,
   SphereGeometry,
   TorusGeometry,
+  Vector3,
 } from '@iwsdk/core';
 
 /**
@@ -264,10 +266,30 @@ function makeDefault(root: Group,label: string) {
   // Unknown future options still get a tactile miniature rather than text.
   box(root,materials.turquoise,[0,0.016,0],[0.032,0.032,0.032]);
 }
+/**
+ * Normalize props to the same visible footprint so small silhouettes (such as
+ * a seed or key) remain easy to identify beside wider props. The target bounds
+ * fit inside the existing tile footprint, but the object itself is the visible
+ * answer target; the tile mesh is hidden by PuzzleSystem.
+ */
 export function createPuzzleObject(label: string): Group {
   const root = new Group();
   root.name = 'puzzle-object:' + label;
   makeDefault(root,label);
+
+  root.updateMatrixWorld(true);
+  const bounds = new Box3().setFromObject(root);
+  const size = bounds.getSize(new Vector3());
+  const center = bounds.getCenter(new Vector3());
+  if (size.x > 0 && size.y > 0 && size.z > 0) {
+    const scale = Math.min(0.12 / size.x, 0.062 / size.y, 0.026 / size.z);
+    root.scale.setScalar(scale);
+    root.position.set(
+      -center.x * scale,
+      0.001 - bounds.min.y * scale,
+      -center.z * scale,
+    );
+  }
   return root;
 }
 export function disposePuzzleObject(root: Group): void {
