@@ -443,19 +443,19 @@
       "type": "visual",
       "prompt": "Which item is not normally used to carry a message?",
       "tiles": [
-        "envelope",
-        "message bottle",
-        "USB drive",
-        "frying pan"
+        "iron nail",
+        "steel screw",
+        "steel paper clip",
+        "wooden block"
       ],
-      "answer": "frying pan",
+      "answer": "wooden block",
       "accepted": [],
       "options": [],
       "answer_mode": "grab",
-      "hint": "Three of these can carry a written or digital message.",
-      "explanation": "An envelope, a message bottle, and a USB drive are all used to carry information. A frying pan is used for cooking.",
+      "hint": "Imagine a magnet nearby.",
+      "explanation": "An ordinary magnet attracts iron and steel objects such as a nail, screw, and steel paper clip. Wood is not ferromagnetic.",
       "subtitle_en": null,
-      "difficulty": 1,
+      "difficulty": 2,
       "status": "draft"
     },
     {
@@ -560,7 +560,7 @@
         "seventeen"
       ],
       "answer_mode": "voice+orbs",
-      "hint": "\"All but nine\" means every goat except nine.",
+      "hint": "“All but nine” means every goat except nine.",
       "explanation": "All the goats except nine leave, so nine goats remain.",
       "subtitle_en": null,
       "difficulty": 1,
