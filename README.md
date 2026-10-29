@@ -21,7 +21,8 @@ you can click around in.
 > odd one out on the tray before the 60-second timer runs out. The timer only
 > runs inside VR. It always uses the first visual puzzle in
 > `content/puzzles.json`; runs, RUSH, voice answers and the other puzzle types
-> come next.
+> come next. A voice check panel to the right tests whether your device can
+> recognize speech on the device itself (see "Voice input" below).
 
 ## Run it locally
 
@@ -57,13 +58,14 @@ Then open https://localhost:4173/thinkrush-vr/.
 | `npm run dev`       | IWSDK dev server plus the managed emulator browser                   |
 | `npm run typecheck` | TypeScript check                                                     |
 | `npm run validate`  | Checks `content/puzzles.json` and the `src/i18n` files               |
+| `npm test`          | Unit tests in `tests/` (Node's built-in test runner)                 |
 | `npm run build`     | `validate`, production build into `dist/`, then the 20 MB size check |
 | `npm run preview`   | Serves `dist/` under `/thinkrush-vr/`                                |
 
 ## Deployment
 
 Every push to `main` runs `.github/workflows/deploy.yml`: `npm ci`, the
-typecheck and the build, then publishes `dist/` to GitHub Pages with the
+typecheck, the tests and the build, then publishes `dist/` to GitHub Pages with the
 official Pages actions. Pull requests run the same checks without deploying.
 The build's base path is `/thinkrush-vr/` (set in `vite.config.ts`); the dev
 server stays at `/`.
@@ -115,6 +117,25 @@ punctuation (straight quotes, no long dashes), because the game font has no
 other characters. `npm run validate` (and every build) checks all of this, plus
 unique ids and the `subtitle_en` rule, and names the field to fix.
 
+## Voice input
+
+Spoken answers must not go through an online service, so the game only uses
+speech recognition that runs on the device (the Web Speech API's
+`processLocally` mode), and never starts listening otherwise. Many browsers
+offer only online recognition, and the Quest Browser may have none, so the
+voice check panel answers that for your device:
+
+1. Press **Check this device**. It shows, for English and Swahili, one of:
+   ready, can be downloaded, not available, only online recognition (not
+   used), or no speech recognition at all.
+2. If English can be downloaded, press **Download English speech**.
+3. Once English is ready, press **Say the answer** and answer the riddle out
+   loud. The panel shows what it heard and whether that matches.
+
+Answers match the CLAUDE.md rule: the answer or an `accepted` answer,
+ignoring case, punctuation and "a", "an", "the". Orbs stay available either
+way, so voice is never required.
+
 ## Project rules
 
 The full list is in [CLAUDE.md](CLAUDE.md). In short:
@@ -145,6 +166,9 @@ src/ui-text.ts            fills UIKitML text from src/i18n
 src/input-visuals.ts      code-built hands and controllers for VR
 src/visual-puzzle.ts      the visual puzzle: tiles, tray, timer, feedback
 src/puzzles.ts            typed access to content/puzzles.json
+src/voice.ts              on-device-only speech recognition
+src/answer-match.ts       spoken-answer matching (tests in tests/)
+src/voice-check.ts        the voice check panel
 src/assets.ts             asset manifest; models are built in src/scene-assets/
 scripts/                  content check, build size check, chime generator
 iwsdk.config.json         IWSDK settings: XR mode, hand tracking, features
