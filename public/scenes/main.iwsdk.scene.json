@@ -3,23 +3,53 @@
   "units": "meters",
   "components": {
     "com.iwsdk.components.DomeGradient": {
-      "sky": [0.843, 0.796, 0.882, 1],
-      "equator": [0.808, 0.855, 0.91, 1],
-      "ground": [0.902, 0.855, 0.82, 1],
+      "sky": [
+        0.13,
+        0.15,
+        0.34,
+        1
+      ],
+      "equator": [
+        0.23,
+        0.31,
+        0.43,
+        1
+      ],
+      "ground": [
+        0.1,
+        0.14,
+        0.25,
+        1
+      ],
       "elevationDeg": 24,
       "azimuthDeg": -31,
       "dither": true
     },
     "com.iwsdk.components.IBLGradient": {
-      "sky": [0.72, 0.7, 0.8, 1],
-      "equator": [0.78, 0.78, 0.84, 1],
-      "ground": [0.5, 0.52, 0.58, 1],
-      "intensity": 0.2025
+      "sky": [
+        0.34,
+        0.31,
+        0.52,
+        1
+      ],
+      "equator": [
+        0.6,
+        0.43,
+        0.28,
+        1
+      ],
+      "ground": [
+        0.22,
+        0.25,
+        0.34,
+        1
+      ],
+      "intensity": 0.26
     }
   },
   "environment": {
     "toneMapping": "aces",
-    "exposure": 1.2,
+    "exposure": 1.1,
     "shadows": true,
     "shadowMapType": "pcf"
   },
@@ -53,7 +83,11 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [0, 0, 0.1]
+        "position": [
+          0,
+          0,
+          0.1
+        ]
       }
     },
     {
@@ -66,7 +100,11 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [0, 0.035, -0.41]
+        "position": [
+          0,
+          0.035,
+          -0.41
+        ]
       },
       "components": {
         "PuzzleBoard": {
@@ -80,11 +118,18 @@
           "id": "puzzle-table-contact",
           "name": "Contact Shadow",
           "transform": {
-            "position": [0, 0.002, 0]
+            "position": [
+              0,
+              0.002,
+              0
+            ]
           },
           "components": {
             "ContactShadow": {
-              "size": [0.9, 0.55],
+              "size": [
+                0.9,
+                0.55
+              ],
               "height": 0.0018
             }
           }
@@ -100,7 +145,11 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [0, 0.68, -0.29]
+        "position": [
+          0,
+          0.68,
+          -0.29
+        ]
       },
       "components": {
         "AudioSource": {
@@ -120,7 +169,11 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [-0.255, 0.725, -0.5]
+        "position": [
+          -0.255,
+          0.725,
+          -0.5
+        ]
       },
       "components": {
         "OneHandGrabbable": {},
@@ -138,7 +191,11 @@
             "asset": "tile-label"
           },
           "transform": {
-            "position": [0, 0, 0.0185],
+            "position": [
+              0,
+              0,
+              0.0185
+            ],
             "scale": 0.115
           }
         }
@@ -154,7 +211,11 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [-0.085, 0.725, -0.5]
+        "position": [
+          -0.085,
+          0.725,
+          -0.5
+        ]
       },
       "components": {
         "OneHandGrabbable": {},
@@ -172,7 +233,11 @@
             "asset": "tile-label"
           },
           "transform": {
-            "position": [0, 0, 0.0185],
+            "position": [
+              0,
+              0,
+              0.0185
+            ],
             "scale": 0.115
           }
         }
@@ -188,7 +253,11 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [0.085, 0.725, -0.5]
+        "position": [
+          0.085,
+          0.725,
+          -0.5
+        ]
       },
       "components": {
         "OneHandGrabbable": {},
@@ -206,7 +275,11 @@
             "asset": "tile-label"
           },
           "transform": {
-            "position": [0, 0, 0.0185],
+            "position": [
+              0,
+              0,
+              0.0185
+            ],
             "scale": 0.115
           }
         }
@@ -222,7 +295,11 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [0.255, 0.725, -0.5]
+        "position": [
+          0.255,
+          0.725,
+          -0.5
+        ]
       },
       "components": {
         "OneHandGrabbable": {},
@@ -240,7 +317,11 @@
             "asset": "tile-label"
           },
           "transform": {
-            "position": [0, 0, 0.0185],
+            "position": [
+              0,
+              0,
+              0.0185
+            ],
             "scale": 0.115
           }
         }
@@ -255,7 +336,11 @@
         "castShadow": true
       },
       "transform": {
-        "position": [-0.26, 0.9, -0.44]
+        "position": [
+          -0.26,
+          0.9,
+          -0.44
+        ]
       },
       "components": {
         "RayInteractable": {},
@@ -273,7 +358,11 @@
             "asset": "orb-label"
           },
           "transform": {
-            "position": [0, 0, 0.062],
+            "position": [
+              0,
+              0,
+              0.062
+            ],
             "scale": 0.12
           }
         }
@@ -288,7 +377,11 @@
         "castShadow": true
       },
       "transform": {
-        "position": [0, 0.9, -0.44]
+        "position": [
+          0,
+          0.9,
+          -0.44
+        ]
       },
       "components": {
         "RayInteractable": {},
@@ -306,7 +399,11 @@
             "asset": "orb-label"
           },
           "transform": {
-            "position": [0, 0, 0.062],
+            "position": [
+              0,
+              0,
+              0.062
+            ],
             "scale": 0.12
           }
         }
@@ -321,7 +418,11 @@
         "castShadow": true
       },
       "transform": {
-        "position": [0.26, 0.9, -0.44]
+        "position": [
+          0.26,
+          0.9,
+          -0.44
+        ]
       },
       "components": {
         "RayInteractable": {},
@@ -339,7 +440,11 @@
             "asset": "orb-label"
           },
           "transform": {
-            "position": [0, 0, 0.062],
+            "position": [
+              0,
+              0,
+              0.062
+            ],
             "scale": 0.12
           }
         }
@@ -353,7 +458,11 @@
         "asset": "panel-handle"
       },
       "transform": {
-        "position": [0, 0.72, -0.86]
+        "position": [
+          0,
+          0.72,
+          -0.86
+        ]
       },
       "components": {
         "RayInteractable": {},
@@ -372,8 +481,16 @@
             "asset": "puzzle-panel"
           },
           "transform": {
-            "position": [0, 0.42, 0],
-            "rotationDeg": [-12, 0, 0],
+            "position": [
+              0,
+              0.42,
+              0
+            ],
+            "rotationDeg": [
+              -12,
+              0,
+              0
+            ],
             "scale": 0.13
           },
           "components": {
@@ -390,8 +507,16 @@
         "asset": "panel-handle"
       },
       "transform": {
-        "position": [0.62, 0.83, -0.62],
-        "rotationDeg": [0, -45, 0]
+        "position": [
+          0.62,
+          0.83,
+          -0.62
+        ],
+        "rotationDeg": [
+          0,
+          -45,
+          0
+        ]
       },
       "components": {
         "RayInteractable": {},
@@ -410,7 +535,11 @@
             "asset": "voice-check"
           },
           "transform": {
-            "position": [0, 0.22, 0],
+            "position": [
+              0,
+              0.22,
+              0
+            ],
             "scale": 0.11
           },
           "components": {
@@ -427,8 +556,16 @@
         "asset": "panel-handle"
       },
       "transform": {
-        "position": [-0.62, 0.83, -0.62],
-        "rotationDeg": [0, 45, 0]
+        "position": [
+          -0.62,
+          0.83,
+          -0.62
+        ],
+        "rotationDeg": [
+          0,
+          45,
+          0
+        ]
       },
       "components": {
         "RayInteractable": {},
@@ -447,7 +584,11 @@
             "asset": "welcome-panel"
           },
           "transform": {
-            "position": [0, 0.22, 0],
+            "position": [
+              0,
+              0.22,
+              0
+            ],
             "scale": 0.11
           },
           "components": {
@@ -466,19 +607,34 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [-3.5562, 0, -4.0787],
-        "rotationDeg": [0, 35, 0]
+        "position": [
+          -3.5562,
+          0,
+          -4.0787
+        ],
+        "rotationDeg": [
+          0,
+          35,
+          0
+        ]
       },
       "children": [
         {
           "id": "gallery-set-contact",
           "name": "Contact Shadow",
           "transform": {
-            "position": [0, 0.002, 0]
+            "position": [
+              0,
+              0.002,
+              0
+            ]
           },
           "components": {
             "ContactShadow": {
-              "size": [1.9, 1]
+              "size": [
+                1.9,
+                1
+              ]
             }
           }
         },
@@ -486,11 +642,18 @@
           "id": "gallery-vase-contact",
           "name": "Contact Shadow",
           "transform": {
-            "position": [-0.95, 0.002, -0.15]
+            "position": [
+              -0.95,
+              0.002,
+              -0.15
+            ]
           },
           "components": {
             "ContactShadow": {
-              "size": [0.55, 0.55],
+              "size": [
+                0.55,
+                0.55
+              ],
               "height": 0.0011
             }
           }
@@ -507,19 +670,34 @@
         "receiveShadow": true
       },
       "transform": {
-        "position": [3.6709, 0, -4.2426],
-        "rotationDeg": [0, -35, 0]
+        "position": [
+          3.6709,
+          0,
+          -4.2426
+        ],
+        "rotationDeg": [
+          0,
+          -35,
+          0
+        ]
       },
       "children": [
         {
           "id": "sideboard-set-contact",
           "name": "Contact Shadow",
           "transform": {
-            "position": [0, 0.002, 0]
+            "position": [
+              0,
+              0.002,
+              0
+            ]
           },
           "components": {
             "ContactShadow": {
-              "size": [2.3, 0.9]
+              "size": [
+                2.3,
+                0.9
+              ]
             }
           }
         },
@@ -527,11 +705,18 @@
           "id": "floor-lamp-contact",
           "name": "Contact Shadow",
           "transform": {
-            "position": [1.1, 0.002, -0.08]
+            "position": [
+              1.1,
+              0.002,
+              -0.08
+            ]
           },
           "components": {
             "ContactShadow": {
-              "size": [0.45, 0.45],
+              "size": [
+                0.45,
+                0.45
+              ],
               "height": 0.0009
             }
           }
@@ -542,12 +727,25 @@
       "id": "key-light",
       "name": "Key Light",
       "transform": {
-        "position": [-2.3541, 11.2763, 1.762],
-        "rotationDeg": [-73.3982, -11.3134, 0]
+        "position": [
+          -2.3541,
+          11.2763,
+          1.762
+        ],
+        "rotationDeg": [
+          -73.3982,
+          -11.3134,
+          0
+        ]
       },
       "components": {
         "DirectionalLight": {
-          "color": [1, 0.945, 0.87, 1],
+          "color": [
+            1,
+            0.945,
+            0.87,
+            1
+          ],
           "intensity": 2.3,
           "castShadow": true,
           "shadowMapSize": "2048",
@@ -565,8 +763,18 @@
       "name": "Fill Light",
       "components": {
         "HemisphereLight": {
-          "skyColor": [0.78, 0.83, 0.96, 1],
-          "groundColor": [0.592, 0.608, 0.651, 1],
+          "skyColor": [
+            0.78,
+            0.83,
+            0.96,
+            1
+          ],
+          "groundColor": [
+            0.592,
+            0.608,
+            0.651,
+            1
+          ],
           "intensity": 1.15
         }
       }
