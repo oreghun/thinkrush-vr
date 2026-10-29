@@ -209,6 +209,33 @@ export class PuzzleSystem extends createSystem({
     const run = () => this.startRun();
     const exit = () => this.exitToPractice();
     const category = () => this.cycleCategory();
+
+    // The welcome hub offers direct entry into each puzzle world. Selecting
+    // a world filters both practice browsing and the three-minute run draw.
+    const welcomePanel = this.world.getSceneObject<UIKitMLAsset>('welcome-panel');
+    const worldButtons: Array<[string, Category]> = [
+      ['world-visual', PuzzleCategory.Visual],
+      ['world-riddle', PuzzleCategory.Riddle],
+      ['world-proverb', PuzzleCategory.Proverb],
+      ['world-mafumbo', PuzzleCategory.Mafumbo],
+    ];
+    const worldCleanup = worldButtons.flatMap(([id, selectedCategory]) => {
+      const button = welcomePanel?.getElementById(id);
+      if (!button) return [];
+      const selectWorld = () => {
+        const board = this.board;
+        if (!board) return;
+        const available = categoryIndices(PUZZLES, selectedCategory);
+        if (available.length === 0) return;
+        board.setValue(PuzzleBoard, 'mode', PuzzleMode.Practice);
+        board.setValue(PuzzleBoard, 'category', selectedCategory);
+        this.startRound(available[0]);
+        button.setProperties({ borderColor: CATEGORY_ACCENTS[selectedCategory] });
+      };
+      button.addEventListener('click', selectWorld);
+      return [() => button.removeEventListener('click', selectWorld)];
+    });
+
     this.elements.next?.addEventListener('click', next);
     this.elements.run?.addEventListener('click', run);
     this.elements.exit?.addEventListener('click', exit);
@@ -226,6 +253,7 @@ export class PuzzleSystem extends createSystem({
       () => this.elements.run?.removeEventListener('click', run),
       () => this.elements.exit?.removeEventListener('click', exit),
       () => this.elements.category?.removeEventListener('click', category),
+      ...worldCleanup,
       this.queries.pressedOrbs.subscribe('qualify', (orb) => {
         this.onOrbPressed(orb);
       }),
