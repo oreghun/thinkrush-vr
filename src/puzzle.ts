@@ -387,7 +387,7 @@ export class PuzzleSystem extends createSystem({
         const model = createPuzzleObject(label);
         // The tile origin is its centre; its top surface is 1.75 cm above it.
         // Keep the normalized miniature on the table, with no box behind it.
-        model.position.set(0, 0.0185, 0);
+        model.position.set(0, -0.044, 0);
         tile.object3D!.add(model);
         this.tileModels[slot] = model;
       }
