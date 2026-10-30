@@ -7,6 +7,7 @@
 
 import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
+import { withBuildId } from './build-id.js';
 import { onLanguageChange, t } from './i18n/index.js';
 import { installCodeInputVisuals } from './input-visuals.js';
 import { MovablePanelSystem } from './movable-panel.js';
@@ -23,7 +24,15 @@ onLanguageChange(updateTitle);
 
 World.create(
   document.getElementById('scene-container') as HTMLDivElement,
-  projectOptions,
+  // Only the scene URL changes: tagged per release like the other public
+  // files, so a browser never loads it stale (see src/build-id.ts).
+  {
+    ...projectOptions,
+    level:
+      typeof projectOptions.level === 'string'
+        ? withBuildId(projectOptions.level)
+        : projectOptions.level,
+  },
 ).then((world) => {
   installCodeInputVisuals(world);
   world.registerSystem(UITextSystem);

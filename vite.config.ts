@@ -14,6 +14,14 @@ const PAGES_BASE = '/thinkrush-vr/';
 
 export default defineConfig(({ command, isPreview }) => ({
   plugins: [iwsdkDev()],
+  // Tags public file URLs per release (src/build-id.ts): the commit on CI.
+  define: {
+    __BUILD_ID__: JSON.stringify(
+      command === 'build'
+        ? (process.env.GITHUB_SHA ?? Date.now().toString(36)).slice(0, 12)
+        : '',
+    ),
+  },
   server: { host: '0.0.0.0', port: 8081, open: false },
   build: {
     outDir: 'dist',
