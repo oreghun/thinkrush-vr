@@ -22,6 +22,10 @@ export const IMPORTED_OBJECTS: readonly TileModel[] = [
   'keyring',
   'key',
   'padlock',
+  'nail',
+  'screw',
+  'paper clip',
+  'wooden block',
 ];
 
 const slug = (model: TileModel) => model.replace(/ /gu, '-');
