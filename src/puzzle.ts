@@ -50,7 +50,7 @@ import {
 } from './scene-assets/display-stand.scene-asset.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 import { IMPORTED_OBJECTS, objectAssetId } from './imported-objects.js';
-import { tileModelFor } from './tile-models.js';
+import { type TileModel, tileModelFor } from './tile-models.js';
 
 const ROUND_SECONDS = 60;
 const RUN_SECONDS = 180;
@@ -165,6 +165,8 @@ export class PuzzleSystem extends createSystem({
   private readonly tileBySlot: Entity[] = [];
   private readonly tileLabels: (UIKitMLAsset | undefined)[] = [];
   private readonly tileModels: (import('@iwsdk/core').Group | undefined)[] = [];
+  // The word each tile stands for this round ('' when tiles are stowed).
+  private readonly tileWords: string[] = [];
   private readonly tileBaseMaterials: (Material | Material[] | undefined)[] = [];
   private readonly tileHiddenMaterials: (Material | Material[] | undefined)[] = [];
   private readonly worldMaterials: Array<{
@@ -394,6 +396,12 @@ export class PuzzleSystem extends createSystem({
       onLanguageChange(() => this.render()),
     );
     this.startRound(this.board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0);
+    for (const model of IMPORTED_OBJECTS) {
+      AssetManager.loadGLTFById(objectAssetId(model))
+        .then(() => this.swapInImported(model))
+        // A model that fails to load keeps its code-built stand-in.
+        .catch(() => undefined);
+    }
   }
 
   update(delta: number): void {
@@ -517,30 +525,8 @@ export class PuzzleSystem extends createSystem({
     this.tileBySlot.forEach((tile, slot) => {
       const label = tileLabels[slot] ?? '';
       tile.setValue(PuzzleTile, 'correct', label === puzzle.answer);
-      const previousModel = this.tileModels[slot];
-      if (previousModel) {
-        tile.object3D!.remove(previousModel);
-        disposePuzzleObject(previousModel);
-        this.tileModels[slot] = undefined;
-      }
-      // A tile shows a low-poly miniature when its label has one, and
-      // otherwise the word printed on the slab.
-      const model =
-        this.isVisual && label
-          ? createPuzzleObject(label, importedObject(label))
-          : undefined;
-      if (model) {
-        // On top of the stand, while the tile's slab remains invisible.
-        // Add to the offset createPuzzleObject set, which puts the model's
-        // base on its origin: an imported model is centred on its middle.
-        model.position.y += TILE_FLOOR_Y + this.standSeat;
-        tile.object3D!.add(model);
-        this.tileModels[slot] = model;
-      }
-      this.showSlab(slot, !model);
-      this.tileLabels[slot]
-        ?.getElementById('tile-text')
-        ?.setProperties({ text: model ? '' : label });
+      this.tileWords[slot] = this.isVisual ? label : '';
+      this.setTileModel(slot);
       this.place(tile, this.tileHomes[slot], this.isVisual);
       tile.object3D!.quaternion.copy(this.tileRotations[slot]);
     });
@@ -755,6 +741,53 @@ export class PuzzleSystem extends createSystem({
         entry.role === 'floor' ? theme.floor : theme.stage,
       );
     }
+  }
+
+  /**
+   * Puts the miniature for the tile's current word on its stand, replacing
+   * the previous one: the owner's imported model once it has loaded, else
+   * the code-built one; a word with no miniature is printed on the slab.
+   */
+  private setTileModel(slot: number): void {
+    const tile = this.tileBySlot[slot];
+    const label = this.tileWords[slot] ?? '';
+    const previousModel = this.tileModels[slot];
+    if (previousModel) {
+      tile.object3D!.remove(previousModel);
+      disposePuzzleObject(previousModel);
+      this.tileModels[slot] = undefined;
+    }
+    const model = label
+      ? createPuzzleObject(label, importedObject(label))
+      : undefined;
+    if (model) {
+      // On top of the stand, while the tile's slab remains invisible.
+      // Add to the offset createPuzzleObject set, which puts the model's
+      // base on its origin: an imported model is centred on its middle.
+      model.position.y += TILE_FLOOR_Y + this.standSeat;
+      tile.object3D!.add(model);
+      this.tileModels[slot] = model;
+    }
+    this.showSlab(slot, !model);
+    this.tileLabels[slot]
+      ?.getElementById('tile-text')
+      ?.setProperties({ text: model ? '' : label });
+  }
+
+  /**
+   * Imported miniatures load in the background, so the first puzzle can
+   * start with code-built stand-ins. As each one arrives, swap it onto any
+   * tile still showing the stand-in, without restarting the round.
+   */
+  private swapInImported(model: TileModel): void {
+    this.tileWords.forEach((label, slot) => {
+      if (
+        tileModelFor(label) === model &&
+        !this.tileModels[slot]?.userData.imported
+      ) {
+        this.setTileModel(slot);
+      }
+    });
   }
 
   /** Shows a tile's slab and printed word, or hides both for a miniature. */
