@@ -42,6 +42,10 @@ import {
   speak,
   stopSpeaking,
 } from './read-aloud.js';
+import {
+  createDisplayStand,
+  STAND_HEIGHT,
+} from './scene-assets/display-stand.scene-asset.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 
 const ROUND_SECONDS = 60;
@@ -54,6 +58,9 @@ const BEST_SCORE_KEY = 'thinkrush.bestScore';
 // How many visual puzzles this device has started, which decides when each
 // move is introduced (see src/moves.ts).
 const MOVES_SEEN_KEY = 'thinkrush.visualSeen';
+// The table surface in a tile's own frame: the tile origin is the centre of
+// its (hidden or word-printed) slab.
+const TILE_FLOOR_Y = -0.044;
 // Lift counts once the held pick is this far above the eyes for this long:
 // clearly above the head, so holding something close to look at it is not
 // an answer.
@@ -227,6 +234,11 @@ export class PuzzleSystem extends createSystem({
       this.tileHomes[slot] = tile.object3D!.position.clone();
       this.tileRotations[slot] = tile.object3D!.quaternion.clone();
       this.tileLabels[slot] = findUIKitML(tile);
+      // Every choice sits on the same display stand, picked up with it;
+      // a word card stands set into the stand's top.
+      const stand = createDisplayStand();
+      stand.position.y = TILE_FLOOR_Y;
+      tile.object3D!.add(stand);
       // Each round either hides the printed slab behind a miniature (the
       // tile stays the grabbable hit target) or shows the word on it.
       if (this.tileLabels[slot]) this.tileLabels[slot]!.visible = false;
@@ -507,9 +519,8 @@ export class PuzzleSystem extends createSystem({
       const model =
         this.isVisual && label ? createPuzzleObject(label) : undefined;
       if (model) {
-        // The tile origin is its centre; keep the miniature on the table
-        // while the tile's dark slab remains invisible.
-        model.position.set(0, -0.044, 0);
+        // On top of the stand, while the tile's slab remains invisible.
+        model.position.set(0, TILE_FLOOR_Y + STAND_HEIGHT, 0);
         tile.object3D!.add(model);
         this.tileModels[slot] = model;
       }

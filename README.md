@@ -24,8 +24,9 @@ you can click around in.
 > move the panel asks for: drop it on the tray, flip it over, or lift it
 > above your head. The right object with the wrong move is "Right answer,
 > wrong move!", so read (or listen) carefully. New moves arrive one at a
-> time. The objects are built in code; abstract ones, like a password,
-> appear as a word. Riddles, proverbs and mafumbo use three answer orbs you
+> time. The objects are built in code and stand on identical wooden display
+> stands, all at one size; abstract ones, like a password, appear as a word
+> card set into the stand. Riddles, proverbs and mafumbo use three answer orbs you
 > point at and pinch. Ten Swahili methali drafts are kept separately in
 > `content/methali-drafts.json` for fluent-language review and are not loaded
 > into gameplay yet. Next puzzle (always available) steps through the bank, and a

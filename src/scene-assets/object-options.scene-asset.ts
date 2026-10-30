@@ -36,6 +36,10 @@ const materials = {
   red: new MeshStandardMaterial({ color: '#C84F46', roughness: 0.65 }),
 };
 
+// Longest side of every miniature, in metres: fits on the display stand's
+// top (0.142 x 0.102 m) with a margin.
+const OBJECT_SIZE = 0.085;
+
 function add(
   root: Group,
   geometry: BoxGeometry | ConeGeometry | CylinderGeometry | SphereGeometry | TorusGeometry,
@@ -255,10 +259,11 @@ const BUILDERS: Record<TileModel, (root: Group) => void> = {
   'wooden block': makeWoodBlock,
 };
 /**
- * Normalize props to the same visible footprint so small silhouettes (such as
- * a seed or key) remain easy to identify beside wider props. The target bounds
- * fit inside the existing tile footprint, but the object itself is the visible
- * answer target; the tile mesh is hidden by PuzzleSystem.
+ * Normalize props so their longest side is the same, OBJECT_SIZE: the four
+ * choices then read at one size on their identical display stands, whether
+ * the object is long (a ruler), tall (a thermometer) or round (an egg). The
+ * object itself is the visible answer target; the tile mesh is hidden by
+ * PuzzleSystem.
  */
 export function createPuzzleObject(label: string): Group | undefined {
   const model = tileModelFor(label);
@@ -272,7 +277,7 @@ export function createPuzzleObject(label: string): Group | undefined {
   const size = bounds.getSize(new Vector3());
   const center = bounds.getCenter(new Vector3());
   if (size.x > 0 && size.y > 0 && size.z > 0) {
-    const scale = Math.min(0.12 / size.x, 0.062 / size.y, 0.026 / size.z);
+    const scale = OBJECT_SIZE / Math.max(size.x, size.y, size.z);
     root.scale.setScalar(scale);
     root.position.set(
       -center.x * scale,
