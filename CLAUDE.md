@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-30, PRs 1-25 merged plus the batch 2-3 objects PR (6 answer orbs;
+As of 2026-10-30, PRs 1-26 merged plus the batch 4-5 objects PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -105,7 +105,8 @@ read-aloud in place of voice recognition; 20 the action twist; 21
 release-tagged URLs for public files; 22 display stands for the visual
 choices; 23 the owner's Meshy stand replacing the code-built one; 24
 the first Meshy miniatures, for the wind puzzle; 25 objects at 10 cm;
-then Meshy miniatures for the number and beginnings puzzles):
+26 Meshy miniatures for the number and beginnings puzzles, swapped in as
+they load; then the keys, lock and magnet puzzles' miniatures):
 
 Live on main
 
@@ -134,8 +135,12 @@ Live on main
 - Imported miniatures: src/imported-objects.ts lists the tile models that
   have an owner-made model in public/models/objects/ (batches 1-3: kite,
   sail, parachute, umbrella, thermometer, ruler, scale, telescope, seed
-  (a sunflower seed, also used for the dry seed), egg, blueprint, house). They load with background priority so the
-  game starts fast; until one has loaded, its code-built version shows.
+  (a sunflower seed, also used for the dry seed), egg, blueprint, house;
+  batch 4: piano, keyboard, typewriter, keyring, key, padlock; batch 5:
+  nail, screw, paper clip, wooden block). They load
+  with background priority so the game starts fast; until one has loaded,
+  its code-built version shows, and PuzzleSystem swaps it onto any tile
+  still showing that stand-in as soon as it arrives.
   tests/imported-objects.test.ts fails if a listed model has no optimized
   file or no row in art/SOURCES.md. Object textures are 512 px (28 objects
   at 1024 px would cost ~150 MB of GPU memory once all were seen).
@@ -228,12 +233,15 @@ Open questions (owner deciding, 2026-10-30)
 - Action twist follow-ups: moves for the answer orbs, and a "hold it up to
   RUSH" variant once RUSH exists.
 
-- More AI-made models: batches 4-6 of the miniatures (prompts were given
+- More AI-made models: batch 6 of the miniatures, plus a bright yellow
+  replacement for the wooden ruler, which disappears on the wooden stand
+  (prompts were given
   in chat: one ChatGPT style message, then one subject line per object;
   Meshy remesh to ~3,000 triangles, symmetry off for asymmetric objects).
   To add one: optimize it to public/models/objects/<model>.glb with
   --max-texture 512 (add --flat-roughness 0.55 unless it has real metal
-  parts; the optimizer keeps data maps as PNG), add its TileModel to
+  parts; the optimizer keeps data maps as PNG at half the colour maps'
+  size), add its TileModel to
   IMPORTED_OBJECTS, add its row to art/SOURCES.md. Batch 3's seed is a
   sunflower seed: the first seed looked like the egg beside it.
 

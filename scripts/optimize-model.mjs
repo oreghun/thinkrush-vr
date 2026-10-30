@@ -7,6 +7,9 @@
 //   node scripts/optimize-model.mjs <in.glb> <out.glb> \
 //     [--max-texture 1024] [--flat-roughness 0.55]
 //
+// Data maps are kept at half the colour maps' size: metal and roughness
+// change over broad areas, and PNG at full size would dominate the file.
+//
 // Uses only sharp (already installed) and the GLB container format, so no
 // outside tool runs on the file.
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -24,6 +27,7 @@ const option = (name, fallback) => {
   return at === -1 ? fallback : Number(flags[at + 1]);
 };
 const maxTexture = option('--max-texture', 1024);
+const maxDataTexture = Math.max(128, Math.round(maxTexture / 2));
 const flatRoughness = option('--flat-roughness', undefined);
 
 // A GLB is a 12-byte header, a JSON chunk and one binary chunk.
@@ -96,9 +100,10 @@ const encoded = new Map();
 for (const [position, image] of images.entries()) {
   const lossless = dataImages.has(keptImages[position]);
   const source = viewBytes(gltf.bufferViews[image.bufferView]);
+  const side = lossless ? maxDataTexture : maxTexture;
   const picture = sharp(source).resize({
-    width: maxTexture,
-    height: maxTexture,
+    width: side,
+    height: side,
     fit: 'inside',
     withoutEnlargement: true,
   });
