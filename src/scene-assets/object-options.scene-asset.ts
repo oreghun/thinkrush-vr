@@ -10,11 +10,13 @@ import {
   TorusGeometry,
   Vector3,
 } from '@iwsdk/core';
+import { type TileModel, tileModelFor } from '../tile-models.js';
 
 /**
  * Small, code-generated visual-puzzle props. The source label is only used to
- * choose a model; it is never rendered as text. Each returned group is owned
- * by one tile and can be removed/disposed when the next round starts.
+ * choose a model (see tile-models.ts); a label without one is shown as a word
+ * on the tile instead. Each returned group is owned by one tile and can be
+ * removed/disposed when the next round starts.
  *
  * Keep the geometry deliberately low-poly: these objects are viewed at arm's
  * length on a Quest and the four choices must read by silhouette first.
@@ -32,7 +34,6 @@ const materials = {
   green: new MeshStandardMaterial({ color: '#5B8A58', roughness: 0.8 }),
   blue: new MeshStandardMaterial({ color: '#386CA8', roughness: 0.56 }),
   red: new MeshStandardMaterial({ color: '#C84F46', roughness: 0.65 }),
-  shadow: new MeshStandardMaterial({ color: '#323B59', roughness: 0.9 }),
 };
 
 function add(
@@ -182,13 +183,6 @@ function makePan(root: Group) {
   cylinder(root,materials.dark,[0,0.01,0],0.022,0.022,0.008,12);
   cylinder(root,materials.metal,[0.034,0.013,0],0.004,0.004,0.06,8,[0,0,-Math.PI/2]);
 }
-function makeFingerprint(root: Group) {
-  for(let i=0;i<4;i++) ring(root,materials.turquoise,[0,0.009+i*0.001,0],0.007+i*0.004,0.001,[Math.PI/2,0,0]);
-  box(root,materials.cream,[0,0.006,0],[0.036,0.004,0.036]);
-}
-function makeShadow(root: Group) {
-  sphere(root,materials.shadow,[0,0.004,0],[0.035,0.003,0.02],12);
-}
 function makeScale(root: Group) {
   box(root,materials.dark,[0,0.01,0],[0.045,0.012,0.038]);
   box(root,materials.cream,[0,0.017,0],[0.025,0.002,0.019]);
@@ -222,60 +216,56 @@ function makeSeed(root: Group) {
 function makeWoodBlock(root: Group) {
   box(root,materials.wood,[0,0.018,0],[0.032,0.032,0.032]);
 }
-function makeEggshell(root: Group) {
-  makeEgg(root);
+function makeKeyring(root: Group) {
+  ring(root,materials.metal,[0,0.017,0],0.016,0.002,[Math.PI/2,0,0]);
+  makeKey(root);
 }
-function makeDefault(root: Group,label: string) {
-  const lower=label.toLowerCase();
-  if(lower.includes('seed')) return makeSeed(root);
-  if(lower.includes('egg')) return makeEggshell(root);
-  if(lower.includes('house')) return makeHouse(root);
-  if(lower.includes('key') && !lower.includes('keyboard') && !lower.includes('keyring')) return makeKey(root);
-  if(lower.includes('padlock')) return makePadlock(root);
-  if(lower.includes('umbrella')) return makeUmbrella(root);
-  if(lower.includes('piano')) return makePiano(root);
-  if(lower.includes('keyboard')) return makeKeyboard(root);
-  if(lower.includes('typewriter')) return makeTypewriter(root);
-  if(lower.includes('keyring')) { ring(root,materials.metal,[0,0.017,0],0.016,0.002,[Math.PI/2,0,0]); makeKey(root); return; }
-  if(lower.includes('paper clip')) return makePaperClip(root);
-  if(lower.includes('nail')) return makeNail(root);
-  if(lower.includes('screw')) return makeScrew(root);
-  if(lower.includes('megaphone')) return makeMegaphone(root);
-  if(lower.includes('trumpet')) return makeTrumpet(root);
-  if(lower.includes('loudspeaker')) return makeLoudspeaker(root);
-  if(lower.includes('thermometer')) return makeThermometer(root);
-  if(lower.includes('ruler')) return makeRuler(root);
-  if(lower.includes('telescope')) return makeTelescope(root);
-  if(lower.includes('scale')) return makeScale(root);
-  if(lower.includes('blueprint')) return makeBlueprint(root);
-  if(lower.includes('footprint')) { sphere(root,materials.terracotta,[-0.008,0.005,0],[0.011,0.003,0.02],10); sphere(root,materials.terracotta,[0.01,0.005,0],[0.008,0.003,0.012],10); return; }
-  if(lower.includes('fingerprint')) return makeFingerprint(root);
-  if(lower.includes('shadow')) return makeShadow(root);
-  if(lower.includes('kite')) return makeKite(root);
-  if(lower.includes('sail')) return makeSail(root);
-  if(lower.includes('parachute')) return makeParachute(root);
-  if(lower.includes('envelope')) return makeEnvelope(root);
-  if(lower.includes('bottle')) return makeBottle(root);
-  if(lower.includes('usb')) return makeUSB(root);
-  if(lower.includes('solar panel')) return makeSolarPanel(root);
-  if(lower.includes('battery')) return makeBattery(root);
-  if(lower.includes('candle')) return makeCandle(root);
-  if(lower.includes('frying pan')) return makePan(root);
-  if(lower.includes('wooden block')) return makeWoodBlock(root);
-  if(lower.includes('weighing scale')) return makeScale(root);
-  // Unknown future options still get a tactile miniature rather than text.
-  box(root,materials.turquoise,[0,0.016,0],[0.032,0.032,0.032]);
-}
+const BUILDERS: Record<TileModel, (root: Group) => void> = {
+  seed: makeSeed,
+  egg: makeEgg,
+  house: makeHouse,
+  keyboard: (root) => makeKeyboard(root),
+  keyring: makeKeyring,
+  key: makeKey,
+  padlock: makePadlock,
+  umbrella: makeUmbrella,
+  piano: makePiano,
+  typewriter: makeTypewriter,
+  'paper clip': makePaperClip,
+  nail: makeNail,
+  screw: makeScrew,
+  megaphone: makeMegaphone,
+  trumpet: makeTrumpet,
+  loudspeaker: makeLoudspeaker,
+  thermometer: makeThermometer,
+  ruler: makeRuler,
+  telescope: makeTelescope,
+  scale: makeScale,
+  blueprint: makeBlueprint,
+  kite: makeKite,
+  sail: makeSail,
+  parachute: makeParachute,
+  envelope: makeEnvelope,
+  bottle: makeBottle,
+  usb: makeUSB,
+  'solar panel': makeSolarPanel,
+  battery: makeBattery,
+  candle: makeCandle,
+  'frying pan': makePan,
+  'wooden block': makeWoodBlock,
+};
 /**
  * Normalize props to the same visible footprint so small silhouettes (such as
  * a seed or key) remain easy to identify beside wider props. The target bounds
  * fit inside the existing tile footprint, but the object itself is the visible
  * answer target; the tile mesh is hidden by PuzzleSystem.
  */
-export function createPuzzleObject(label: string): Group {
+export function createPuzzleObject(label: string): Group | undefined {
+  const model = tileModelFor(label);
+  if (!model) return undefined;
   const root = new Group();
   root.name = 'puzzle-object:' + label;
-  makeDefault(root,label);
+  BUILDERS[model](root);
 
   root.updateMatrixWorld(true);
   const bounds = new Box3().setFromObject(root);
