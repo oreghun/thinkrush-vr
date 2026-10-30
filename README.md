@@ -20,8 +20,11 @@ you can click around in.
 > Status: 40 English draft puzzles are playable, one at a time: ten each of
 > visual puzzles, riddles, proverbs and mafumbo stories. A visual puzzle
 > puts four objects on the table under a clue such as "Three of these let
-> you in. Which one keeps you out?", and you drop the one it points to on
-> the tray. The objects are built in code; abstract ones, like a password,
+> you in. Which one keeps you out?" Pick the one it points to, then do the
+> move the panel asks for: drop it on the tray, flip it over, or lift it
+> above your head. The right object with the wrong move is "Right answer,
+> wrong move!", so read (or listen) carefully. New moves arrive one at a
+> time. The objects are built in code; abstract ones, like a password,
 > appear as a word. Riddles, proverbs and mafumbo use three answer orbs you
 > point at and pinch. Ten Swahili methali drafts are kept separately in
 > `content/methali-drafts.json` for fluent-language review and are not loaded
@@ -184,6 +187,7 @@ src/movable-panel.ts      panels hang from grab bars and can be re-placed
 src/screen-look.ts        drag-to-look camera for flat screens
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
+src/moves.ts              the action twist: which move to ask for, and judging it
 src/read-aloud.ts         reads puzzles aloud with on-device voices only
 src/assets.ts             asset manifest; models are built in src/scene-assets/
 scripts/                  content check, build size check, chime generator

@@ -1,10 +1,13 @@
 import { createComponent, Types } from '@iwsdk/core';
 import { PuzzleCategory } from './categories.js';
+import { Move } from './moves.js';
 
 export const PuzzleStatus = {
   Playing: 'playing',
   Solved: 'solved',
   TimeUp: 'timeUp',
+  /** A run puzzle lost to the right object with the wrong move. */
+  WrongMove: 'wrongMove',
 } as const;
 
 export const PuzzleMode = {
@@ -41,6 +44,8 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
     enum: PuzzleCategory,
     default: PuzzleCategory.All,
   },
+  // What a visual puzzle asks you to do with your pick (see src/moves.ts).
+  move: { type: Types.Enum, enum: Move, default: Move.Drop },
 });
 
 /**
