@@ -1,0 +1,160 @@
+// Makes an imported model (for example from Meshy) light enough for the
+// headset: shrinks every texture to at most --max-texture pixels, stores
+// colour maps as JPEG, and can replace a nearly uniform metallic-roughness
+// map with plain factors. Geometry is copied unchanged.
+//
+//   node scripts/optimize-model.mjs <in.glb> <out.glb> \
+//     [--max-texture 1024] [--flat-roughness 0.55]
+//
+// Uses only sharp (already installed) and the GLB container format, so no
+// outside tool runs on the file.
+import { readFileSync, writeFileSync } from 'node:fs';
+import sharp from 'sharp';
+
+const [input, output, ...flags] = process.argv.slice(2);
+if (!input || !output) {
+  console.error(
+    'usage: node scripts/optimize-model.mjs <in.glb> <out.glb> [--max-texture N] [--flat-roughness R]',
+  );
+  process.exit(1);
+}
+const option = (name, fallback) => {
+  const at = flags.indexOf(name);
+  return at === -1 ? fallback : Number(flags[at + 1]);
+};
+const maxTexture = option('--max-texture', 1024);
+const flatRoughness = option('--flat-roughness', undefined);
+
+// A GLB is a 12-byte header, a JSON chunk and one binary chunk.
+const glb = readFileSync(input);
+if (glb.toString('latin1', 0, 4) !== 'glTF') {
+  throw new Error(`${input} is not a GLB file`);
+}
+const jsonLength = glb.readUInt32LE(12);
+const gltf = JSON.parse(glb.toString('utf8', 20, 20 + jsonLength));
+const binStart = 20 + jsonLength + 8;
+const viewBytes = (view) => {
+  const start = binStart + (view.byteOffset ?? 0);
+  return glb.subarray(start, start + view.byteLength);
+};
+
+// Swap the metallic-roughness map for factors: wood is not metal, and a
+// 2048-pixel image of one roughness value costs megabytes for nothing.
+if (flatRoughness !== undefined) {
+  for (const material of gltf.materials ?? []) {
+    const pbr = material.pbrMetallicRoughness;
+    if (pbr?.metallicRoughnessTexture) {
+      delete pbr.metallicRoughnessTexture;
+      pbr.metallicFactor = 0;
+      pbr.roughnessFactor = flatRoughness;
+    }
+  }
+}
+
+// Drop textures and images no material uses any more, renumbering the rest.
+const textureSlots = [];
+for (const material of gltf.materials ?? []) {
+  for (const holder of [material, material.pbrMetallicRoughness ?? {}]) {
+    for (const [key, value] of Object.entries(holder)) {
+      if (key.endsWith('Texture') && typeof value?.index === 'number') {
+        textureSlots.push(value);
+      }
+    }
+  }
+}
+const keptTextures = [...new Set(textureSlots.map((slot) => slot.index))];
+const keptImages = [
+  ...new Set(keptTextures.map((index) => gltf.textures[index].source)),
+];
+for (const slot of textureSlots) {
+  slot.index = keptTextures.indexOf(slot.index);
+}
+gltf.textures = keptTextures.map((index) => ({
+  ...gltf.textures[index],
+  source: keptImages.indexOf(gltf.textures[index].source),
+}));
+const images = keptImages.map((index) => gltf.images[index]);
+
+// Re-encode each kept image: at most maxTexture pixels a side, JPEG unless
+// it needs transparency.
+const encoded = new Map();
+for (const image of images) {
+  const source = viewBytes(gltf.bufferViews[image.bufferView]);
+  const picture = sharp(source).resize({
+    width: maxTexture,
+    height: maxTexture,
+    fit: 'inside',
+    withoutEnlargement: true,
+  });
+  const { hasAlpha } = await sharp(source).metadata();
+  const bytes = hasAlpha
+    ? await picture.png({ compressionLevel: 9 }).toBuffer()
+    : await picture.jpeg({ quality: 85, mozjpeg: true }).toBuffer();
+  image.mimeType = hasAlpha ? 'image/png' : 'image/jpeg';
+  encoded.set(image.bufferView, bytes);
+}
+
+// Rebuild the binary chunk from the views still in use, 4-byte aligned.
+const usedViews = new Set([
+  ...(gltf.accessors ?? []).map((accessor) => accessor.bufferView),
+  ...images.map((image) => image.bufferView),
+]);
+const parts = [];
+const viewIndex = new Map();
+const views = [];
+let offset = 0;
+gltf.bufferViews.forEach((view, index) => {
+  if (!usedViews.has(index)) {
+    return;
+  }
+  const bytes = encoded.get(index) ?? viewBytes(view);
+  const padding = (4 - (offset % 4)) % 4;
+  parts.push(Buffer.alloc(padding), bytes);
+  offset += padding;
+  viewIndex.set(index, views.length);
+  views.push({
+    ...view,
+    buffer: 0,
+    byteOffset: offset,
+    byteLength: bytes.length,
+  });
+  offset += bytes.length;
+});
+for (const accessor of gltf.accessors ?? []) {
+  accessor.bufferView = viewIndex.get(accessor.bufferView);
+}
+for (const image of images) {
+  image.bufferView = viewIndex.get(image.bufferView);
+}
+gltf.bufferViews = views;
+gltf.images = images;
+let bin = Buffer.concat(parts);
+bin = Buffer.concat([bin, Buffer.alloc((4 - (bin.length % 4)) % 4)]);
+gltf.buffers = [{ byteLength: bin.length }];
+
+let json = Buffer.from(JSON.stringify(gltf), 'utf8');
+json = Buffer.concat([json, Buffer.alloc((4 - (json.length % 4)) % 4, 0x20)]);
+const header = Buffer.alloc(12);
+header.write('glTF', 0, 'latin1');
+header.writeUInt32LE(2, 4);
+header.writeUInt32LE(12 + 8 + json.length + 8 + bin.length, 8);
+const chunk = (length, type) => {
+  const head = Buffer.alloc(8);
+  head.writeUInt32LE(length, 0);
+  head.write(type, 4, 'latin1');
+  return head;
+};
+writeFileSync(
+  output,
+  Buffer.concat([
+    header,
+    chunk(json.length, 'JSON'),
+    json,
+    chunk(bin.length, 'BIN\0'),
+    bin,
+  ]),
+);
+const megabytes = (bytes) => (bytes / 1024 / 1024).toFixed(2);
+console.log(
+  `${input}: ${megabytes(glb.length)} MB -> ${output}: ${megabytes(12 + 16 + json.length + bin.length)} MB`,
+);

@@ -1,9 +1,12 @@
 import {
+  Box3,
   ExtrudeGeometry,
   Group,
   Mesh,
   MeshStandardMaterial,
+  type Object3D,
   Shape,
+  Vector3,
 } from '@iwsdk/core';
 
 /**
@@ -68,6 +71,42 @@ const baseGeometry = roundedSlab(
   BASE.radius,
 );
 const topGeometry = roundedSlab(TOP.width, TOP.depth, TOP.height, TOP.radius);
+
+/** A stand placed under a choice, and the height its objects rest at. */
+export interface DisplayStand {
+  object: Object3D;
+  seatHeight: number;
+}
+
+// The imported stand (public/models/display-stand.glb, see art/SOURCES.md)
+// has a recessed tray top: its floor is at 92% of the model's height.
+const IMPORTED_SEAT_FRACTION = 0.92;
+
+/**
+ * Fits the imported stand model to the code-built stand's width, bottom
+ * centre at the origin, keeping its own proportions.
+ */
+export function fitImportedStand(model: Object3D): DisplayStand {
+  const bounds = new Box3().setFromObject(model);
+  const size = bounds.getSize(new Vector3());
+  const scale = BASE.width / size.x;
+  const center = bounds.getCenter(new Vector3());
+  model.scale.multiplyScalar(scale);
+  model.position.set(
+    -center.x * scale,
+    -bounds.min.y * scale,
+    -center.z * scale,
+  );
+  const stand = new Group();
+  stand.name = 'DisplayStand';
+  stand.add(model);
+  return { object: stand, seatHeight: size.y * scale * IMPORTED_SEAT_FRACTION };
+}
+
+/** The code-built stand, used when the imported one is unavailable. */
+export function builtStand(): DisplayStand {
+  return { object: createDisplayStand(), seatHeight: STAND_HEIGHT };
+}
 
 /** A new stand; its meshes share one geometry and material set. */
 export function createDisplayStand(): Group {
