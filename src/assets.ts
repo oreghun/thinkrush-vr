@@ -11,6 +11,7 @@ import {
   createGallerySet,
   createSideboardSet,
 } from './scene-assets/decor.scene-asset.js';
+import { createDisplayStand } from './scene-assets/display-stand.scene-asset.js';
 import {
   createAnswerOrb,
   createAnswerTray,
@@ -39,6 +40,7 @@ export default defineAssets({
   'puzzle-table': createPuzzleTable(),
   'answer-tray': createAnswerTray(),
   'puzzle-tile': createPuzzleTile(),
+  'display-stand': createDisplayStand(),
   'answer-orb': createAnswerOrb(),
   'panel-handle': createPanelHandle(),
   'welcome-panel': uikitml('welcome.uikitml', 'Welcome Panel'),
