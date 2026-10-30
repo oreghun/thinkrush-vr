@@ -92,14 +92,14 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-30, PRs 1-18 merged plus the read-aloud PR (6 answer orbs;
+As of 2026-10-30, PRs 1-19 merged plus the action-twist PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
 Swahili methali drafts kept aside, the indigo/turquoise studio palette with
 category accents, code-built miniatures on the visual tiles, and the
-"Choose your world" hub; 18 clue-style visual prompts and word tiles; then
-read-aloud in place of voice recognition):
+"Choose your world" hub; 18 clue-style visual prompts and word tiles; 19
+read-aloud in place of voice recognition; then the action twist):
 
 Live on main
 
@@ -118,6 +118,18 @@ Live on main
   footprint, fingerprint, tyre track) shows as a word on the tile's slab
   instead. tests/tile-models.test.ts fails if a puzzle's answer is the only
   word among miniatures or the only miniature among words.
+- Action twist (src/moves.ts, PuzzleBoard.move): each visual puzzle asks
+  for a move with your pick, shown as the panel's instruction line and read
+  aloud: DROP it on the tray, FLIP it over (released upside down, anywhere),
+  or LIFT it above your head (held 0.1 m above the eyes for 0.5 s, so
+  looking closely at it is not an answer). The game picks the move, never
+  the puzzle file: the first two visual puzzles on a device are drops, the
+  3rd introduces flip and the 5th lift ("New move!"), then it is random
+  (count kept in localStorage, thinkrush.visualSeen). Wrong object = wrong
+  answer whatever the move. Right object, wrong move = "Right answer, wrong
+  move!": a run loses that puzzle (status wrongMove, no points, moves on
+  after 2.5 s); practice says so and lets you retry. Orb puzzles have no
+  moves. The tray stays visible for every move: the habit is the trap.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - Category button on the puzzle panel (practice only): cycles All plus each
@@ -186,10 +198,9 @@ Decisions
 
 Open questions (owner deciding, 2026-10-30)
 
-- Action twist: the clue names an action (drop on the tray, flip over, hold
-  up to RUSH) and the right object with the wrong action fails with "Right
-  answer, wrong move". Proposed with the action drawn by the game rather
-  than written into each puzzle.
+- Action twist follow-ups: moves for the answer orbs, and a "hold it up to
+  RUSH" variant once RUSH exists.
+
 - AI-made models (image tool, then Meshy image-to-3D) for the tiles and a
   few set pieces. Needs the asset rule above changed first; Meshy's free
   plan is CC BY 4.0 (attribution), its paid plans grant ownership. Every

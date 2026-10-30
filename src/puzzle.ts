@@ -28,6 +28,13 @@ import {
   PuzzleStatus,
   PuzzleTile,
 } from './puzzle-components.js';
+import {
+  judge,
+  Move,
+  type MoveName,
+  pickMove,
+  releaseMove,
+} from './moves.js';
 import { type Puzzle, PUZZLES } from './puzzles.js';
 import {
   isReadAloudOn,
@@ -44,6 +51,16 @@ const POINTS_PER_DIFFICULTY = 10;
 // How long the Correct feedback stays up before a run auto-advances.
 const SOLVE_BEAT_SECONDS = 2.5;
 const BEST_SCORE_KEY = 'thinkrush.bestScore';
+// How many visual puzzles this device has started, which decides when each
+// move is introduced (see src/moves.ts).
+const MOVES_SEEN_KEY = 'thinkrush.visualSeen';
+// Lift counts once the held pick is this far above the eyes for this long:
+// clearly above the head, so holding something close to look at it is not
+// an answer.
+const LIFT_ABOVE_EYES = 0.1;
+const LIFT_SECONDS = 0.5;
+// A released tile whose up axis points at least this far down was flipped.
+const FLIPPED_UP_Y = -0.5;
 // A tile released within this distance of the tray's center, and not far
 // above it, counts as dropped on the tray.
 const TRAY_DROP_RADIUS = 0.1;
@@ -66,6 +83,12 @@ const STATUS_COLORS = {
 };
 const TIMER_COLORS = { normal: '#fafaf7', low: '#f5b14a' };
 const ORB_GLOW = { correct: '#1d5c2a', wrong: '#8a5a00', idle: '#000000' };
+
+const MOVE_KEYS: Record<MoveName, MessageKey> = {
+  [Move.Drop]: 'move.drop',
+  [Move.Flip]: 'move.flip',
+  [Move.Lift]: 'move.lift',
+};
 
 const CATEGORY_LABEL_KEYS: Record<Category, MessageKey> = {
   [PuzzleCategory.All]: 'category.all',
@@ -114,6 +137,16 @@ export class PuzzleSystem extends createSystem({
   // puzzle; the button then says so.
   private noVoice = false;
   private lastVisibility: VisibilityState = VisibilityState.NonImmersive;
+  // Whether this visual puzzle introduces its move ("New move!"), and, in
+  // practice, whether the last try was the right object with the wrong move.
+  private moveIsNew = false;
+  private wrongMoveShown = false;
+  // Seconds each held tile has been raised above the eyes, and tiles whose
+  // lift already counted during the current hold.
+  private readonly liftTime = new Map<Entity, number>();
+  private readonly lifted = new Set<Entity>();
+  private readonly headPosition = new Vector3();
+  private readonly tileUp = new Vector3();
   private board?: Entity;
   private tray?: Entity;
   private readonly tileBySlot: Entity[] = [];
@@ -332,6 +365,7 @@ export class PuzzleSystem extends createSystem({
       }),
       this.queries.heldTiles.subscribe('qualify', (tile) => {
         this.settling.delete(tile);
+        this.liftTime.delete(tile);
       }),
       this.queries.heldTiles.subscribe('disqualify', (tile) => {
         this.onTileReleased(tile);
@@ -415,8 +449,10 @@ export class PuzzleSystem extends createSystem({
 
     let overTray = false;
     if (this.isVisual && this.status() === PuzzleStatus.Playing) {
+      this.player.head.getWorldPosition(this.headPosition);
       for (const tile of this.queries.heldTiles.entities) {
         overTray ||= this.isOverTray(tile.object3D!.position);
+        this.trackLift(tile, delta);
       }
     }
     this.setTrayGlow(overTray);
@@ -442,6 +478,17 @@ export class PuzzleSystem extends createSystem({
     }
     board.setValue(PuzzleBoard, 'wrongAnswers', 0);
     this.advanceIn = 0;
+    this.wrongMoveShown = false;
+    this.liftTime.clear();
+    this.lifted.clear();
+    if (this.isVisual) {
+      // The game, not the puzzle, picks the move, one new move at a time.
+      const seen = readMovesSeen();
+      const { move, isNew } = pickMove(seen, Math.random());
+      board.setValue(PuzzleBoard, 'move', move);
+      this.moveIsNew = isNew;
+      writeMovesSeen(seen + 1);
+    }
     this.settling.clear();
     this.orbFlash.clear();
 
@@ -502,9 +549,16 @@ export class PuzzleSystem extends createSystem({
     ) {
       return;
     }
-    const text = puzzle.question
-      ? `${puzzle.prompt} ${puzzle.question}`
-      : puzzle.prompt;
+    // The move is part of what to listen for. Its verb is in capitals on
+    // the panel; spoken, it is a plain word (some voices spell capitals).
+    const move = this.moveText().replace(/\b[A-Z]{2,}\b/gu, (word) =>
+      word.toLowerCase(),
+    );
+    const text = this.isVisual
+      ? `${puzzle.prompt} ${move}`
+      : puzzle.question
+        ? `${puzzle.prompt} ${puzzle.question}`
+        : puzzle.prompt;
     const spoken = speak(text, puzzle.lang);
     if (asked) {
       this.noVoice = !spoken;
@@ -532,22 +586,89 @@ export class PuzzleSystem extends createSystem({
   }
 
   private onTileReleased(tile: Entity): void {
-    const board = this.board;
-    if (
-      board &&
-      this.isVisual &&
-      this.status() === PuzzleStatus.Playing &&
-      this.isOverTray(tile.object3D!.position)
-    ) {
-      if (tile.getValue(PuzzleTile, 'correct')) {
-        this.onSolved();
-      } else {
-        const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
-        board.setValue(PuzzleBoard, 'wrongAnswers', wrong + 1);
-      }
-      this.render();
+    this.liftTime.delete(tile);
+    // A lift already answered during this hold; letting go adds nothing.
+    const answered = this.lifted.delete(tile);
+    const object = tile.object3D!;
+    this.tileUp.set(0, 1, 0).applyQuaternion(object.quaternion);
+    const made = releaseMove(
+      this.tileUp.y < FLIPPED_UP_Y,
+      this.isOverTray(object.position),
+    );
+    if (!answered && made) {
+      this.answer(tile, made);
     }
     this.settling.add(tile);
+  }
+
+  /** Counts a held tile kept above the eyes for LIFT_SECONDS as a lift. */
+  private trackLift(tile: Entity, delta: number): void {
+    if (
+      this.lifted.has(tile) ||
+      tile.object3D!.position.y < this.headPosition.y + LIFT_ABOVE_EYES
+    ) {
+      this.liftTime.delete(tile);
+      return;
+    }
+    const held = (this.liftTime.get(tile) ?? 0) + delta;
+    if (held < LIFT_SECONDS) {
+      this.liftTime.set(tile, held);
+      return;
+    }
+    this.liftTime.delete(tile);
+    this.lifted.add(tile);
+    this.answer(tile, Move.Lift);
+  }
+
+  /** Judges a tile answered with `made`: object first, then the move. */
+  private answer(tile: Entity, made: MoveName): void {
+    const board = this.board;
+    if (
+      !board ||
+      !this.isVisual ||
+      this.status() !== PuzzleStatus.Playing
+    ) {
+      return;
+    }
+    const verdict = judge(
+      made,
+      this.move(),
+      tile.getValue(PuzzleTile, 'correct') ?? false,
+    );
+    if (verdict === 'solved') {
+      this.onSolved();
+    } else if (verdict === 'wrongMove') {
+      this.onWrongMove();
+    } else {
+      this.wrongMoveShown = false;
+      const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
+      board.setValue(PuzzleBoard, 'wrongAnswers', wrong + 1);
+    }
+    this.render();
+  }
+
+  /**
+   * The right object with the wrong move. A run counts the puzzle as lost
+   * and moves on after the usual beat; practice says so and lets you retry.
+   */
+  private onWrongMove(): void {
+    if (this.mode() === PuzzleMode.Run) {
+      stopSpeaking();
+      this.board!.setValue(PuzzleBoard, 'status', PuzzleStatus.WrongMove);
+      this.advanceIn = SOLVE_BEAT_SECONDS;
+    } else {
+      this.wrongMoveShown = true;
+    }
+  }
+
+  /** The move line under the clue, with "New move!" when it is new. */
+  private moveText(): string {
+    const move = t(MOVE_KEYS[this.move()]);
+    return this.moveIsNew ? `${t('move.new')} ${move}` : move;
+  }
+
+  private move(): MoveName {
+    return (this.board?.getValue(PuzzleBoard, 'move') ?? Move.Drop) as MoveName;
   }
 
   private mode(): Mode {
@@ -812,7 +933,7 @@ export class PuzzleSystem extends createSystem({
     const score = board.getValue(PuzzleBoard, 'score') ?? 0;
 
     let statusText = this.isVisual
-      ? t('puzzle.instructions')
+      ? this.moveText()
       : t('puzzle.instructionsOrbs');
     const accent = CATEGORY_ACCENTS[puzzle.type as Category] ?? CATEGORY_ACCENTS[PuzzleCategory.All];
     let statusColor = accent;
@@ -833,6 +954,11 @@ export class PuzzleSystem extends createSystem({
       statusText = t('puzzle.timeUp');
       statusColor = STATUS_COLORS.timeUp;
       detail = puzzle.explanation;
+    } else if (status === PuzzleStatus.WrongMove || this.wrongMoveShown) {
+      statusText = t('puzzle.wrongMove');
+      statusColor = STATUS_COLORS.wrong;
+      // Under the verdict, the move that was asked for.
+      detail = t(MOVE_KEYS[this.move()]);
     } else if (wrong > 0) {
       statusText = t('puzzle.wrong');
       statusColor = STATUS_COLORS.wrong;
@@ -953,6 +1079,24 @@ function readBestScore(): number {
     return Number.isFinite(value) && value > 0 ? value : 0;
   } catch {
     return 0;
+  }
+}
+
+function readMovesSeen(): number {
+  try {
+    const value = Number(localStorage.getItem(MOVES_SEEN_KEY));
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeMovesSeen(seen: number): void {
+  try {
+    // Capped: past every introduction the count no longer matters.
+    localStorage.setItem(MOVES_SEEN_KEY, String(Math.min(seen, 99)));
+  } catch {
+    // Storage can be blocked (private mode); moves then restart next visit.
   }
 }
 
