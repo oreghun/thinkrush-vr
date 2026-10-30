@@ -166,6 +166,11 @@ Decisions
   riddle-style clue. Prompts carry no action verb (grab means pinch in VR
   and click on a screen); the panel's instruction line says how to answer.
   Each hint goes one step closer than its clue.
+- Voice (owner, 2026-10-30): no spoken answers in v1 (accents, and
+  on-device recognition may be missing on Quest). Instead the game reads
+  each question aloud with an on-device voice only, and the player answers
+  with the tiles or orbs as usual. This replaces "Answers: by voice" in
+  Game design above. The read-aloud PR also retires the voice check panel.
 - Mafumbo stories are long for a headset: plan for RUSH to reveal them in
   two or three beats. Owner may rework options so the correct answer is not
   always the longest.
@@ -180,9 +185,6 @@ Open questions (owner deciding, 2026-10-30)
   few set pieces. Needs the asset rule above changed first; Meshy's free
   plan is CC BY 4.0 (attribution), its paid plans grant ownership. Every
   import goes through an optimize step and a per-model size budget.
-- Voice: proposed to drop spoken answers from v1 (accents, and on-device
-  recognition may be missing on Quest) and instead have the game read
-  each question aloud with an on-device voice.
 
 Next up (in order)
 
