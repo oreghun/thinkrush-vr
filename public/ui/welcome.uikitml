@@ -131,4 +131,10 @@
     </ButtonIcon>
     <ButtonLabel id="language-label" class="button-label">...</ButtonLabel>
   </Button>
+  <Button id="read-aloud-button" class="button">
+    <ButtonIcon>
+      <Volume2></Volume2>
+    </ButtonIcon>
+    <ButtonLabel id="read-aloud-label" class="button-label">...</ButtonLabel>
+  </Button>
 </Panel>

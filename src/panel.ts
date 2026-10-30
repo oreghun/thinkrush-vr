@@ -12,6 +12,13 @@ import {
   setLanguage,
   t,
 } from './i18n/index.js';
+import {
+  hasVoice,
+  nextReadAloudSpeed,
+  onVoicesChanged,
+  readAloudSpeed,
+  setReadAloudSpeed,
+} from './read-aloud.js';
 
 export class PanelSystem extends createSystem({}) {
   init(): void {
@@ -20,6 +27,7 @@ export class PanelSystem extends createSystem({}) {
       return;
     }
     this.initLanguageButton(panel);
+    this.initReadAloudButton(panel);
     this.initXRButtons(panel);
   }
 
@@ -38,6 +46,34 @@ export class PanelSystem extends createSystem({}) {
     this.cleanupFuncs.push(
       () => button.removeEventListener('click', toggle),
       onLanguageChange(updateLabel),
+    );
+  }
+
+  private initReadAloudButton(panel: UIKitMLAsset): void {
+    const button = panel.getElementById('read-aloud-button');
+    const label = panel.getElementById('read-aloud-label');
+    if (button == null || label == null) {
+      return;
+    }
+    // One button cycles Off, Slow, Normal and Fast. The bank is English
+    // first, so the English voice decides whether this device can read at
+    // all; the label doubles as that on-device check.
+    const updateLabel = () =>
+      label.setProperties({
+        text: hasVoice('en')
+          ? t(`readAloud.${readAloudSpeed()}`)
+          : t('readAloud.noVoice'),
+      });
+    const toggle = () => {
+      setReadAloudSpeed(nextReadAloudSpeed(readAloudSpeed()));
+      updateLabel();
+    };
+    updateLabel();
+    button.addEventListener('click', toggle);
+    this.cleanupFuncs.push(
+      () => button.removeEventListener('click', toggle),
+      onLanguageChange(updateLabel),
+      onVoicesChanged(updateLabel),
     );
   }
 

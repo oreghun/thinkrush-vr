@@ -102,6 +102,12 @@
     <div id="puzzle-status" class="status">...</div>
     <div id="puzzle-detail" class="detail">...</div>
   </div>
+  <Button id="puzzle-read" class="button">
+    <ButtonIcon>
+      <Volume2></Volume2>
+    </ButtonIcon>
+    <ButtonLabel id="puzzle-read-label" class="button-label">...</ButtonLabel>
+  </Button>
   <Button id="puzzle-category" class="button">
     <ButtonIcon>
       <Layers></Layers>

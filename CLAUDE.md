@@ -92,13 +92,14 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-30, PRs 1-17 merged plus the visual-clues PR (6 answer orbs;
+As of 2026-10-30, PRs 1-18 merged plus the read-aloud PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
 Swahili methali drafts kept aside, the indigo/turquoise studio palette with
 category accents, code-built miniatures on the visual tiles, and the
-"Choose your world" hub; then clue-style visual prompts and word tiles):
+"Choose your world" hub; 18 clue-style visual prompts and word tiles; then
+read-aloud in place of voice recognition):
 
 Live on main
 
@@ -139,10 +140,18 @@ Live on main
   moves only the panel), and we deliberately do not rotate the world in VR.
   The run clock ticks on flat pages too (practice stays VR-only); only a
   blurred XR session pauses everything.
-- Voice: on-device-only Web Speech wrapper (src/voice.ts) and a voice check
-  panel. Desktop Chrome verified: English downloads then recognizes
-  on-device; Swahili (sw-KE) is unavailable in Chrome. Quest Browser still
-  untested - the owner runs "Check this device" on the headset and reports.
+- Read aloud (src/read-aloud.ts): each new puzzle's prompt (plus the
+  mafumbo question) is read with speechSynthesis, one utterance per
+  sentence, using on-device voices only (localService); online voices are
+  never used. Welcome panel button cycles Off/Slow/Normal/Fast (rates 0.8,
+  1, 1.25; saved as thinkrush.readAloud) and says "No voice on this device"
+  when there is no local English voice. Puzzle panel "Read it out" reads on
+  demand. Entering VR reads the current puzzle (browsers need a user
+  gesture before speech); a blurred session pauses speech; solving and the
+  run summary stop it. Speech recognition, the voice check panel and
+  answer matching were removed (git history has them). Quest Browser voice
+  availability still untested: the owner checks the welcome panel label on
+  the headset.
 
 Decisions
 
@@ -170,7 +179,7 @@ Decisions
   on-device recognition may be missing on Quest). Instead the game reads
   each question aloud with an on-device voice only, and the player answers
   with the tiles or orbs as usual. This replaces "Answers: by voice" in
-  Game design above. The read-aloud PR also retires the voice check panel.
+  Game design above; the player can set the reading pace.
 - Mafumbo stories are long for a headset: plan for RUSH to reveal them in
   two or three beats. Owner may rework options so the correct answer is not
   always the longest.
@@ -195,7 +204,7 @@ Next up (in order)
 4. Palm-up pause gesture; pause when the session loses visibility.
    Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
    real Quest 3, demo video. Cut order if time runs short: leaderboard,
-   misplaced-object puzzle variant, in-game voice answers, extra puzzle count.
+   misplaced-object puzzle variant, extra puzzle count.
 
 Working notes
 
