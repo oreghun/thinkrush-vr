@@ -92,14 +92,15 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-30, PRs 1-19 merged plus the action-twist PR (6 answer orbs;
+As of 2026-10-30, PRs 1-20 merged plus the cache-fix PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
 Swahili methali drafts kept aside, the indigo/turquoise studio palette with
 category accents, code-built miniatures on the visual tiles, and the
 "Choose your world" hub; 18 clue-style visual prompts and word tiles; 19
-read-aloud in place of voice recognition; then the action twist):
+read-aloud in place of voice recognition; 20 the action twist; then
+release-tagged URLs for public files):
 
 Live on main
 
@@ -224,6 +225,12 @@ Working notes
   - npm test + npm run build (content rules and the 20 MB budget included).
 - The UIKitML panels reflow, so a button's world position moves with panel
   content; query xr list-targets before aiming at it.
+- Public files keep fixed names and GitHub Pages lets browsers reuse them
+  for 10 minutes, so production builds fetch the scene and every manifest
+  URL with ?v=<commit> (src/build-id.ts, __BUILD_ID__ defined in
+  vite.config.ts). Without it, a reload right after a deploy paired new
+  code with the old scene ("asset voice-check is not declared"). A new
+  public file must go through publicAssetUrl or withBuildId.
 - Script edits must assert their match: one silent no-op left MovablePanel
   out of components.ts and every scene load failed with "not present in the
   active component catalog". Components must be declared in system-free
