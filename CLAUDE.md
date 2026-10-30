@@ -123,7 +123,7 @@ Live on main
   footprint, fingerprint, tyre track) shows as a word on the tile's slab
   instead. tests/tile-models.test.ts fails if a puzzle's answer is the only
   word among miniatures or the only miniature among words. Miniatures scale
-  so their longest side is 8.5 cm, and every tile carries the same wooden
+  so their longest side is 10 cm, and every tile carries the same wooden
   display stand (display-stand asset, 15.6 x 11.6 x 2.2 cm, origin bottom
   centre, +Z to the player), picked up with it; word cards stand set into
   it. The stand is now the owner's Meshy model (public/models/display-stand.glb,
