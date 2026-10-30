@@ -1,4 +1,5 @@
 import {
+  AssetManager,
   AudioUtils,
   createSystem,
   type Entity,
@@ -43,8 +44,8 @@ import {
   stopSpeaking,
 } from './read-aloud.js';
 import {
-  createDisplayStand,
-  STAND_HEIGHT,
+  builtStand,
+  fitImportedStand,
 } from './scene-assets/display-stand.scene-asset.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 
@@ -140,6 +141,8 @@ export class PuzzleSystem extends createSystem({
 }) {
   private puzzle?: Puzzle;
   private isVisual = true;
+  // Height above the table where objects rest on the display stand.
+  private standSeat = 0;
   // Set when a "Read it out" press found no on-device voice, until the next
   // puzzle; the button then says so.
   private noVoice = false;
@@ -235,10 +238,13 @@ export class PuzzleSystem extends createSystem({
       this.tileRotations[slot] = tile.object3D!.quaternion.clone();
       this.tileLabels[slot] = findUIKitML(tile);
       // Every choice sits on the same display stand, picked up with it;
-      // a word card stands set into the stand's top.
-      const stand = createDisplayStand();
-      stand.position.y = TILE_FLOOR_Y;
-      tile.object3D!.add(stand);
+      // a word card stands set into the stand's top. The imported stand
+      // when it loaded, else the code-built one.
+      const imported = AssetManager.getGLTF('display-stand')?.scene;
+      const stand = imported ? fitImportedStand(imported) : builtStand();
+      stand.object.position.y = TILE_FLOOR_Y;
+      tile.object3D!.add(stand.object);
+      this.standSeat = stand.seatHeight;
       // Each round either hides the printed slab behind a miniature (the
       // tile stays the grabbable hit target) or shows the word on it.
       if (this.tileLabels[slot]) this.tileLabels[slot]!.visible = false;
@@ -520,7 +526,7 @@ export class PuzzleSystem extends createSystem({
         this.isVisual && label ? createPuzzleObject(label) : undefined;
       if (model) {
         // On top of the stand, while the tile's slab remains invisible.
-        model.position.set(0, TILE_FLOOR_Y + STAND_HEIGHT, 0);
+        model.position.set(0, TILE_FLOOR_Y + this.standSeat, 0);
         tile.object3D!.add(model);
         this.tileModels[slot] = model;
       }

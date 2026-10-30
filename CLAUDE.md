@@ -16,8 +16,10 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 - Performance: at least 60 fps on Quest 3. Low-poly models, few draw calls,
   simple lighting, small compressed textures. Total build target under 20 MB.
 - Language: English primary. Any Swahili text must show English subtitles.
-- Originality: only code-generated assets or CC0 assets. No CC-BY or other
-  attribution-required assets.
+- Originality: only code-generated assets, CC0 assets, or assets the owner
+  generated on a plan that grants ownership (e.g. Meshy's paid plans), each
+  listed in art/SOURCES.md. No CC-BY or other attribution-required assets
+  (Meshy's free plan is CC BY 4.0).
 - No real people, brand names, logos, trademarks, or characters/quotes from films or TV.
 - Free to play: no ads, payments, analytics, or external AI services at the core.
 - The deadline is Nov 18, 2026, 12:00 PST. Nothing can change after that.
@@ -92,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-30, PRs 1-21 merged plus the display-stands PR (6 answer orbs;
+As of 2026-10-30, PRs 1-22 merged plus the imported-stand PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -100,8 +102,8 @@ Swahili methali drafts kept aside, the indigo/turquoise studio palette with
 category accents, code-built miniatures on the visual tiles, and the
 "Choose your world" hub; 18 clue-style visual prompts and word tiles; 19
 read-aloud in place of voice recognition; 20 the action twist; 21
-release-tagged URLs for public files; then display stands for the visual
-choices):
+release-tagged URLs for public files; 22 display stands for the visual
+choices; then the owner's Meshy stand replacing the code-built one):
 
 Live on main
 
@@ -123,8 +125,10 @@ Live on main
   so their longest side is 8.5 cm, and every tile carries the same wooden
   display stand (display-stand asset, 15.6 x 11.6 x 2.2 cm, origin bottom
   centre, +Z to the player), picked up with it; word cards stand set into
-  it. The stand is the first candidate for an imported model: keep that
-  origin and envelope when swapping it.
+  it. The stand is now the owner's Meshy model (public/models/display-stand.glb,
+  loaded as a critical manifest asset, fitted to 15.6 cm wide at runtime;
+  objects rest on its tray floor at 92% of its height). If it fails to load,
+  the code-built stand (builtStand) takes its place.
 - Action twist (src/moves.ts, PuzzleBoard.move): each visual puzzle asks
   for a move with your pick, shown as the panel's instruction line and read
   aloud: DROP it on the tray, FLIP it over (released upside down, anywhere),
@@ -199,6 +203,12 @@ Decisions
   each question aloud with an on-device voice only, and the player answers
   with the tiles or orbs as usual. This replaces "Answers: by voice" in
   Game design above; the player can set the reading pace.
+- AI-made models (owner, 2026-10-30): allowed when the owner generates them
+  on a plan that grants ownership. Pipeline: owner uploads to art/incoming/;
+  scripts/optimize-model.mjs writes the game copy to public/models/
+  (textures <= 1024 px JPEG, a flat roughness map becomes factors); the
+  originals move to art/source/ with a row in art/SOURCES.md. Ask for about
+  5,000 triangles (Meshy remesh) and low-profile shapes for table props.
 - Mafumbo stories are long for a headset: plan for RUSH to reveal them in
   two or three beats. Owner may rework options so the correct answer is not
   always the longest.
@@ -208,10 +218,8 @@ Open questions (owner deciding, 2026-10-30)
 - Action twist follow-ups: moves for the answer orbs, and a "hold it up to
   RUSH" variant once RUSH exists.
 
-- AI-made models (image tool, then Meshy image-to-3D) for the tiles and a
-  few set pieces. Needs the asset rule above changed first; Meshy's free
-  plan is CC BY 4.0 (attribution), its paid plans grant ownership. Every
-  import goes through an optimize step and a per-model size budget.
+- More AI-made models: the miniatures themselves and a few set pieces,
+  following the stand's pipeline below.
 
 Next up (in order)
 
