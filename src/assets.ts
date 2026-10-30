@@ -8,6 +8,11 @@
 import { AssetType, defineAssets } from '@iwsdk/core';
 import { withBuildId } from './build-id.js';
 import {
+  IMPORTED_OBJECTS,
+  objectAssetId,
+  objectFile,
+} from './imported-objects.js';
+import {
   createGallerySet,
   createSideboardSet,
 } from './scene-assets/decor.scene-asset.js';
@@ -49,6 +54,19 @@ export default defineAssets({
   },
   'answer-orb': createAnswerOrb(),
   'panel-handle': createPanelHandle(),
+  // Loaded in the background so the game starts fast; a miniature still
+  // loading shows its code-built version for that round.
+  ...Object.fromEntries(
+    IMPORTED_OBJECTS.map((model) => [
+      objectAssetId(model),
+      {
+        url: publicAssetUrl(objectFile(model)),
+        type: AssetType.GLTF,
+        priority: 'background' as const,
+        name: `Object: ${model}`,
+      },
+    ]),
+  ),
   'welcome-panel': uikitml('welcome.uikitml', 'Welcome Panel'),
   'puzzle-panel': uikitml('puzzle-panel.uikitml', 'Puzzle Panel'),
   'tile-label': uikitml('tile-label.uikitml', 'Tile Label'),

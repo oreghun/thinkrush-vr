@@ -8,6 +8,7 @@ import {
   MeshStandardMaterial,
   SphereGeometry,
   TorusGeometry,
+  type Object3D,
   Vector3,
 } from '@iwsdk/core';
 import { type TileModel, tileModelFor } from '../tile-models.js';
@@ -265,12 +266,22 @@ const BUILDERS: Record<TileModel, (root: Group) => void> = {
  * object itself is the visible answer target; the tile mesh is hidden by
  * PuzzleSystem.
  */
-export function createPuzzleObject(label: string): Group | undefined {
+export function createPuzzleObject(
+  label: string,
+  imported?: Object3D,
+): Group | undefined {
   const model = tileModelFor(label);
   if (!model) return undefined;
   const root = new Group();
   root.name = 'puzzle-object:' + label;
-  BUILDERS[model](root);
+  if (imported) {
+    // An imported model's geometry is shared with the loaded asset, so
+    // disposePuzzleObject must leave it alone.
+    root.add(imported);
+    root.userData.imported = true;
+  } else {
+    BUILDERS[model](root);
+  }
 
   root.updateMatrixWorld(true);
   const bounds = new Box3().setFromObject(root);
@@ -288,6 +299,10 @@ export function createPuzzleObject(label: string): Group | undefined {
   return root;
 }
 export function disposePuzzleObject(root: Group): void {
+  if (root.userData.imported) {
+    root.clear();
+    return;
+  }
   root.traverse((object) => {
     const part = object as Mesh;
     if (part.isMesh) part.geometry.dispose();

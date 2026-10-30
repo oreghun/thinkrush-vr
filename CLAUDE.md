@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-30, PRs 1-22 merged plus the imported-stand PR (6 answer orbs;
+As of 2026-10-30, PRs 1-23 merged plus the imported-objects PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -103,7 +103,8 @@ category accents, code-built miniatures on the visual tiles, and the
 "Choose your world" hub; 18 clue-style visual prompts and word tiles; 19
 read-aloud in place of voice recognition; 20 the action twist; 21
 release-tagged URLs for public files; 22 display stands for the visual
-choices; then the owner's Meshy stand replacing the code-built one):
+choices; 23 the owner's Meshy stand replacing the code-built one; then
+the first Meshy miniatures, for the wind puzzle):
 
 Live on main
 
@@ -129,6 +130,13 @@ Live on main
   loaded as a critical manifest asset, fitted to 15.6 cm wide at runtime;
   objects rest on its tray floor at 92% of its height). If it fails to load,
   the code-built stand (builtStand) takes its place.
+- Imported miniatures: src/imported-objects.ts lists the tile models that
+  have an owner-made model in public/models/objects/ (kite, sail,
+  parachute, umbrella so far). They load with background priority so the
+  game starts fast; until one has loaded, its code-built version shows.
+  tests/imported-objects.test.ts fails if a listed model has no optimized
+  file or no row in art/SOURCES.md. Object textures are 512 px (28 objects
+  at 1024 px would cost ~150 MB of GPU memory once all were seen).
 - Action twist (src/moves.ts, PuzzleBoard.move): each visual puzzle asks
   for a move with your pick, shown as the panel's instruction line and read
   aloud: DROP it on the tray, FLIP it over (released upside down, anywhere),
@@ -218,8 +226,12 @@ Open questions (owner deciding, 2026-10-30)
 - Action twist follow-ups: moves for the answer orbs, and a "hold it up to
   RUSH" variant once RUSH exists.
 
-- More AI-made models: the miniatures themselves and a few set pieces,
-  following the stand's pipeline below.
+- More AI-made models: batches 2-6 of the miniatures (prompts were given
+  in chat: one ChatGPT style message, then one subject line per object;
+  Meshy remesh to ~3,000 triangles, symmetry off for asymmetric objects).
+  To add one: optimize it to public/models/objects/<model>.glb with
+  --max-texture 512, add its TileModel to IMPORTED_OBJECTS, add its row
+  to art/SOURCES.md.
 
 Next up (in order)
 
