@@ -37,9 +37,11 @@ const materials = {
   red: new MeshStandardMaterial({ color: '#C84F46', roughness: 0.65 }),
 };
 
-// Longest side of every miniature, in metres: fits on the display stand's
-// top (0.142 x 0.102 m) with a margin.
-const OBJECT_SIZE = 0.085;
+// Longest side of every miniature, in metres (owner, 2026-10-30: 10 cm
+// read better than 8.5 cm). It fits within the display stand's tray,
+// about 15.6 x 12.5 cm for the imported stand and 14.2 x 10.2 cm for the
+// code-built one.
+const OBJECT_SIZE = 0.1;
 
 function add(
   root: Group,
