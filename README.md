@@ -17,10 +17,13 @@ tracking turned on in the headset's settings, put the controllers down and the
 game switches to your hands. On a computer, the same link shows a 3D preview
 you can click around in.
 
-> Status: 30 English draft puzzles are playable, one at a time: ten visual
-> puzzles, ten riddles, and ten mafumbo stories. Visual puzzles use the four
-> tiles and the tray; riddles and mafumbo use three answer orbs you point at
-> and pinch. Ten Swahili methali drafts are kept separately in
+> Status: 40 English draft puzzles are playable, one at a time: ten each of
+> visual puzzles, riddles, proverbs and mafumbo stories. A visual puzzle
+> puts four objects on the table under a clue such as "Three of these let
+> you in. Which one keeps you out?", and you drop the one it points to on
+> the tray. The objects are built in code; abstract ones, like a password,
+> appear as a word. Riddles, proverbs and mafumbo use three answer orbs you
+> point at and pinch. Ten Swahili methali drafts are kept separately in
 > `content/methali-drafts.json` for fluent-language review and are not loaded
 > into gameplay yet. Next puzzle (always available) steps through the bank, and a
 > Category button narrows browsing and runs to one puzzle type. The
@@ -178,6 +181,7 @@ src/puzzle.ts             gameplay: tiles, tray, answer orbs, timer, progression
 src/movable-panel.ts      panels hang from grab bars and can be re-placed
 src/screen-look.ts        drag-to-look camera for flat screens
 src/puzzles.ts            typed access to content/puzzles.json
+src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/voice.ts              on-device-only speech recognition
 src/answer-match.ts       spoken-answer matching (tests in tests/)
 src/voice-check.ts        the voice check panel

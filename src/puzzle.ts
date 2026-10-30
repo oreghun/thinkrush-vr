@@ -180,7 +180,8 @@ export class PuzzleSystem extends createSystem({
       this.tileHomes[slot] = tile.object3D!.position.clone();
       this.tileRotations[slot] = tile.object3D!.quaternion.clone();
       this.tileLabels[slot] = findUIKitML(tile);
-      // Keep the tile as a grabbable hit target, but hide its printed slab.
+      // Each round either hides the printed slab behind a miniature (the
+      // tile stays the grabbable hit target) or shows the word on it.
       if (this.tileLabels[slot]) this.tileLabels[slot]!.visible = false;
       const tileMesh = tile.object3D;
       if (tileMesh instanceof Mesh) {
@@ -416,25 +417,27 @@ export class PuzzleSystem extends createSystem({
     this.tileBySlot.forEach((tile, slot) => {
       const label = tileLabels[slot] ?? '';
       tile.setValue(PuzzleTile, 'correct', label === puzzle.answer);
-      // Names remain in the puzzle data for answer matching, but never appear
-      // on the table. Each visible tile gets a low-poly object miniature.
-      this.tileLabels[slot]
-        ?.getElementById('tile-text')
-        ?.setProperties({ text: '' });
       const previousModel = this.tileModels[slot];
       if (previousModel) {
         tile.object3D!.remove(previousModel);
         disposePuzzleObject(previousModel);
         this.tileModels[slot] = undefined;
       }
-      if (this.isVisual && label) {
-        const model = createPuzzleObject(label);
+      // A tile shows a low-poly miniature when its label has one, and
+      // otherwise the word printed on the slab.
+      const model =
+        this.isVisual && label ? createPuzzleObject(label) : undefined;
+      if (model) {
         // The tile origin is its centre; keep the miniature on the table
         // while the tile's dark slab remains invisible.
         model.position.set(0, -0.044, 0);
         tile.object3D!.add(model);
         this.tileModels[slot] = model;
       }
+      this.showSlab(slot, !model);
+      this.tileLabels[slot]
+        ?.getElementById('tile-text')
+        ?.setProperties({ text: model ? '' : label });
       this.place(tile, this.tileHomes[slot], this.isVisual);
       tile.object3D!.quaternion.copy(this.tileRotations[slot]);
     });
@@ -549,6 +552,17 @@ export class PuzzleSystem extends createSystem({
         entry.role === 'floor' ? theme.floor : theme.stage,
       );
     }
+  }
+
+  /** Shows a tile's slab and printed word, or hides both for a miniature. */
+  private showSlab(slot: number, visible: boolean): void {
+    const tileMesh = this.tileBySlot[slot]?.object3D;
+    const material = visible
+      ? this.tileBaseMaterials[slot]
+      : this.tileHiddenMaterials[slot];
+    if (tileMesh instanceof Mesh && material) tileMesh.material = material;
+    const label = this.tileLabels[slot];
+    if (label) label.visible = visible;
   }
 
   /** The Category button: next non-empty category, All always included. */
@@ -782,9 +796,10 @@ export class PuzzleSystem extends createSystem({
     this.elements.category?.setProperties({
       display: mode === PuzzleMode.Practice ? 'flex' : 'none',
     });
+    // The button face is light, so its label keeps the kit's dark text: the
+    // bright category accents are only readable on the dark panel itself.
     this.elements.categoryLabel?.setProperties({
       text: `${t('puzzle.category')}: ${t(CATEGORY_LABEL_KEYS[this.category()])}`,
-      color: CATEGORY_ACCENTS[this.category()],
     });
     this.elements.score?.setProperties({
       text: `${t('puzzle.score')}: ${score}`,

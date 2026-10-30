@@ -92,27 +92,37 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-29, PRs 1-10 merged (6 answer orbs; 7 Next always visible on
-the desktop page, where tiles need hands; 8 movable panels and drag-to-look;
-9 the 3-minute run loop; 10 the category picker, the run clock ticking on
-flat pages, the puzzle panel raised clear of the orbs, and look-drag gated
-to empty space):
+As of 2026-10-30, PRs 1-17 merged plus the visual-clues PR (6 answer orbs;
+7 Next always visible on the desktop page, where tiles need hands; 8 movable
+panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
+desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
+Swahili methali drafts kept aside, the indigo/turquoise studio palette with
+category accents, code-built miniatures on the visual tiles, and the
+"Choose your world" hub; then clue-style visual prompts and word tiles):
 
 Live on main
 
 - Foundation: IWSDK 1.1.0-rc.2 scaffold, Pages deploy on every push to main,
-  en/sw i18n behind t(key), content/puzzles.json (21 English drafts) with
-  validators wired into every build.
+  en/sw i18n behind t(key), content/puzzles.json (40 English drafts,
+  ten per type) with validators wired into every build. Ten Swahili methali
+  drafts wait in content/methali-drafts.json and are not loaded yet.
 - Playable: every puzzle in the bank, one at a time. Visual puzzles use the
   four grabbable tiles and the tray; riddles/proverbs/mafumbo use the three
   answer orbs; "Next puzzle" steps through the bank and wraps. The unused
   set (tiles or orbs) stows below the floor. 60 s timer runs only while the
   XR session is visible.
+- Visual tiles show code-built low-poly miniatures
+  (src/scene-assets/object-options.scene-asset.ts), picked by label in
+  src/tile-models.ts. A label with no miniature (password, shadow,
+  footprint, fingerprint, tyre track) shows as a word on the tile's slab
+  instead. tests/tile-models.test.ts fails if a puzzle's answer is the only
+  word among miniatures or the only miniature among words.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - Category button on the puzzle panel (practice only): cycles All plus each
-  puzzle type that has content (empty ones are skipped, so Proverbs hides
-  until methali arrive); filters practice Next and the draw order of runs.
+  puzzle type that has content (empty ones are skipped); filters practice
+  Next and the draw order of runs. The welcome panel's "Choose your world"
+  buttons pick a category directly and tint the floor and stage for it.
   Pure logic in src/categories.ts with unit tests. Switching keeps the
   current puzzle when it already fits the category.
 - Run mode: Start a 3-minute run draws from the chosen category, shuffled,
@@ -150,9 +160,29 @@ Decisions
 - Competition strategy: polish two mechanics (patterns + orbs) over adding
   more; RUSH is the demo video's face; verify with iwsdk-glasses-test and
   claim Meta VR Glasses readiness; keep the first 60 seconds tutorial-free.
+- Visual clue style: the prompt points at the answer from an angle ("Three
+  of these let you in. Which one keeps you out?") and never names it
+  outright; easy puzzles state the shared link plainly, harder ones use a
+  riddle-style clue. Prompts carry no action verb (grab means pinch in VR
+  and click on a screen); the panel's instruction line says how to answer.
+  Each hint goes one step closer than its clue.
 - Mafumbo stories are long for a headset: plan for RUSH to reveal them in
   two or three beats. Owner may rework options so the correct answer is not
   always the longest.
+
+Open questions (owner deciding, 2026-10-30)
+
+- Action twist: the clue names an action (drop on the tray, flip over, hold
+  up to RUSH) and the right object with the wrong action fails with "Right
+  answer, wrong move". Proposed with the action drawn by the game rather
+  than written into each puzzle.
+- AI-made models (image tool, then Meshy image-to-3D) for the tiles and a
+  few set pieces. Needs the asset rule above changed first; Meshy's free
+  plan is CC BY 4.0 (attribution), its paid plans grant ownership. Every
+  import goes through an optimize step and a per-model size budget.
+- Voice: proposed to drop spoken answers from v1 (accents, and on-device
+  recognition may be missing on Quest) and instead have the game read
+  each question aloud with an on-device voice.
 
 Next up (in order)
 
