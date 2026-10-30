@@ -1,7 +1,8 @@
 // Makes an imported model (for example from Meshy) light enough for the
 // headset: shrinks every texture to at most --max-texture pixels, stores
-// colour maps as JPEG, and can replace a nearly uniform metallic-roughness
-// map with plain factors. Geometry is copied unchanged.
+// colour maps as JPEG and data maps (metal/roughness, normals, occlusion)
+// as lossless PNG, and can replace a nearly uniform metallic-roughness map
+// with plain factors. Geometry is copied unchanged.
 //
 //   node scripts/optimize-model.mjs <in.glb> <out.glb> \
 //     [--max-texture 1024] [--flat-roughness 0.55]
@@ -53,15 +54,29 @@ if (flatRoughness !== undefined) {
 
 // Drop textures and images no material uses any more, renumbering the rest.
 const textureSlots = [];
+// Textures holding data rather than colour: JPEG would bleed one channel
+// into the next (metal into roughness), so these stay lossless.
+const dataTextures = new Set();
+const DATA_SLOTS = [
+  'metallicRoughnessTexture',
+  'normalTexture',
+  'occlusionTexture',
+];
 for (const material of gltf.materials ?? []) {
   for (const holder of [material, material.pbrMetallicRoughness ?? {}]) {
     for (const [key, value] of Object.entries(holder)) {
       if (key.endsWith('Texture') && typeof value?.index === 'number') {
         textureSlots.push(value);
+        if (DATA_SLOTS.includes(key)) {
+          dataTextures.add(value.index);
+        }
       }
     }
   }
 }
+const dataImages = new Set(
+  [...dataTextures].map((index) => gltf.textures[index].source),
+);
 const keptTextures = [...new Set(textureSlots.map((slot) => slot.index))];
 const keptImages = [
   ...new Set(keptTextures.map((index) => gltf.textures[index].source)),
@@ -76,9 +91,10 @@ gltf.textures = keptTextures.map((index) => ({
 const images = keptImages.map((index) => gltf.images[index]);
 
 // Re-encode each kept image: at most maxTexture pixels a side, JPEG unless
-// it needs transparency.
+// it holds data or needs transparency.
 const encoded = new Map();
-for (const image of images) {
+for (const [position, image] of images.entries()) {
+  const lossless = dataImages.has(keptImages[position]);
   const source = viewBytes(gltf.bufferViews[image.bufferView]);
   const picture = sharp(source).resize({
     width: maxTexture,
@@ -87,10 +103,11 @@ for (const image of images) {
     withoutEnlargement: true,
   });
   const { hasAlpha } = await sharp(source).metadata();
-  const bytes = hasAlpha
+  const png = lossless || hasAlpha;
+  const bytes = png
     ? await picture.png({ compressionLevel: 9 }).toBuffer()
     : await picture.jpeg({ quality: 85, mozjpeg: true }).toBuffer();
-  image.mimeType = hasAlpha ? 'image/png' : 'image/jpeg';
+  image.mimeType = png ? 'image/png' : 'image/jpeg';
   encoded.set(image.bufferView, bytes);
 }
 
