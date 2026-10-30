@@ -7,6 +7,7 @@ import {
   Material,
   Mesh,
   MeshStandardMaterial,
+  type Object3D,
   Pressed,
   Quaternion,
   type UIKitMLAsset,
@@ -48,6 +49,8 @@ import {
   fitImportedStand,
 } from './scene-assets/display-stand.scene-asset.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
+import { IMPORTED_OBJECTS, objectAssetId } from './imported-objects.js';
+import { tileModelFor } from './tile-models.js';
 
 const ROUND_SECONDS = 60;
 const RUN_SECONDS = 180;
@@ -523,10 +526,14 @@ export class PuzzleSystem extends createSystem({
       // A tile shows a low-poly miniature when its label has one, and
       // otherwise the word printed on the slab.
       const model =
-        this.isVisual && label ? createPuzzleObject(label) : undefined;
+        this.isVisual && label
+          ? createPuzzleObject(label, importedObject(label))
+          : undefined;
       if (model) {
         // On top of the stand, while the tile's slab remains invisible.
-        model.position.set(0, TILE_FLOOR_Y + this.standSeat, 0);
+        // Add to the offset createPuzzleObject set, which puts the model's
+        // base on its origin: an imported model is centred on its middle.
+        model.position.y += TILE_FLOOR_Y + this.standSeat;
         tile.object3D!.add(model);
         this.tileModels[slot] = model;
       }
@@ -1097,6 +1104,18 @@ function readBestScore(): number {
   } catch {
     return 0;
   }
+}
+
+/**
+ * A fresh copy of the owner's imported model for `label`, once its
+ * background load has finished; undefined means use the code-built one.
+ */
+function importedObject(label: string): Object3D | undefined {
+  const model = tileModelFor(label);
+  if (!model || !IMPORTED_OBJECTS.includes(model)) {
+    return undefined;
+  }
+  return AssetManager.getGLTF(objectAssetId(model))?.scene ?? undefined;
 }
 
 function readMovesSeen(): number {
