@@ -92,15 +92,16 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-30, PRs 1-20 merged plus the cache-fix PR (6 answer orbs;
+As of 2026-10-30, PRs 1-21 merged plus the display-stands PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
 Swahili methali drafts kept aside, the indigo/turquoise studio palette with
 category accents, code-built miniatures on the visual tiles, and the
 "Choose your world" hub; 18 clue-style visual prompts and word tiles; 19
-read-aloud in place of voice recognition; 20 the action twist; then
-release-tagged URLs for public files):
+read-aloud in place of voice recognition; 20 the action twist; 21
+release-tagged URLs for public files; then display stands for the visual
+choices):
 
 Live on main
 
@@ -118,7 +119,12 @@ Live on main
   src/tile-models.ts. A label with no miniature (password, shadow,
   footprint, fingerprint, tyre track) shows as a word on the tile's slab
   instead. tests/tile-models.test.ts fails if a puzzle's answer is the only
-  word among miniatures or the only miniature among words.
+  word among miniatures or the only miniature among words. Miniatures scale
+  so their longest side is 8.5 cm, and every tile carries the same wooden
+  display stand (display-stand asset, 15.6 x 11.6 x 2.2 cm, origin bottom
+  centre, +Z to the player), picked up with it; word cards stand set into
+  it. The stand is the first candidate for an imported model: keep that
+  origin and envelope when swapping it.
 - Action twist (src/moves.ts, PuzzleBoard.move): each visual puzzle asks
   for a move with your pick, shown as the panel's instruction line and read
   aloud: DROP it on the tray, FLIP it over (released upside down, anywhere),
