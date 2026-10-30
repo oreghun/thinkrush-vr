@@ -30,9 +30,9 @@ you can click around in.
 > 60-second practice timer only runs inside VR; a run's 3-minute clock also
 > ticks on the flat page, so desktop runs end properly. In VR, pinch the bar
 > under any panel (on a screen, mouse-drag it) to move the panel where you
-> like; on a flat screen, drag empty space to look around. A voice check
-> panel to the right tests whether your device can recognize speech on the
-> device itself (see "Voice input" below). Press Start a 3-minute run for a
+> like; on a flat screen, drag empty space to look around. Each new puzzle
+> is read aloud by a voice built into your device (see "Read aloud" below).
+> Press Start a 3-minute run for a
 > scored dash through shuffled puzzles: solving auto-advances, Skip costs
 > only time, points scale with difficulty, and your best score stays on your
 > device. RUSH and the pattern puzzles come next.
@@ -130,24 +130,26 @@ punctuation (straight quotes, no long dashes), because the game font has no
 other characters. `npm run validate` (and every build) checks all of this, plus
 unique ids and the `subtitle_en` rule, and names the field to fix.
 
-## Voice input
+## Read aloud
 
-Spoken answers must not go through an online service, so the game only uses
-speech recognition that runs on the device (the Web Speech API's
-`processLocally` mode), and never starts listening otherwise. Many browsers
-offer only online recognition, and the Quest Browser may have none, so the
-voice check panel answers that for your device:
+The game reads each new puzzle's question out loud; players answer by
+choosing a tile or an orb, never by speaking. It uses the browser's own
+speech synthesis (the Web Speech API) with **voices installed on the device
+only**: online voices send the text to a server, so the game skips them.
 
-1. Press **Check this device**. It shows, for English and Swahili, one of:
-   ready, can be downloaded, not available, only online recognition (not
-   used), or no speech recognition at all.
-2. If English can be downloaded, press **Download English speech**.
-3. Once English is ready, press **Say the answer** and answer the riddle out
-   loud. The panel shows what it heard and whether that matches.
+- The welcome panel's **Read aloud** button cycles Off, Slow, Normal and
+  Fast. The choice is saved in the browser. If it says **No voice on this
+  device**, the device has no built-in English voice and the game stays
+  quiet; the text is always on screen either way.
+- **Read it out** on the puzzle panel reads the current question again,
+  even with automatic reading off.
+- Reading pauses when the headset is taken off or a system menu opens, and
+  stops when the puzzle is solved.
+- Swahili puzzles are read only where the device has a Swahili voice.
 
-Answers match the CLAUDE.md rule: the answer or an `accepted` answer,
-ignoring case, punctuation and "a", "an", "the". Orbs stay available either
-way, so voice is never required.
+Browsers only allow speech after the first tap or click, so on a flat page
+the first puzzle is read once you interact; in VR, entering the headset
+reads the current puzzle.
 
 ## Project rules
 
@@ -182,9 +184,7 @@ src/movable-panel.ts      panels hang from grab bars and can be re-placed
 src/screen-look.ts        drag-to-look camera for flat screens
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
-src/voice.ts              on-device-only speech recognition
-src/answer-match.ts       spoken-answer matching (tests in tests/)
-src/voice-check.ts        the voice check panel
+src/read-aloud.ts         reads puzzles aloud with on-device voices only
 src/assets.ts             asset manifest; models are built in src/scene-assets/
 scripts/                  content check, build size check, chime generator
 iwsdk.config.json         IWSDK settings: XR mode, hand tracking, features

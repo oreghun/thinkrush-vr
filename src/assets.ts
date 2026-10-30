@@ -44,5 +44,4 @@ export default defineAssets({
   'puzzle-panel': uikitml('puzzle-panel.uikitml', 'Puzzle Panel'),
   'tile-label': uikitml('tile-label.uikitml', 'Tile Label'),
   'orb-label': uikitml('orb-label.uikitml', 'Orb Label'),
-  'voice-check': uikitml('voice-check.uikitml', 'Voice Check'),
 });

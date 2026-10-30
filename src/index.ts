@@ -12,7 +12,6 @@ import { installCodeInputVisuals } from './input-visuals.js';
 import { MovablePanelSystem } from './movable-panel.js';
 import { PanelSystem } from './panel.js';
 import { UITextSystem } from './ui-text.js';
-import { VoiceCheckSystem } from './voice-check.js';
 import { PuzzleSystem } from './puzzle.js';
 import { ScreenLookSystem } from './screen-look.js';
 
@@ -32,5 +31,4 @@ World.create(
   world.registerSystem(MovablePanelSystem);
   world.registerSystem(ScreenLookSystem);
   world.registerSystem(PuzzleSystem);
-  world.registerSystem(VoiceCheckSystem);
 });

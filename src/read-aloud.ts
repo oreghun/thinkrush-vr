@@ -1,0 +1,181 @@
+// Reads puzzle text aloud with the browser's speech synthesis, using only
+// voices that run on the device: an online voice would send the text to a
+// server, which the competition rules rule out. Players never answer by
+// voice; they listen, then choose a tile or an orb.
+//
+// No runtime imports, so Node's test runner can load the pure helpers.
+
+/** The parts of a voice that decide whether, and which, we use. */
+export type VoiceInfo = Pick<
+  SpeechSynthesisVoice,
+  'lang' | 'localService' | 'default'
+>;
+
+/**
+ * The index of the on-device voice for `language` ("en", "sw"), or -1 when
+ * there is none. The device's default voice wins among the matches.
+ */
+export function pickVoice(
+  voices: readonly VoiceInfo[],
+  language: string,
+): number {
+  let best = -1;
+  voices.forEach((voice, index) => {
+    const base = voice.lang.toLowerCase().split(/[-_]/u)[0];
+    if (!voice.localService || base !== language) {
+      return;
+    }
+    if (best === -1 || (voice.default && !voices[best].default)) {
+      best = index;
+    }
+  });
+  return best;
+}
+
+/**
+ * Splits text into sentences, each read as its own utterance: some browsers
+ * cut a long utterance off part-way, and a mafumbo story is long.
+ */
+export function sentences(text: string): string[] {
+  return (text.match(/[^.!?]+(?:[.!?]+["')]*|$)/gu) ?? [])
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length > 0);
+}
+
+/** The read-aloud setting: off, or the pace the puzzles are read at. */
+export const READ_ALOUD_SPEEDS = ['off', 'slow', 'normal', 'fast'] as const;
+export type ReadAloudSpeed = (typeof READ_ALOUD_SPEEDS)[number];
+
+// Speech rate per pace: 1 is the voice's own speed. Slow helps a player
+// who is still learning English; fast suits a quick run.
+const RATES: Record<Exclude<ReadAloudSpeed, 'off'>, number> = {
+  slow: 0.8,
+  normal: 1,
+  fast: 1.25,
+};
+
+/** The setting after `speed` on the welcome panel's single button. */
+export function nextReadAloudSpeed(speed: ReadAloudSpeed): ReadAloudSpeed {
+  return READ_ALOUD_SPEEDS[
+    (READ_ALOUD_SPEEDS.indexOf(speed) + 1) % READ_ALOUD_SPEEDS.length
+  ];
+}
+
+const STORAGE_KEY = 'thinkrush.readAloud';
+
+let speed = loadSpeed();
+let pending: { text: string; language: string } | undefined;
+
+function synth(): SpeechSynthesis | undefined {
+  return typeof speechSynthesis === 'undefined' ? undefined : speechSynthesis;
+}
+
+function loadSpeed(): ReadAloudSpeed {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (READ_ALOUD_SPEEDS.includes(saved as ReadAloudSpeed)) {
+      return saved as ReadAloudSpeed;
+    }
+  } catch {
+    // Fall through to the default.
+  }
+  return 'normal';
+}
+
+export function readAloudSpeed(): ReadAloudSpeed {
+  return speed;
+}
+
+/** Whether each new puzzle is read out on its own. On unless turned off. */
+export function isReadAloudOn(): boolean {
+  return speed !== 'off';
+}
+
+export function setReadAloudSpeed(next: ReadAloudSpeed): void {
+  speed = next;
+  try {
+    localStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    // Storage can be blocked (private mode); the choice then lasts this visit.
+  }
+  if (next === 'off') {
+    stopSpeaking();
+  }
+}
+
+function voiceFor(language: string): SpeechSynthesisVoice | undefined {
+  const voices = synth()?.getVoices() ?? [];
+  return voices[pickVoice(voices, language)];
+}
+
+/** Whether this device has an on-device voice for `language`. */
+export function hasVoice(language: string): boolean {
+  return voiceFor(language) !== undefined;
+}
+
+/**
+ * Reads `text` in `language`, replacing anything still being read. Returns
+ * false when there is no on-device voice for it, so nothing is said. On a
+ * fresh page the voice list can still be loading: the text is then read as
+ * soon as the voices arrive, if one of them fits.
+ */
+export function speak(text: string, language: string): boolean {
+  const speech = synth();
+  if (speech === undefined) {
+    return false;
+  }
+  speech.cancel();
+  pending = undefined;
+  if (speech.getVoices().length === 0) {
+    pending = { text, language };
+    speech.addEventListener('voiceschanged', speakPending, { once: true });
+    return false;
+  }
+  const voice = voiceFor(language);
+  if (voice === undefined) {
+    return false;
+  }
+  for (const sentence of sentences(text)) {
+    const utterance = new SpeechSynthesisUtterance(sentence);
+    utterance.voice = voice;
+    utterance.lang = voice.lang;
+    // "Read it out" still works with automatic reading off, at normal pace.
+    utterance.rate = RATES[speed === 'off' ? 'normal' : speed];
+    speech.speak(utterance);
+  }
+  return true;
+}
+
+function speakPending(): void {
+  if (pending !== undefined) {
+    speak(pending.text, pending.language);
+  }
+}
+
+export function stopSpeaking(): void {
+  pending = undefined;
+  synth()?.cancel();
+}
+
+/** Holds speech while the headset is off or a system menu is up. */
+export function pauseSpeaking(paused: boolean): void {
+  const speech = synth();
+  if (paused) {
+    speech?.pause();
+  } else {
+    speech?.resume();
+  }
+}
+
+/**
+ * Calls `listener` whenever the device's voice list changes (it loads
+ * after the page on some browsers); returns an unsubscribe function.
+ */
+export function onVoicesChanged(listener: () => void): () => void {
+  const speech = synth();
+  if (speech === undefined) {
+    return () => {};
+  }
+  speech.addEventListener('voiceschanged', listener);
+  return () => speech.removeEventListener('voiceschanged', listener);
+}

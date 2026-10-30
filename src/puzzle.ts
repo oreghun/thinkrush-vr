@@ -29,6 +29,12 @@ import {
   PuzzleTile,
 } from './puzzle-components.js';
 import { type Puzzle, PUZZLES } from './puzzles.js';
+import {
+  isReadAloudOn,
+  pauseSpeaking,
+  speak,
+  stopSpeaking,
+} from './read-aloud.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 
 const ROUND_SECONDS = 60;
@@ -104,6 +110,10 @@ export class PuzzleSystem extends createSystem({
 }) {
   private puzzle?: Puzzle;
   private isVisual = true;
+  // Set when a "Read it out" press found no on-device voice, until the next
+  // puzzle; the button then says so.
+  private noVoice = false;
+  private lastVisibility: VisibilityState = VisibilityState.NonImmersive;
   private board?: Entity;
   private tray?: Entity;
   private readonly tileBySlot: Entity[] = [];
@@ -148,7 +158,9 @@ export class PuzzleSystem extends createSystem({
     | 'next'
     | 'nextLabel'
     | 'exit'
-    | 'exitLabel',
+    | 'exitLabel'
+    | 'read'
+    | 'readLabel',
     UIElement
   > = {
     prompt: null,
@@ -165,6 +177,8 @@ export class PuzzleSystem extends createSystem({
     nextLabel: null,
     exit: null,
     exitLabel: null,
+    read: null,
+    readLabel: null,
   };
 
   init(): void {
@@ -233,11 +247,14 @@ export class PuzzleSystem extends createSystem({
       nextLabel: panel?.getElementById('puzzle-next-label') ?? null,
       exit: panel?.getElementById('puzzle-exit') ?? null,
       exitLabel: panel?.getElementById('puzzle-exit-label') ?? null,
+      read: panel?.getElementById('puzzle-read') ?? null,
+      readLabel: panel?.getElementById('puzzle-read-label') ?? null,
     };
     const next = () => this.onNextPressed();
     const run = () => this.startRun();
     const exit = () => this.exitToPractice();
     const category = () => this.cycleCategory();
+    const read = () => this.readPuzzle(true);
 
     // The welcome hub offers direct entry into each puzzle world. Selecting
     // a world filters both practice browsing and the three-minute run draw.
@@ -269,6 +286,7 @@ export class PuzzleSystem extends createSystem({
     this.elements.run?.addEventListener('click', run);
     this.elements.exit?.addEventListener('click', exit);
     this.elements.category?.addEventListener('click', category);
+    this.elements.read?.addEventListener('click', read);
 
     this.cleanupFuncs.push(
       () => this.tileModels.forEach((model, slot) => {
@@ -294,6 +312,20 @@ export class PuzzleSystem extends createSystem({
       () => this.elements.run?.removeEventListener('click', run),
       () => this.elements.exit?.removeEventListener('click', exit),
       () => this.elements.category?.removeEventListener('click', category),
+      () => this.elements.read?.removeEventListener('click', read),
+      // Entering VR is the first moment a headset player can hear the
+      // puzzle; a blurred session holds the voice along with the clock.
+      this.world.visibilityState.subscribe((state) => {
+        pauseSpeaking(state === VisibilityState.VisibleBlurred);
+        if (
+          state === VisibilityState.Visible &&
+          this.lastVisibility === VisibilityState.NonImmersive
+        ) {
+          this.readPuzzle(false);
+        }
+        this.lastVisibility = state;
+      }),
+      stopSpeaking,
       ...worldCleanup,
       this.queries.pressedOrbs.subscribe('qualify', (orb) => {
         this.onOrbPressed(orb);
@@ -451,7 +483,33 @@ export class PuzzleSystem extends createSystem({
       this.place(orb, this.orbHomes[slot], !this.isVisual);
       this.setOrbGlow(slot, ORB_GLOW.idle);
     });
+    this.noVoice = false;
     this.render();
+    this.readPuzzle(false);
+  }
+
+  /**
+   * Reads the puzzle aloud: on its own for each new puzzle while read-aloud
+   * is on, or whenever the player presses "Read it out". The player still
+   * answers by choosing a tile or an orb.
+   */
+  private readPuzzle(asked: boolean): void {
+    const puzzle = this.puzzle;
+    if (
+      !puzzle ||
+      this.mode() === PuzzleMode.RunOver ||
+      (!asked && !isReadAloudOn())
+    ) {
+      return;
+    }
+    const text = puzzle.question
+      ? `${puzzle.prompt} ${puzzle.question}`
+      : puzzle.prompt;
+    const spoken = speak(text, puzzle.lang);
+    if (asked) {
+      this.noVoice = !spoken;
+      this.render();
+    }
   }
 
   private onOrbPressed(orb: Entity): void {
@@ -585,6 +643,7 @@ export class PuzzleSystem extends createSystem({
   /** Marks the round solved; in a run it also scores and queues the next. */
   private onSolved(): void {
     const board = this.board!;
+    stopSpeaking();
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Solved);
     AudioUtils.play(this.tray!);
     if (this.mode() === PuzzleMode.Run && this.puzzle) {
@@ -647,6 +706,7 @@ export class PuzzleSystem extends createSystem({
   /** Ends the run and shows the summary, remembering the best score. */
   private endRun(): void {
     const board = this.board!;
+    stopSpeaking();
     this.advanceIn = 0;
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.RunOver);
     board.setValue(PuzzleBoard, 'secondsLeft', 0);
@@ -829,6 +889,12 @@ export class PuzzleSystem extends createSystem({
     });
     this.elements.exitLabel?.setProperties({
       text: t('puzzle.backToPractice'),
+    });
+    this.elements.read?.setProperties({
+      display: mode === PuzzleMode.RunOver ? 'none' : 'flex',
+    });
+    this.elements.readLabel?.setProperties({
+      text: this.noVoice ? t('readAloud.noVoice') : t('readAloud.again'),
     });
     this.shownSeconds = -1;
     this.renderTimer();
