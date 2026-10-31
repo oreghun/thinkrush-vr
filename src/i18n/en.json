@@ -81,5 +81,6 @@
   "tour.clockDetail": "I shrink and turn red as time runs out, and the music speeds up.",
   "tour.pause": "Need a break?",
   "tour.pauseDetail": "Turn a palm up and hold it to pause.",
-  "tour.done": "You're ready! Pick a world to play."
+  "tour.done": "You're ready! Pick a world to play.",
+  "readAloud.blank": "blank"
 }

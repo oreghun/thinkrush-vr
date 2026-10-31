@@ -54,6 +54,7 @@ import {
   isSpeaking,
   pauseSpeaking,
   speak,
+  speakableBlanks,
   stopSpeaking,
 } from './read-aloud.js';
 import {
@@ -863,7 +864,8 @@ export class PuzzleSystem extends createSystem({
         : puzzle.question
         ? `${puzzle.prompt} ${puzzle.question}`
         : puzzle.prompt;
-    const spoken = speak(text, puzzle.lang);
+    // A proverb's gap is said as "blank", not spelled out as underscores.
+    const spoken = speak(speakableBlanks(text, t('readAloud.blank')), puzzle.lang);
     if (asked) {
       this.noVoice = !spoken;
       this.render();

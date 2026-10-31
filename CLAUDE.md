@@ -119,7 +119,8 @@ plan; 43 Complete the object, unpredictable answer places and one pick
 per puzzle in a run; 44 the room; 45 the phone view and no projector;
 46 the music fix (superseded); 47 the sound quality pass (owner: "the
 sound is better now"); 48 the door and the horizon; 49 the band off the
-door; 50 English only for the competition; then the How to play tour):
+door; 50 English only for the competition; then the How to play tour
+and proverb gaps read as "blank"):
 
 Live on main
 
@@ -498,7 +499,8 @@ Live on main
   The run clock ticks on flat pages too (practice stays VR-only); only a
   blurred XR session pauses everything.
 - Read aloud (src/read-aloud.ts): each new puzzle's prompt (plus the
-  mafumbo question) is read with speechSynthesis, one utterance per
+  mafumbo question) is read with speechSynthesis (a "____" gap is said as
+  "blank": speakableBlanks, key readAloud.blank), one utterance per
   sentence, using on-device voices only (localService); online voices are
   never used. Home page button cycles Off/Slow/Normal/Fast (rates 0.8,
   1, 1.25; saved as thinkrush.readAloud) and says "No voice on this device"

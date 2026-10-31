@@ -165,6 +165,8 @@ The game reads each new puzzle's question out loud; players answer by
 choosing a tile or an orb, never by speaking. It uses the browser's own
 speech synthesis (the Web Speech API) with **voices installed on the device
 only**: online voices send the text to a server, so the game skips them.
+A proverb's missing word, drawn as "____" on the screen, is read as "blank"
+(read as written, voices spell out every underscore).
 
 - The home page's **Read aloud** button cycles Off, Slow, Normal and
   Fast. The choice is saved in the browser. If it says **No voice on this
