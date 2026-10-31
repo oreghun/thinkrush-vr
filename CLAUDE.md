@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-33 merged plus the room-set PR (6 answer orbs;
+As of 2026-10-31, PRs 1-34 merged plus the play-table PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -110,7 +110,8 @@ they load; 27 the keys, lock and magnet puzzles' miniatures; then the
 energy and sound puzzles' miniatures; 29 the yellow ruler and flat
 objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 32 one projected screen with home and puzzle pages; 33 beckoning it;
-then the owner's room set in the back corners):
+34 the owner's room set in the back corners; then the owner's pedestal
+table as the play table):
 
 Live on main
 
@@ -189,8 +190,17 @@ Live on main
   clay pot, a basket, a snake plant) and "cabinet-corner" (right: cabinet
   with a small pot on top, a snake plant, the stool), each piece with a
   ContactShadow node. The low table was meant to be the play table but
-  came out coffee-table height (my prompt said "low"); the play table
-  stays code-built until the owner's pedestal-table regeneration arrives.
+  came out coffee-table height (my prompt said "low"), so it dresses a
+  corner.
+- Play table: the owner's Meshy pedestal table (public/models/play-table.glb,
+  manifest id play-table, critical), optimized with --height 0.645 to
+  1.01 x 0.645 x 0.51 m at its own proportions, so its top is at 0.68 m on
+  the stage (owner wanted it no smaller; an earlier fit to the code-built
+  0.84 x 0.44 footprint needed a 20% stretch). The puzzle-table entity keeps
+  its code-built content (it carries PuzzleBoard); PuzzleSystem.useOwnersTable
+  hides the code-built pillar and top (BUILT_TABLE_PARTS) and adds the model
+  3 cm further back (OWNERS_TABLE_BACK) so its near edge stays 19 cm in
+  front of the seat; if it failed to load, the code-built table stays.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
@@ -291,7 +301,9 @@ Decisions
   originals move to art/source/ with a row in art/SOURCES.md. Ask for about
   5,000 triangles (Meshy remesh) and low-profile shapes for table props.
   --height <m> scales a model to its real height with its origin at the
-  centre of its base, so the scene places it at scale 1 (room pieces).
+  centre of its base, so the scene places it at scale 1 (room pieces);
+  --size W,H,D fits each axis exactly, stretching (for a piece that must
+  match a layout).
   Describe proportions in prompts ("about three quarters as tall as it is
   wide"): "low" gave a coffee table.
 - Mafumbo stories are long for a headset: plan for RUSH to reveal them in
@@ -317,18 +329,11 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Play table (owner regenerating as dining_table.glb): a narrow
-   rectangular pedestal table like the code-built one (top 0.84 x 0.44 m,
-   top surface at 0.68 m, one round column on a round base). Fit it to that
-   footprint and height (a little non-uniform scaling is fine), hide the
-   code-built table mesh but keep the puzzle-table entity (it carries
-   PuzzleBoard), load it as a critical asset with the code-built table as
-   the fallback, like the display stand.
-2. Pattern puzzle type (decision above).
-3. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
+1. Pattern puzzle type (decision above).
+2. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
    RUSH's reactions (RUSH itself is built).
-4. Streaks and the Daily Challenge (localStorage only).
-5. Palm-up pause gesture; pause when the session loses visibility.
+3. Streaks and the Daily Challenge (localStorage only).
+4. Palm-up pause gesture; pause when the session loses visibility.
    Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
    real Quest 3, demo video. Cut order if time runs short: leaderboard,
    misplaced-object puzzle variant, extra puzzle count.

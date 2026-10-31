@@ -82,6 +82,9 @@ const graphiteMaterial = createSceneMaterial({
   },
 });
 
+/** The code-built table's meshes, hidden when the owner's table loads. */
+export const BUILT_TABLE_PARTS = ['PuzzleTable/Pillar', 'PuzzleTable/Top'];
+
 /** Pedestal table with its origin at floor contact. */
 export function createPuzzleTable(width = 0.84, depth = 0.44): Group {
   const pillar = createScenePrimitiveObject(
@@ -116,6 +119,9 @@ export function createPuzzleTable(width = 0.84, depth = 0.44): Group {
     woodMaterial,
   );
   top.position.y = TABLE_HEIGHT - 0.0175;
+  // Named so the owner's table (play-table) can stand in for both parts.
+  pillar.name = BUILT_TABLE_PARTS[0];
+  top.name = BUILT_TABLE_PARTS[1];
   const table = new Group();
   table.add(pillar, top);
   return table;

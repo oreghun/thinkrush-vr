@@ -53,6 +53,7 @@ import {
   builtStand,
   fitImportedStand,
 } from './scene-assets/display-stand.scene-asset.js';
+import { BUILT_TABLE_PARTS } from './scene-assets/puzzle.scene-asset.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 import { IMPORTED_OBJECTS, objectAssetId } from './imported-objects.js';
 import { type TileModel, tileModelFor } from './tile-models.js';
@@ -88,6 +89,10 @@ const TRAY_REST_HEIGHT = 0.0142 + 0.045;
 // How quickly a released tile eases back home or onto the tray, per second.
 const SETTLE_RATE = 14;
 const LOW_TIME_SECONDS = 10;
+// The owner's table is 7 cm deeper than the code-built top; moving it this
+// far back keeps its near edge 19 cm in front of the seat, as before.
+const OWNERS_TABLE_BACK = 0.03;
+
 // The stowed half of the set (tiles or orbs) waits this far below its place.
 const STOW_DROP = 2.5;
 // How long a wrongly picked orb glows amber.
@@ -256,6 +261,7 @@ export class PuzzleSystem extends createSystem({
       return;
     }
 
+    this.useOwnersTable();
     for (const tile of this.queries.tiles.entities) {
       const slot = tile.getValue(PuzzleTile, 'slot') ?? 0;
       this.tileBySlot[slot] = tile;
@@ -441,6 +447,35 @@ export class PuzzleSystem extends createSystem({
         // A model that fails to load keeps its code-built stand-in.
         .catch(() => undefined);
     }
+  }
+
+  /**
+   * The owner's pedestal table stands in for the code-built one when it
+   * loaded. It arrives at its real size (1.01 x 0.645 x 0.51 m, origin at
+   * its base), so its top meets the tray and tiles at 0.68 m as the
+   * code-built top did. It is deeper than the code-built top, so it sits
+   * OWNERS_TABLE_BACK further away: its near edge stays where the old one
+   * was, clear of the player's body. If it failed to load, the code-built
+   * table stays.
+   */
+  private useOwnersTable(): void {
+    const model = AssetManager.getGLTF('play-table')?.scene;
+    const table = this.board?.object3D;
+    if (!model || !table) {
+      return;
+    }
+    for (const name of BUILT_TABLE_PARTS) {
+      const part = table.getObjectByName(name);
+      if (part) part.visible = false;
+    }
+    model.traverse((object) => {
+      if (object instanceof Mesh) {
+        object.castShadow = true;
+        object.receiveShadow = true;
+      }
+    });
+    model.position.z -= OWNERS_TABLE_BACK;
+    table.add(model);
   }
 
   update(delta: number): void {
