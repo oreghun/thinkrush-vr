@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-43 merged plus the room PR (6 answer orbs;
+As of 2026-10-31, PRs 1-44 merged plus the phone view PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -115,7 +115,7 @@ table as the play table; 36 the pattern puzzle; 37 the sound pass; 38 the
 Daily Challenge and streaks; 39 the palm-up pause; 40 the Meta VR
 Glasses check and layout; 41 the performance pass; 42 the demo video
 plan; 43 Complete the object, unpredictable answer places and one pick
-per puzzle in a run; then the room):
+per puzzle in a run; 44 the room; then the phone view):
 
 Live on main
 
@@ -366,6 +366,19 @@ Live on main
   floor. Measured in the emulator on a visual puzzle: 55 draw calls, 92k
   triangles, 29 textures, 21 programs. The renderer already uses
   multiview, 4x MSAA and full fixed foveation (IWSDK and three defaults).
+- Phone view (src/flat-view.ts FlatViewSystem, framing in
+  src/flat-framing.ts with tests): the flat page frames itself for the
+  window's shape. At 1.25:1 and wider it keeps the iwsdk.config.json view
+  exactly (a test checks they match). Narrower, the camera eases back and
+  up toward (0, 1.45, 1.1) looking at (0, 0.95, -0.7) (fully at 0.5:1)
+  and the vertical view opens just enough to keep MUST_SEE in frame: the
+  screen at its Far stop (tall home page included), RUSH, the orbs, the
+  tiles and the tray or board, with 3 degrees spare, at most 100 degrees
+  (about 72 on a 9:20 phone, 61 on 9:16). Applied at start, after every
+  resize or rotation and when VR ends, never in VR. Before, a phone held
+  upright kept the fixed 70 degree vertical view and saw about 35 degrees
+  across, cutting off the screen and the table. Checked in Chromium at
+  412 x 915: the whole home page, RUSH and the table in view.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
