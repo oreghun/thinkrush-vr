@@ -34,6 +34,9 @@ Devpost competitions use; cut the optional shots if the limit is shorter.
   for DROP. To show the move twist, play three visual puzzles first (or use
   a device that already has). Clearing the browser's site data starts the
   count over, and also clears streaks and best scores.
+- How to play: a device entering VR for the first time starts RUSH's tour.
+  Play it or press Skip tour before recording; it then waits for the home
+  page's How to play button (clearing site data brings it back too).
 - Sit in a real chair, facing forward, and keep head movement slow: viewers
   watch through your eyes, and fast turns are hard to watch.
 

@@ -71,7 +71,8 @@ export function reactionTo(
   }
   if (
     after.puzzleIndex !== before.puzzleIndex ||
-    (after.mode === 'run' && before.mode !== 'run')
+    (after.mode === 'run' && before.mode !== 'run') ||
+    (after.mode === 'tour' && before.mode !== 'tour')
   ) {
     return Reaction.Present;
   }

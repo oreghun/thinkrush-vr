@@ -165,6 +165,8 @@ The game reads each new puzzle's question out loud; players answer by
 choosing a tile or an orb, never by speaking. It uses the browser's own
 speech synthesis (the Web Speech API) with **voices installed on the device
 only**: online voices send the text to a server, so the game skips them.
+A proverb's missing word, drawn as "____" on the screen, is read as "blank"
+(read as written, voices spell out every underscore).
 
 - The home page's **Read aloud** button cycles Off, Slow, Normal and
   Fast. The choice is saved in the browser. If it says **No voice on this
@@ -190,6 +192,20 @@ Daily Challenge gives everyone the same boards, but replaying it moves the
 pieces. `tests/answer-order.test.ts` checks this over 60,000 rounds. And in
 a run (the Daily Challenge too) a wrong pick loses the puzzle, so trying
 every choice in turn doesn't pay either.
+
+## How to play
+
+The first time a device enters VR from the home page, RUSH runs a short
+tour that you play rather than read (`src/tour.ts`): pick up an object,
+drop the odd one out on the tray, point at an orb and pinch, watch RUSH
+shrink and redden as the clock (the music speeds up with it), then turn a
+palm up to pause and again to carry on. Each step waits for you to do it;
+the pause step ends on its own after 15 seconds. Every line is read aloud
+and shown on the screen, no clock runs and mistakes cost nothing. **Skip
+tour** leaves at any time. The home page's **How to play** button replays
+it; on a flat page, where there are no hands, a **Next step** button moves
+it along. Once finished or skipped it is remembered on the device
+(`thinkrush.tourSeen` in localStorage).
 
 ## Daily Challenge and streaks
 
@@ -311,6 +327,7 @@ src/object-art.ts         builds the figures and pieces from blocks in code
 src/object-play.ts        the object board on the table: the gap, judging a piece, the snap
 src/sound.ts              music and RUSH's voice, synthesized (composition in src/sound-design.ts)
 src/daily.ts              the Daily Challenge's puzzles and the streak (tests in tests/)
+src/tour.ts               How to play: the tour's steps and clock demo (tests in tests/)
 src/pause-gesture.ts      the palm-up pause (gesture logic in src/palm.ts, tested)
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)

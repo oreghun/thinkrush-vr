@@ -69,5 +69,18 @@
   "perf.line": "{fps} fps (display {hz} Hz), slowest frame {worst} ms, {late} late, {calls} draws, {triangles}k triangles",
   "sound.on": "Sound on",
   "sound.off": "Sound off",
-  "readAloud.noVoice": "No voice on this device"
+  "readAloud.noVoice": "No voice on this device",
+  "tour.start": "How to play",
+  "tour.skip": "Skip tour",
+  "tour.next": "Next step",
+  "tour.eyebrow": "HOW TO PLAY - STEP {n} OF {total}",
+  "tour.hello": "Hi, I'm RUSH, your puzzle partner.",
+  "tour.grab": "Pinch an object on the table and pick it up.",
+  "tour.orb": "Point at the orb with the right answer, then pinch.",
+  "tour.clock": "I'm also your clock.",
+  "tour.clockDetail": "I shrink and turn red as time runs out, and the music speeds up.",
+  "tour.pause": "Need a break?",
+  "tour.pauseDetail": "Turn a palm up and hold it to pause.",
+  "tour.done": "You're ready! Pick a world to play.",
+  "readAloud.blank": "blank"
 }

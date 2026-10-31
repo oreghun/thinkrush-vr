@@ -14,8 +14,10 @@
   src/puzzle.ts fills and colors the rest: prompt, question, score, timer,
   status, detail and the button labels. It shows the buttons that fit the
   mode: practice offers Category, Start run, Next puzzle and Home, a run
-  offers Skip, and the run-over summary offers Run again, Back to practice
-  and Home. "..." is only a placeholder.
+  offers Skip, the run-over summary offers Run again, Back to practice
+  and Home, and the How to play tour (src/tour.ts) offers Skip tour, plus
+  Next step on a flat page, where there are no hands. "..." is only a
+  placeholder.
 
   The perf row stays hidden unless the page URL has ?fps: then
   src/performance.ts fills it with the frame rate once a second.
@@ -191,6 +193,11 @@
     border-color: #8fd14f;
   }
 
+  .tour-button {
+    flex-grow: 0;
+    border-color: #62e3d6;
+  }
+
   .world-mafumbo {
     border-color: #b9a7ff;
   }
@@ -219,6 +226,12 @@
               <CalendarDays></CalendarDays>
             </ButtonIcon>
             <ButtonLabel id="daily-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="tour-button" class="button tour-button">
+            <ButtonIcon>
+              <CircleHelp></CircleHelp>
+            </ButtonIcon>
+            <ButtonLabel id="tour.start" class="button-label">...</ButtonLabel>
           </Button>
         </div>
         <div id="welcome.worldHeading" class="world-heading">...</div>
@@ -300,6 +313,12 @@
               <House></House>
             </ButtonIcon>
             <ButtonLabel id="puzzle.home" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="tour-skip" class="button" style="display: none">
+            <ButtonIcon>
+              <SkipForward></SkipForward>
+            </ButtonIcon>
+            <ButtonLabel id="tour.skip" class="button-label">...</ButtonLabel>
           </Button>
         </div>
       </div>

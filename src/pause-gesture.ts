@@ -56,8 +56,12 @@ export class PauseGestureSystem extends createSystem({
       return;
     }
     const mode = board.getValue(PuzzleBoard, 'mode');
-    // Only a puzzle in play can pause; home and the run summary wait anyway.
-    const pausable = mode === PuzzleMode.Practice || mode === PuzzleMode.Run;
+    // Only a puzzle in play (or the tour, which teaches it) can pause; home
+    // and the run summary wait anyway.
+    const pausable =
+      mode === PuzzleMode.Practice ||
+      mode === PuzzleMode.Run ||
+      mode === PuzzleMode.Tour;
     this.sinceHolding =
       this.queries.held.entities.size > 0 ? 0 : this.sinceHolding + delta;
 

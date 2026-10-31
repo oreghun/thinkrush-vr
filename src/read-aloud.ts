@@ -42,6 +42,16 @@ export function sentences(text: string): string[] {
     .filter((sentence) => sentence.length > 0);
 }
 
+/**
+ * Text as it should sound: a fill-in gap ("____", as in "Practice makes
+ * ____.") is said as `word` ("blank"). Read as written, voices spell the
+ * symbols out ("underscore underscore underscore underscore"). The screen
+ * keeps the gap as drawn.
+ */
+export function speakableBlanks(text: string, word: string): string {
+  return text.replace(/_+/gu, word);
+}
+
 /** The read-aloud setting: off, or the pace the puzzles are read at. */
 export const READ_ALOUD_SPEEDS = ['off', 'slow', 'normal', 'fast'] as const;
 export type ReadAloudSpeed = (typeof READ_ALOUD_SPEEDS)[number];

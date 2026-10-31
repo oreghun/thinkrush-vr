@@ -69,5 +69,18 @@
   "perf.line": "",
   "sound.on": "",
   "sound.off": "",
-  "readAloud.noVoice": ""
+  "readAloud.noVoice": "",
+  "tour.start": "",
+  "tour.skip": "",
+  "tour.next": "",
+  "tour.eyebrow": "",
+  "tour.hello": "",
+  "tour.grab": "",
+  "tour.orb": "",
+  "tour.clock": "",
+  "tour.clockDetail": "",
+  "tour.pause": "",
+  "tour.pauseDetail": "",
+  "tour.done": "",
+  "readAloud.blank": ""
 }

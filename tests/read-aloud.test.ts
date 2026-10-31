@@ -4,6 +4,7 @@ import {
   nextReadAloudSpeed,
   pickVoice,
   sentences,
+  speakableBlanks,
   type VoiceInfo,
 } from '../src/read-aloud.ts';
 
@@ -49,4 +50,18 @@ test('the welcome button cycles off, slow, normal, fast', () => {
   assert.equal(nextReadAloudSpeed('slow'), 'normal');
   assert.equal(nextReadAloudSpeed('normal'), 'fast');
   assert.equal(nextReadAloudSpeed('fast'), 'off');
+});
+
+test('a fill-in gap is said as a word, not spelled out as underscores', () => {
+  assert.equal(
+    speakableBlanks('Complete the proverb: Practice makes ____.', 'blank'),
+    'Complete the proverb: Practice makes blank.',
+  );
+  // Any length of gap, and more than one, each become one word.
+  assert.equal(speakableBlanks('A _ and a ________ gap', 'blank'), 'A blank and a blank gap');
+  assert.equal(speakableBlanks('No gap here.', 'blank'), 'No gap here.');
+  // The sentence still ends where it did, so it is read as one utterance.
+  assert.deepEqual(sentences(speakableBlanks('Look before you ____.', 'blank')), [
+    'Look before you blank.',
+  ]);
 });
