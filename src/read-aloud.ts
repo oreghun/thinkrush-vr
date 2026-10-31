@@ -54,7 +54,7 @@ const RATES: Record<Exclude<ReadAloudSpeed, 'off'>, number> = {
   fast: 1.25,
 };
 
-/** The setting after `speed` on the welcome panel's single button. */
+/** The setting after `speed` on the home page's single button. */
 export function nextReadAloudSpeed(speed: ReadAloudSpeed): ReadAloudSpeed {
   return READ_ALOUD_SPEEDS[
     (READ_ALOUD_SPEEDS.indexOf(speed) + 1) % READ_ALOUD_SPEEDS.length

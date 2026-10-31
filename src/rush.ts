@@ -149,6 +149,8 @@ export class RushSystem extends createSystem({
     this.read(board);
 
     const wantsShow =
+      (this.now.mode === PuzzleMode.Practice ||
+        this.now.mode === PuzzleMode.Run) &&
       this.now.status === PuzzleStatus.Playing &&
       board.getValue(PuzzleBoard, 'move') === Move.Show &&
       PUZZLES[this.now.puzzleIndex]?.type === 'visual';
@@ -174,11 +176,12 @@ export class RushSystem extends createSystem({
     const lasting = baseMood(this.now);
     const mood = this.reaction ? reactionMood(this.reaction, lasting) : lasting;
 
-    // RUSH is the timer: the run's clock in a run, the puzzle's otherwise.
+    // RUSH is the timer: the run's clock in a run, the puzzle's otherwise;
+    // at home and on the run summary no clock runs, so RUSH is full size.
     const mode = this.now.mode;
     const total = mode === PuzzleMode.Run ? RUN_SECONDS : ROUND_SECONDS;
     const fraction =
-      mode === PuzzleMode.RunOver
+      mode === PuzzleMode.RunOver || mode === PuzzleMode.Home
         ? 1
         : timeFraction(board.getValue(PuzzleBoard, 'secondsLeft') ?? 0, total);
     this.scale +=

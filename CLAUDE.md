@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-30 merged plus the show-it-to-RUSH PR (6 answer orbs;
+As of 2026-10-31, PRs 1-31 merged plus the one-screen PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -108,7 +108,8 @@ the first Meshy miniatures, for the wind puzzle; 25 objects at 10 cm;
 26 Meshy miniatures for the number and beginnings puzzles, swapped in as
 they load; 27 the keys, lock and magnet puzzles' miniatures; then the
 energy and sound puzzles' miniatures; 29 the yellow ruler and flat
-objects tilted toward the player; 30 RUSH; then the show-it-to-RUSH move):
+objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
+then one projected screen with home and puzzle pages):
 
 Live on main
 
@@ -150,12 +151,12 @@ Live on main
   file or no row in art/SOURCES.md. Object textures are 512 px (28 objects
   at 1024 px would cost ~150 MB of GPU memory once all were seen).
 - Action twist (src/moves.ts, PuzzleBoard.move): each visual puzzle asks
-  for a move with your pick, shown as the panel's instruction line and read
+  for a move with your pick, shown as the screen's instruction line and read
   aloud: DROP it on the tray, FLIP it over (released upside down, anywhere),
   LIFT it above your head (held 0.1 m above the eyes for 0.5 s, so
   looking closely at it is not an answer), or SHOW it to RUSH (held within
   0.2 m of RUSH's centre for 0.6 s; for this move RUSH glides from beside
-  the panel, out of seated reach, to a spot fixed when the move starts:
+  the screen, out of seated reach, to a spot fixed when the move starts:
   0.28 m right, 0.2 m below and 0.42 m in front of the head). The game
   picks the move, never the puzzle file: the first two visual puzzles on a
   device are drops, the 3rd introduces flip, the 5th lift and the 7th show
@@ -166,8 +167,8 @@ Live on main
   after 2.5 s); practice says so and lets you retry. Orb puzzles have no
   moves. The tray stays visible for every move: the habit is the trap.
 - RUSH (src/rush.ts, logic in src/rush-mood.ts with tests, model in
-  src/scene-assets/rush.scene-asset.ts, scene node "rush" at 0.45, 1.25,
-  -0.8 beside the puzzle panel): a deep-gold glowing sphere, 18 cm across,
+  src/scene-assets/rush.scene-asset.ts, scene node "rush" at 0.48, 1.25,
+  -0.8 beside the screen): a deep-gold glowing sphere, 18 cm across,
   with two eyes; it turns to face the player and blinks. It is the timer:
   it shrinks to 45% and warms from gold to red as the clock (the puzzle's
   60 s, or the run's 180 s) runs out. Lasting moods follow the board
@@ -179,9 +180,21 @@ Live on main
   is read aloud. All motion is RUSH's own, never the player's view.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
-- Category button on the puzzle panel (practice only): cycles All plus each
+- One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
+  0.115, 600 cm wide = 0.69 m, centred 0.86 m in front of the seat): two
+  pages, home and puzzle, shown one at a time by PuzzleSystem.render. The
+  game opens on home (PuzzleMode.Home, the board's default): the table is
+  cleared, no clock runs, RUSH rests full size and nothing is read aloud.
+  A world button starts that world's first puzzle in practice; the puzzle
+  page's Home button (hidden during a run) clears the table and returns.
+  Home holds the welcome text, the four worlds in a 2 x 2 grid, and the
+  settings row (Enter/Exit VR, language, read aloud). Look: plain divs, not
+  the kit's opaque Panel; two faint turquoise rings around dark glass at
+  0.9 alpha with a bright edge (UIKitML takes rgba() colours; it rejects
+  background-opacity). The screen keeps a min-height so both pages match.
+- Category button on the puzzle page (practice only): cycles All plus each
   puzzle type that has content (empty ones are skipped); filters practice
-  Next and the draw order of runs. The welcome panel's "Choose your world"
+  Next and the draw order of runs. The home page's "Choose your world"
   buttons pick a category directly and tint the floor and stage for it.
   Pure logic in src/categories.ts with unit tests. Switching keeps the
   current puzzle when it already fits the category.
@@ -190,26 +203,29 @@ Live on main
   difficulty x 10, the summary shows score/solved/best, and the best run
   score is kept in localStorage (thinkrush.bestScore). Practice stays the
   default browsing mode with the per-puzzle 60 s timer.
-- Each panel hangs from a graphite grab bar: DistanceGrabbable with
-  MoveFromTarget, rotation locked so the single-sided panel keeps facing the
-  player, position clamped near the table by MovablePanelSystem. On flat
+- The screen hangs above its light bar (screen-projector asset: the
+  graphite grab bar, a turquoise lens and an additive fan of light rising
+  toward the screen; the fan's mesh ignores rays, so only the bar grabs):
+  DistanceGrabbable with MoveFromTarget, rotation locked so the
+  single-sided screen keeps facing the player, position clamped near the
+  table by MovablePanelSystem. On flat
   screens, ScreenLookSystem turns the camera when empty space is dragged;
   it never runs in an immersive session (comfort), never starts on a press
   that begins over something interactable (so mouse-dragging a grab bar
-  moves only the panel), and we deliberately do not rotate the world in VR.
+  moves only the screen), and we deliberately do not rotate the world in VR.
   The run clock ticks on flat pages too (practice stays VR-only); only a
   blurred XR session pauses everything.
 - Read aloud (src/read-aloud.ts): each new puzzle's prompt (plus the
   mafumbo question) is read with speechSynthesis, one utterance per
   sentence, using on-device voices only (localService); online voices are
-  never used. Welcome panel button cycles Off/Slow/Normal/Fast (rates 0.8,
+  never used. Home page button cycles Off/Slow/Normal/Fast (rates 0.8,
   1, 1.25; saved as thinkrush.readAloud) and says "No voice on this device"
-  when there is no local English voice. Puzzle panel "Read it out" reads on
+  when there is no local English voice. Puzzle page "Read it out" reads on
   demand. Entering VR reads the current puzzle (browsers need a user
   gesture before speech); a blurred session pauses speech; solving and the
   run summary stop it. Speech recognition, the voice check panel and
   answer matching were removed (git history has them). Quest Browser voice
-  availability still untested: the owner checks the welcome panel label on
+  availability still untested: the owner checks the home page label on
   the headset.
 
 Decisions
@@ -232,7 +248,7 @@ Decisions
   of these let you in. Which one keeps you out?") and never names it
   outright; easy puzzles state the shared link plainly, harder ones use a
   riddle-style clue. Prompts carry no action verb (grab means pinch in VR
-  and click on a screen); the panel's instruction line says how to answer.
+  and click on a screen); the screen's instruction line says how to answer.
   Each hint goes one step closer than its clue.
 - Voice (owner, 2026-10-30): no spoken answers in v1 (accents, and
   on-device recognition may be missing on Quest). Instead the game reads
@@ -268,11 +284,18 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Pattern puzzle type (decision above).
-2. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
+1. Beckon (screen PR 2, agreed 2026-10-31): pinch the light bar and pull
+   to bring the screen in, push to send it back, with two stops: Far
+   (about 1.4 m, scaled up so text keeps its apparent size) for reading
+   and Near (within the 2 ft reach) where PokeInteractable lets a
+   fingertip tap the buttons; it slides home when a puzzle starts. No
+   free-hand "come here" gesture: it looks like the palm-up pause and
+   fails on controllers and glasses.
+2. Pattern puzzle type (decision above).
+3. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
    RUSH's reactions (RUSH itself is built).
-3. Streaks and the Daily Challenge (localStorage only).
-4. Palm-up pause gesture; pause when the session loses visibility.
+4. Streaks and the Daily Challenge (localStorage only).
+5. Palm-up pause gesture; pause when the session loses visibility.
    Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
    real Quest 3, demo video. Cut order if time runs short: leaderboard,
    misplaced-object puzzle variant, extra puzzle count.

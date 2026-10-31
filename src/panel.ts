@@ -22,7 +22,8 @@ import {
 
 export class PanelSystem extends createSystem({}) {
   init(): void {
-    const panel = this.world.getSceneObject<UIKitMLAsset>('welcome-panel');
+    // The home page's settings buttons, on the one screen.
+    const panel = this.world.getSceneObject<UIKitMLAsset>('screen');
     if (panel == null) {
       return;
     }
