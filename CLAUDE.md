@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-34 merged plus the play-table PR (6 answer orbs;
+As of 2026-10-31, PRs 1-35 merged plus the pattern-puzzle PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -110,8 +110,8 @@ they load; 27 the keys, lock and magnet puzzles' miniatures; then the
 energy and sound puzzles' miniatures; 29 the yellow ruler and flat
 objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 32 one projected screen with home and puzzle pages; 33 beckoning it;
-34 the owner's room set in the back corners; then the owner's pedestal
-table as the play table):
+34 the owner's room set in the back corners; 35 the owner's pedestal
+table as the play table; then the pattern puzzle):
 
 Live on main
 
@@ -201,6 +201,27 @@ Live on main
   hides the code-built pillar and top (BUILT_TABLE_PARTS) and adds the model
   3 cm further back (OWNERS_TABLE_BACK) so its near edge stays 19 cm in
   front of the seat; if it failed to load, the code-built table stays.
+- Pattern puzzle (src/patterns.ts with tests, art in src/pattern-art.ts,
+  board in src/pattern-play.ts and the pattern-board scene asset): "Complete
+  the pattern." Ten entries (en-pattern-01..10) name a family (kitenge,
+  beadwork, tessellation, weave, abstract) and a rule: repeat-2, repeat-3,
+  mirror, turn (quarter turns; needs a motif that differs at every turn,
+  so not weave), grow (2 to 7 tokens to count), two-cycles (shape period 2,
+  colour period 3: the gap holds the one pair not shown). Each round deals
+  a fresh random board: a strip of 6 pieces with one gap, and 4 options (1
+  right, 3 near misses: other pieces of the strip, or the answer with one
+  thing changed); tests deal 300 boards per family and rule and check the
+  options all look different and the rule holds. The board (scene node
+  "pattern-board", where the tray sits; the tray hides for patterns) is a
+  wooden lectern tilted 26 degrees with six 5.8 cm cloth cells and a
+  turquoise gap outline that turns gold while a held piece is over it. The
+  tiles carry swatch plaques (createSwatch) on their stands; letting a
+  piece go over the board answers (always a drop, no move twist, and the
+  visualSeen count is untouched). Solving fills the gap and hides the right
+  tile; time up fills it too. Category "pattern" (accent #FF6FA8, pink
+  floor tint), world button "Pattern Loom - Patterns" as a full-width row
+  above the other four on the home page. Textures: 128 px canvases per
+  distinct piece, freed each round.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
@@ -276,10 +297,14 @@ Decisions
   static; ScreenLookSystem runs only outside immersive sessions. The other
   half of comfort is frame rate: 60 fps gets verified on a real Quest 3 in
   Week 3.
-- Pattern puzzle (next big type): universal "Complete the pattern" mechanic;
-  procedurally generated families (kanga/kitenge signature, beadwork,
-  tessellation, weave, abstract); planned content fields: type "pattern" plus
-  a family field. Not built yet.
+- Pattern puzzle (built 2026-10-31, details under Live on main): universal
+  "Complete the pattern"; content gives type "pattern", a family and a rule,
+  answer "generated"; the game deals the board.
+- Assembly idea (owner, 2026-10-31): joining model pieces. Agreed a light
+  version, "Complete the object" (one missing piece of a model, turned and
+  fitted into the gap, snapping when close), after the sound pass and
+  streaks if time allows; full many-piece assembly stays a stretch. Size is
+  no issue: pieces come from code or models already in the game.
 - Competition strategy: polish two mechanics (patterns + orbs) over adding
   more; RUSH is the demo video's face; verify with iwsdk-glasses-test and
   claim Meta VR Glasses readiness; keep the first 60 seconds tutorial-free.
@@ -329,11 +354,10 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Pattern puzzle type (decision above).
-2. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
+1. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
    RUSH's reactions (RUSH itself is built).
-3. Streaks and the Daily Challenge (localStorage only).
-4. Palm-up pause gesture; pause when the session loses visibility.
+2. Streaks and the Daily Challenge (localStorage only).
+3. Palm-up pause gesture; pause when the session loses visibility.
    Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
    real Quest 3, demo video. Cut order if time runs short: leaderboard,
    misplaced-object puzzle variant, extra puzzle count.
@@ -351,6 +375,17 @@ Working notes
   vite.config.ts). Without it, a reload right after a deploy paired new
   code with the old scene ("asset voice-check is not declared"). A new
   public file must go through publicAssetUrl or withBuildId.
+- The headless emulator renders in software (SwiftShader) at about 2 fps
+  with the full room (frame p50 ~0.5 s): UIKit clicks then never fire,
+  because the pointer library counts a click only when release follows
+  press within ~300 ms, and a screenshot looking down at the table can
+  time out and relaunch the browser (check xr status after: a relaunch
+  ends the XR session and xr enter can fail silently). Workarounds: click
+  screen buttons on the flat page with browser_interact at the button's
+  projected canvas point (Pattern Loom ~ (390, 147) on the 780 x 493
+  canvas), then enter XR for grab tests (squeeze has no click window);
+  check the pattern art with a gallery drawn by src/pattern-art.ts in
+  plain Chromium (Playwright page on the dev server, dynamic import).
 - Fingertip pokes can't be proven in the headless emulator: its slow
   frames stretch every press past UIKit's 800 ms click window (contactMs
   over 800 in xr run-sequence). Prove the logic with a ray click from a
