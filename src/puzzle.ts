@@ -22,7 +22,13 @@ import {
   nextIndexInCategory,
   PuzzleCategory,
 } from './categories.js';
-import { fill, type MessageKey, onLanguageChange, t } from './i18n/index.js';
+import {
+  fill,
+  getLanguage,
+  type MessageKey,
+  onLanguageChange,
+  t,
+} from './i18n/index.js';
 import {
   AnswerOrb,
   PuzzleBoard,
@@ -45,10 +51,25 @@ import { MovablePanel } from './movable-panel-component.js';
 import { ScreenStop } from './screen-stops.js';
 import {
   isReadAloudOn,
+  isSpeaking,
   pauseSpeaking,
   speak,
   stopSpeaking,
 } from './read-aloud.js';
+import {
+  clockDemoDone,
+  clockDemoFraction,
+  PAUSE_WAIT_SECONDS,
+  startsTourOnEnter,
+  TOUR_SEEN_KEY,
+  TOUR_STEP_COUNT,
+  tourAfter,
+  type TourEvent,
+  tourPuzzles,
+  TourStep,
+  type TourStepName,
+  tourStepNumber,
+} from './tour.js';
 import {
   builtStand,
   fitImportedStand,
@@ -192,6 +213,10 @@ export class PuzzleSystem extends createSystem({
   private dailyDay?: string;
   // The paused flag as last shown, so a change from any source re-renders.
   private shownPaused = false;
+  // The tour's two puzzles (indices into PUZZLES), and seconds into its
+  // current step (the clock demo, or the wait for a pause).
+  private tourIndices = { visual: -1, riddle: -1 };
+  private tourSeconds = 0;
   private readonly tilePieces: (Piece | undefined)[] = [];
   // Height above the table where objects rest on the display stand.
   private standSeat = 0;
@@ -270,7 +295,10 @@ export class PuzzleSystem extends createSystem({
     | 'pausePage'
     | 'settingsRow'
     | 'resume'
-    | 'pauseHome',
+    | 'pauseHome'
+    | 'eyebrow'
+    | 'tourButton'
+    | 'tourSkip',
     UIElement
   > = {
     prompt: null,
@@ -298,6 +326,9 @@ export class PuzzleSystem extends createSystem({
     settingsRow: null,
     resume: null,
     pauseHome: null,
+    eyebrow: null,
+    tourButton: null,
+    tourSkip: null,
   };
 
   init(): void {
@@ -393,6 +424,9 @@ export class PuzzleSystem extends createSystem({
       settingsRow: panel?.getElementById('settings-row') ?? null,
       resume: panel?.getElementById('pause-resume') ?? null,
       pauseHome: panel?.getElementById('pause-home') ?? null,
+      eyebrow: panel?.getElementById('puzzle.eyebrow') ?? null,
+      tourButton: panel?.getElementById('tour-button') ?? null,
+      tourSkip: panel?.getElementById('tour-skip') ?? null,
     };
     const next = () => this.onNextPressed();
     const run = () => this.startRun();
@@ -403,6 +437,8 @@ export class PuzzleSystem extends createSystem({
     const daily = () => this.startDaily();
     const resume = () => this.setPaused(false);
     const quit = () => this.goHome();
+    const tour = () => this.startTour();
+    const skipTour = () => this.finishTour(false);
     // On a flat page, Escape pauses and resumes (VR uses the palm or menu).
     const key = (event: KeyboardEvent) => {
       if (event.key === 'Escape') this.setPaused(!this.puzzlePaused());
@@ -445,6 +481,8 @@ export class PuzzleSystem extends createSystem({
     this.elements.daily?.addEventListener('click', daily);
     this.elements.resume?.addEventListener('click', resume);
     this.elements.pauseHome?.addEventListener('click', quit);
+    this.elements.tourButton?.addEventListener('click', tour);
+    this.elements.tourSkip?.addEventListener('click', skipTour);
 
     this.cleanupFuncs.push(
       () => this.tileModels.forEach((model, slot) => {
@@ -475,6 +513,8 @@ export class PuzzleSystem extends createSystem({
       () => this.elements.daily?.removeEventListener('click', daily),
       () => this.elements.resume?.removeEventListener('click', resume),
       () => this.elements.pauseHome?.removeEventListener('click', quit),
+      () => this.elements.tourButton?.removeEventListener('click', tour),
+      () => this.elements.tourSkip?.removeEventListener('click', skipTour),
       () => document.removeEventListener('keydown', key),
       // Entering VR is the first moment a headset player can hear the
       // puzzle; a blurred session holds the voice along with the clock.
@@ -484,14 +524,23 @@ export class PuzzleSystem extends createSystem({
         if (state === VisibilityState.VisibleBlurred) {
           this.setPaused(true);
         }
-        pauseSpeaking(state === VisibilityState.VisibleBlurred || this.puzzlePaused());
+        pauseSpeaking(this.speechHeld(state));
         if (
           state === VisibilityState.Visible &&
           this.lastVisibility === VisibilityState.NonImmersive
         ) {
-          this.readPuzzle(false);
+          // A device's first time in VR, at home, starts How to play.
+          if (startsTourOnEnter(readTourSeen(), this.mode())) {
+            this.startTour();
+          } else {
+            this.readPuzzle(false);
+          }
         }
         this.lastVisibility = state;
+        // The tour's Next step button is for flat pages only.
+        if (this.mode() === PuzzleMode.Tour) {
+          this.render();
+        }
       }),
       stopSpeaking,
       () => this.patternTable?.dispose(),
@@ -504,6 +553,9 @@ export class PuzzleSystem extends createSystem({
         this.settling.delete(tile);
         this.liftTime.delete(tile);
         this.showTime.delete(tile);
+        if (this.mode() === PuzzleMode.Tour) {
+          this.advanceTour('grabbed');
+        }
       }),
       this.queries.rushes.subscribe('qualify', (entity) => {
         this.rush = entity;
@@ -576,7 +628,11 @@ export class PuzzleSystem extends createSystem({
     if (paused !== this.shownPaused) {
       // Paused or resumed (palm, menu button, Escape, Resume, headset).
       this.shownPaused = paused;
-      pauseSpeaking(paused);
+      pauseSpeaking(this.speechHeld(state));
+      if (mode === PuzzleMode.Tour) {
+        // The tour's last step is pausing and carrying on.
+        this.advanceTour(paused ? 'paused' : 'resumed');
+      }
       this.render();
     }
     const awake = state !== VisibilityState.VisibleBlurred && !paused;
@@ -610,7 +666,12 @@ export class PuzzleSystem extends createSystem({
       this.advanceIn -= delta;
       if (this.advanceIn <= 0 && this.mode() === PuzzleMode.Run) {
         this.advanceRun();
+      } else if (this.advanceIn <= 0 && this.mode() === PuzzleMode.Tour) {
+        this.advanceTour('solved');
       }
+    }
+    if (awake && this.mode() === PuzzleMode.Tour) {
+      this.updateTour(delta);
     }
 
     const blend = 1 - Math.exp(-SETTLE_RATE * delta);
@@ -696,14 +757,15 @@ export class PuzzleSystem extends createSystem({
     this.liftTime.clear();
     this.showTime.clear();
     this.answeredInHold.clear();
-    if (this.isVisual) {
+    if (this.isVisual && this.mode() !== PuzzleMode.Tour) {
       // The game, not the puzzle, picks the move, one new move at a time.
+      // (The tour's picture puzzle is always a drop and is not counted.)
       const seen = readMovesSeen();
       const { move, isNew } = pickMove(seen, Math.random());
       board.setValue(PuzzleBoard, 'move', move);
       this.moveIsNew = isNew;
       writeMovesSeen(seen + 1);
-    } else if (this.isPattern || this.isObject) {
+    } else if (this.isVisual || this.isPattern || this.isObject) {
       // A pattern or object piece goes in the gap: always a drop, no twist.
       board.setValue(PuzzleBoard, 'move', Move.Drop);
       this.moveIsNew = false;
@@ -790,7 +852,9 @@ export class PuzzleSystem extends createSystem({
     // The move is part of what to listen for. Its verb is in capitals on
     // the panel; spoken, it is a plain word (some voices spell capitals).
     const move = spokenMove(this.moveText());
-    const text = this.isVisual
+    const text = this.mode() === PuzzleMode.Tour
+      ? this.tourLines().spoken
+      : this.isVisual
       ? `${puzzle.prompt} ${move}`
       : this.isPattern
         ? `${puzzle.prompt} ${spokenMove(t('pattern.drop'))}`
@@ -1189,12 +1253,17 @@ export class PuzzleSystem extends createSystem({
         (board.getValue(PuzzleBoard, 'solved') ?? 0) + 1,
       );
       this.advanceIn = SOLVE_BEAT_SECONDS;
+    } else if (this.mode() === PuzzleMode.Tour) {
+      // A moment of "Correct!" and RUSH's cheer, then the next step.
+      this.advanceIn = SOLVE_BEAT_SECONDS;
     }
   }
 
   private onNextPressed(): void {
     if (this.mode() === PuzzleMode.Run) {
       this.advanceRun();
+    } else if (this.mode() === PuzzleMode.Tour) {
+      this.advanceTour('next');
     } else if (this.mode() === PuzzleMode.Practice) {
       this.startRound(
         nextIndexInCategory(
@@ -1287,12 +1356,17 @@ export class PuzzleSystem extends createSystem({
     return Boolean(this.board?.getValue(PuzzleBoard, 'paused'));
   }
 
-  /** Pauses or resumes a puzzle in play; home and the summary never pause. */
+  /**
+   * Pauses or resumes a puzzle in play (or the tour, which teaches it);
+   * home and the summary never pause.
+   */
   private setPaused(paused: boolean): void {
     const mode = this.mode();
     if (
       this.board &&
-      (mode === PuzzleMode.Practice || mode === PuzzleMode.Run)
+      (mode === PuzzleMode.Practice ||
+        mode === PuzzleMode.Run ||
+        mode === PuzzleMode.Tour)
     ) {
       this.board.setValue(PuzzleBoard, 'paused', paused);
     }
@@ -1324,6 +1398,12 @@ export class PuzzleSystem extends createSystem({
     }
     stopSpeaking();
     pauseSpeaking(false);
+    if (this.mode() === PuzzleMode.Tour) {
+      // Finished, skipped or left from the pause page: the tour now waits
+      // for its button instead of starting on the next visit.
+      writeTourSeen();
+      board.setValue(PuzzleBoard, 'tourStep', TourStep.Done);
+    }
     board.setValue(PuzzleBoard, 'paused', false);
     this.shownPaused = false;
     this.dailyDay = undefined;
@@ -1333,6 +1413,12 @@ export class PuzzleSystem extends createSystem({
     board.setValue(PuzzleBoard, 'wrongAnswers', 0);
     board.setValue(PuzzleBoard, 'wrongMoves', 0);
     this.advanceIn = 0;
+    this.clearTable();
+    this.render();
+  }
+
+  /** Stows the tiles and orbs below the floor and puts the tray back. */
+  private clearTable(): void {
     this.settling.clear();
     this.orbFlash.clear();
     this.tileBySlot.forEach((tile, slot) =>
@@ -1344,7 +1430,150 @@ export class PuzzleSystem extends createSystem({
     this.patternTable?.show(false);
     this.objectTable?.show(false);
     this.tray?.setValue(Visibility, 'isVisible', true);
+  }
+
+  /** Whether speech waits: headset off, or paused outside the tour. */
+  private speechHeld(state: VisibilityState): boolean {
+    // The tour keeps talking while paused: it explains how to carry on.
+    return (
+      state === VisibilityState.VisibleBlurred ||
+      (this.puzzlePaused() && this.mode() !== PuzzleMode.Tour)
+    );
+  }
+
+  /**
+   * How to play (src/tour.ts): from the home page, RUSH's played tour. Its
+   * picture puzzle and riddle are real ones from the bank; no clock runs,
+   * mistakes cost nothing, and nothing is scored or counted.
+   */
+  private startTour(): void {
+    const board = this.board;
+    if (!board || this.mode() !== PuzzleMode.Home) {
+      return;
+    }
+    const indices = tourPuzzles(PUZZLES);
+    if (indices.visual < 0 || indices.riddle < 0) {
+      return;
+    }
+    this.tourIndices = indices;
+    this.dailyDay = undefined;
+    board.setValue(PuzzleBoard, 'category', PuzzleCategory.All);
+    board.setValue(PuzzleBoard, 'score', 0);
+    board.setValue(PuzzleBoard, 'solved', 0);
+    board.setValue(PuzzleBoard, 'mode', PuzzleMode.Tour);
+    this.enterTourStep(TourStep.Grab);
+  }
+
+  private tourStep(): TourStepName {
+    return (this.board?.getValue(PuzzleBoard, 'tourStep') ??
+      TourStep.Grab) as TourStepName;
+  }
+
+  /** Moves the tour on when `event` finishes its current step. */
+  private advanceTour(event: TourEvent): void {
+    if (this.mode() !== PuzzleMode.Tour) {
+      return;
+    }
+    const step = this.tourStep();
+    const next = tourAfter(step, event);
+    if (next !== step) {
+      this.enterTourStep(next);
+    }
+  }
+
+  /** Sets up `step`: its puzzle or a cleared table, its lines, its voice. */
+  private enterTourStep(step: TourStepName): void {
+    const board = this.board!;
+    if (step === TourStep.Done) {
+      this.finishTour(true);
+      return;
+    }
+    board.setValue(PuzzleBoard, 'tourStep', step);
+    // RUSH stays full size: the clock only moves in the clock demo.
+    board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
+    this.tourSeconds = 0;
+    this.advanceIn = 0;
+    if (step === TourStep.Grab) {
+      this.startRound(this.tourIndices.visual);
+      return;
+    }
+    if (step === TourStep.Orb) {
+      this.startRound(this.tourIndices.riddle);
+      return;
+    }
+    if (step === TourStep.Clock) {
+      // Eyes on RUSH: the table clears and the riddle's verdict goes.
+      board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
+      board.setValue(PuzzleBoard, 'wrongAnswers', 0);
+      board.setValue(PuzzleBoard, 'wrongMoves', 0);
+      this.wrongMoveShown = false;
+      this.clearTable();
+    }
     this.render();
+    this.readPuzzle(false);
+  }
+
+  /** The clock demo, and the wait for a pause, while the tour is awake. */
+  private updateTour(delta: number): void {
+    const step = this.tourStep();
+    if (step === TourStep.Clock) {
+      this.tourSeconds += delta;
+      // RUSH and the music follow the clock as they do in a puzzle.
+      this.board!.setValue(
+        PuzzleBoard,
+        'secondsLeft',
+        ROUND_SECONDS * clockDemoFraction(this.tourSeconds),
+      );
+      this.renderTimer();
+      if (clockDemoDone(this.tourSeconds, isSpeaking())) {
+        this.advanceTour('clockShown');
+      }
+    } else if (step === TourStep.Pause) {
+      this.tourSeconds += delta;
+      if (this.tourSeconds >= PAUSE_WAIT_SECONDS) {
+        this.advanceTour('timedOut');
+      }
+    }
+  }
+
+  /** Ends the tour at home; a finished one says the player is ready. */
+  private finishTour(finished: boolean): void {
+    if (this.mode() !== PuzzleMode.Tour) {
+      return;
+    }
+    this.goHome();
+    if (finished && isReadAloudOn()) {
+      speak(t('tour.done'), getLanguage());
+    }
+  }
+
+  /** What the screen shows and RUSH says for the tour's current step. */
+  private tourLines(): { prompt: string; status: string; spoken: string } {
+    const prompt = this.puzzle?.prompt ?? '';
+    const both = (first: string, second: string) => ({
+      prompt: first,
+      status: second,
+      spoken: `${first} ${second}`,
+    });
+    switch (this.tourStep()) {
+      case TourStep.Grab:
+        return both(t('tour.hello'), t('tour.grab'));
+      case TourStep.Drop:
+        return {
+          prompt,
+          status: t('move.drop'),
+          spoken: `${prompt} ${spokenMove(t('move.drop'))}`,
+        };
+      case TourStep.Orb:
+        return both(prompt, t('tour.orb'));
+      case TourStep.Clock:
+        return both(t('tour.clock'), t('tour.clockDetail'));
+      case TourStep.Pause:
+        return both(t('tour.pause'), t('tour.pauseDetail'));
+      default:
+        // Paused: the pause page shows how to carry on; RUSH says it too.
+        return { prompt: t('pause.heading'), status: t('pause.body'), spoken: t('pause.body') };
+    }
   }
 
   private exitToPractice(): void {
@@ -1463,8 +1692,13 @@ export class PuzzleSystem extends createSystem({
     const status = this.status();
     const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
     const score = board.getValue(PuzzleBoard, 'score') ?? 0;
+    const inTour = mode === PuzzleMode.Tour;
+    const tour = inTour ? this.tourLines() : undefined;
+    const tourStep = this.tourStep();
 
-    let statusText = this.isVisual
+    let statusText = tour
+      ? tour.status
+      : this.isVisual
       ? this.moveText()
       : this.isPattern
         ? t('pattern.drop')
@@ -1519,10 +1753,18 @@ export class PuzzleSystem extends createSystem({
       detail = `${t('puzzle.hint')} ${puzzle.hint}`;
     }
 
-    this.elements.prompt?.setProperties({ text: puzzle.prompt });
+    this.elements.eyebrow?.setProperties({
+      text: inTour
+        ? fill(t('tour.eyebrow'), {
+            n: tourStepNumber(tourStep),
+            total: TOUR_STEP_COUNT,
+          })
+        : t('puzzle.eyebrow'),
+    });
+    this.elements.prompt?.setProperties({ text: tour?.prompt ?? puzzle.prompt });
     this.elements.question?.setProperties({
       text: puzzle.question ?? ' ',
-      display: puzzle.question ? 'flex' : 'none',
+      display: puzzle.question && !inTour ? 'flex' : 'none',
       color: accent,
     });
     this.elements.status?.setProperties({
@@ -1543,13 +1785,19 @@ export class PuzzleSystem extends createSystem({
     });
     this.elements.score?.setProperties({
       text: `${t('puzzle.score')}: ${score}`,
-      display: mode === PuzzleMode.Practice ? 'none' : 'flex',
+      display: mode === PuzzleMode.Practice || inTour ? 'none' : 'flex',
+    });
+    // The tour shows the clock only while RUSH demonstrates it.
+    this.elements.timer?.setProperties({
+      display: inTour && tourStep !== TourStep.Clock ? 'none' : 'flex',
     });
     // Start run doubles as Run again on the summary.
     // The Daily Challenge summary offers Home and practice, not a run.
     this.elements.run?.setProperties({
       display:
-        mode === PuzzleMode.Run || (mode === PuzzleMode.RunOver && this.dailyDay)
+        mode === PuzzleMode.Run ||
+        inTour ||
+        (mode === PuzzleMode.RunOver && this.dailyDay)
           ? 'none'
           : 'flex',
     });
@@ -1562,11 +1810,21 @@ export class PuzzleSystem extends createSystem({
     // Next is always available in practice: on the desktop page the timer
     // never runs and tiles need hands, so a round there never ends. In a
     // run the same button is Skip; on the summary it hides.
+    // In the tour it is Next step, on a flat page only: there are no hands
+    // there to pick things up or turn a palm.
+    const flat =
+      this.world.visibilityState.peek() === VisibilityState.NonImmersive;
     this.elements.next?.setProperties({
-      display: mode === PuzzleMode.RunOver ? 'none' : 'flex',
+      display:
+        mode === PuzzleMode.RunOver || (inTour && !flat) ? 'none' : 'flex',
     });
     this.elements.nextLabel?.setProperties({
-      text: mode === PuzzleMode.Run ? t('puzzle.skip') : t('puzzle.next'),
+      text:
+        mode === PuzzleMode.Run
+          ? t('puzzle.skip')
+          : inTour
+            ? t('tour.next')
+            : t('puzzle.next'),
     });
     this.elements.exit?.setProperties({
       display: mode === PuzzleMode.RunOver ? 'flex' : 'none',
@@ -1577,10 +1835,11 @@ export class PuzzleSystem extends createSystem({
     this.elements.read?.setProperties({
       display: mode === PuzzleMode.RunOver ? 'none' : 'flex',
     });
-    // Home is offered whenever no run is under way.
+    // Home is offered whenever no run is under way; the tour has Skip tour.
     this.elements.home?.setProperties({
-      display: mode === PuzzleMode.Run ? 'none' : 'flex',
+      display: mode === PuzzleMode.Run || inTour ? 'none' : 'flex',
     });
+    this.elements.tourSkip?.setProperties({ display: inTour ? 'flex' : 'none' });
     this.elements.readLabel?.setProperties({
       text: this.noVoice ? t('readAloud.noVoice') : t('readAloud.again'),
     });
@@ -1694,6 +1953,23 @@ function writeMovesSeen(seen: number): void {
     localStorage.setItem(MOVES_SEEN_KEY, String(Math.min(seen, 99)));
   } catch {
     // Storage can be blocked (private mode); moves then restart next visit.
+  }
+}
+
+function readTourSeen(): boolean {
+  try {
+    return localStorage.getItem(TOUR_SEEN_KEY) === '1';
+  } catch {
+    // Storage blocked: count it as seen rather than start it every visit.
+    return true;
+  }
+}
+
+function writeTourSeen(): void {
+  try {
+    localStorage.setItem(TOUR_SEEN_KEY, '1');
+  } catch {
+    // Storage can be blocked (private mode); nothing to remember then.
   }
 }
 

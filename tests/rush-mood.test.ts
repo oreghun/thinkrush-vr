@@ -49,6 +49,8 @@ test('RUSH reacts to what just changed', () => {
     Reaction.Present,
   );
   assert.equal(reactionTo(board(), board({ mode: 'run' })), Reaction.Present);
+  // The tour starts with a hop, as if RUSH says hello.
+  assert.equal(reactionTo(board(), board({ mode: 'tour' })), Reaction.Present);
   assert.equal(reactionTo(board(), board()), undefined);
   // A new round resets the wrong-answer count: that is no reaction of its own.
   assert.equal(

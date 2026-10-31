@@ -46,7 +46,8 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 - RUSH: a glowing sphere companion with expressive eyes that presents puzzles and
   reacts to answers. RUSH is also the timer: it shrinks and the music speeds up as time runs out.
 - Runs last about 3 minutes. Daily Challenge plus streaks bring players back.
-- The first puzzle is the tutorial. No walls of text.
+- The first puzzle is the tutorial. No walls of text. (Built as the How to
+  play tour: see Live on main.)
 - Palm-up gesture opens pause and settings. Pause when the XR session loses visibility.
 - No passthrough in v1: fully virtual scene.
 - Art direction: Kenyan / pan-African heart, readable to anyone. Patterns are
@@ -94,7 +95,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-49 merged plus the English-only PR (6 answer orbs;
+As of 2026-10-31, PRs 1-50 merged plus the How to play PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -118,7 +119,7 @@ plan; 43 Complete the object, unpredictable answer places and one pick
 per puzzle in a run; 44 the room; 45 the phone view and no projector;
 46 the music fix (superseded); 47 the sound quality pass (owner: "the
 sound is better now"); 48 the door and the horizon; 49 the band off the
-door; then English only for the competition):
+door; 50 English only for the competition; then the How to play tour):
 
 Live on main
 
@@ -340,6 +341,35 @@ Live on main
   into {name} slots). Summary: "Daily Challenge done!", score, solved x/6,
   streak, best daily score; no Run again (Home and Back to practice). The
   general run best (thinkrush.bestScore) is separate.
+- How to play (src/tour.ts with tests; PuzzleMode.Tour, PuzzleBoard.tourStep;
+  PuzzleSystem.startTour/advanceTour/enterTourStep): a tour that is played,
+  not read. It starts on its own when a device that has not seen it enters
+  VR from the home page (startsTourOnEnter; a puzzle already picked on the
+  flat page is left alone), and the home page's "How to play" button (next
+  to the Daily Challenge) replays it. Five steps, numbered on the eyebrow
+  ("HOW TO PLAY - STEP 2 OF 5"): grab (RUSH says hello; picking up any
+  tile moves on), drop (en-visual-07, the magnet puzzle, all four objects
+  owner models; free retries, always a drop, visualSeen untouched), orb
+  (en-riddle-01, the mirror riddle), clock (table cleared; secondsLeft
+  follows clockDemoFraction for 7.3 s: full, down to 0 in 2.5 s, out for
+  2.5 s so the music reaches urgent, back up; it waits for the voice to
+  finish, at most 8 s more), pause (palm up, menu button or Escape: the
+  pause page shows and the voice says how to carry on, as the tour keeps
+  speech going while paused; carrying on ends the tour; no pause in 15 s
+  ends it too). A solve gets the usual 2.5 s beat. Every step's lines go
+  through t() (tour.* keys) and are read aloud by readPuzzle. No clock
+  runs and the timer hides except in the clock step; no score. The
+  puzzle page offers Read it out and Skip tour (Home hidden), plus Next
+  step on a flat page only (no hands there). Finishing, skipping, or Home
+  from the pause page sets thinkrush.tourSeen = 1 (in goHome). The tour
+  puzzles are fixed in TOUR_PUZZLE_IDS; a test checks they exist, are
+  English, easy and (for the visual) all imported models. Verified in the
+  emulator: auto-start on entering VR, grab, a wrong drop (no penalty), a
+  right drop, the orb, the clock demo, the 15 s timeout, Escape pause and
+  resume to home, How to play from home, Next step and Skip tour on the
+  flat page, no second auto-start, and practice unchanged. In XR the
+  hand-ray Skip tour press did not register (slow-frame click window,
+  see Working notes); the palm gesture in the tour is left to the Quest.
 - Pause (PuzzleBoard.paused; src/pause-gesture.ts PauseGestureSystem, the
   gesture maths in src/palm.ts with tests): an open hand (thumb and index
   tips over 3.5 cm apart) turned palm up (palm normal from the wrist and

@@ -1,6 +1,7 @@
 import { createComponent, Types } from '@iwsdk/core';
 import { PuzzleCategory } from './categories.js';
 import { Move } from './moves.js';
+import { TourStep } from './tour.js';
 
 /** Seconds per practice puzzle, and for a whole run. */
 export const ROUND_SECONDS = 60;
@@ -25,6 +26,8 @@ export const PuzzleMode = {
   Run: 'run',
   /** The run ended; the panel shows the summary. */
   RunOver: 'runOver',
+  /** How to play: RUSH's played tour, one action at a time (src/tour.ts). */
+  Tour: 'tour',
 } as const;
 
 /** The state of the current round, kept on the puzzle table. */
@@ -59,6 +62,8 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
   paused: { type: Types.Boolean, default: false },
   // What a visual puzzle asks you to do with your pick (see src/moves.ts).
   move: { type: Types.Enum, enum: Move, default: Move.Drop },
+  // Where the tour is, while mode is tour.
+  tourStep: { type: Types.Enum, enum: TourStep, default: TourStep.Grab },
 });
 
 /**
