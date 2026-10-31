@@ -42,6 +42,11 @@ const materials = {
 // about 15.6 x 12.5 cm for the imported stand and 14.2 x 10.2 cm for the
 // code-built one.
 const OBJECT_SIZE = 0.1;
+// A flat object (a ruler, a paper clip, a key) would show only its edge
+// from the seat. Anything whose height is under FLAT_RATIO of its length
+// tilts up toward the player by FLAT_TILT, like a plate on a display stand.
+const FLAT_RATIO = 0.18;
+const FLAT_TILT = Math.PI / 6;
 
 function add(
   root: Group,
@@ -276,13 +281,22 @@ export function createPuzzleObject(
   if (!model) return undefined;
   const root = new Group();
   root.name = 'puzzle-object:' + label;
+  // The object itself, so it can tilt inside the root that sizes and seats it.
+  const body = new Group();
+  root.add(body);
   if (imported) {
     // An imported model's geometry is shared with the loaded asset, so
     // disposePuzzleObject must leave it alone.
-    root.add(imported);
+    body.add(imported);
     root.userData.imported = true;
   } else {
-    BUILDERS[model](root);
+    BUILDERS[model](body);
+  }
+  body.updateMatrixWorld(true);
+  const shape = new Box3().setFromObject(body).getSize(new Vector3());
+  if (shape.y < FLAT_RATIO * Math.max(shape.x, shape.z)) {
+    // Raise the far edge: the face turns toward the player (+Z).
+    body.rotation.x = FLAT_TILT;
   }
 
   root.updateMatrixWorld(true);

@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-27 merged plus the batch 6 objects PR (6 answer orbs;
+As of 2026-10-31, PRs 1-28 merged plus the yellow-ruler PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -107,7 +107,8 @@ choices; 23 the owner's Meshy stand replacing the code-built one; 24
 the first Meshy miniatures, for the wind puzzle; 25 objects at 10 cm;
 26 Meshy miniatures for the number and beginnings puzzles, swapped in as
 they load; 27 the keys, lock and magnet puzzles' miniatures; then the
-energy and sound puzzles' miniatures and the yellow ruler):
+energy and sound puzzles' miniatures; then the yellow ruler and flat
+objects tilted toward the player):
 
 Live on main
 
@@ -126,7 +127,9 @@ Live on main
   footprint, fingerprint, tyre track) shows as a word on the tile's slab
   instead. tests/tile-models.test.ts fails if a puzzle's answer is the only
   word among miniatures or the only miniature among words. Miniatures scale
-  so their longest side is 10 cm, and every tile carries the same wooden
+  so their longest side is 10 cm (flat ones, under 18% as tall as they are
+  long, tilt 30 degrees toward the player so their face shows: ruler,
+  paper clip, key, keyboard, blueprint), and every tile carries the same wooden
   display stand (display-stand asset, 15.6 x 11.6 x 2.2 cm, origin bottom
   centre, +Z to the player), picked up with it; word cards stand set into
   it. The stand is now the owner's Meshy model (public/models/display-stand.glb,
