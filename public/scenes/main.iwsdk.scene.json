@@ -504,11 +504,7 @@
     },
     {
       "id": "screen-handle",
-      "name": "Screen Handle",
-      "content": {
-        "type": "asset",
-        "asset": "screen-projector"
-      },
+      "name": "Screen Mount",
       "transform": {
         "position": [
           0,
@@ -518,11 +514,6 @@
         "scale": 1.45
       },
       "components": {
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget",
-          "rotate": false
-        },
         "MovablePanel": {}
       },
       "children": [

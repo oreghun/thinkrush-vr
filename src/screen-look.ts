@@ -27,7 +27,7 @@ export class ScreenLookSystem extends createSystem({
         this.pointerId !== undefined ||
         this.world.visibilityState.peek() !== VisibilityState.NonImmersive ||
         // Only empty space turns the view; a press that starts on a button,
-        // orb, tile or grab bar belongs to that thing alone.
+        // orb or tile belongs to that thing alone.
         this.queries.hovered.entities.size > 0
       ) {
         return;

@@ -23,7 +23,6 @@ import { createPatternBoard } from './scene-assets/pattern-board.scene-asset.js'
 import { createObjectBoard } from './scene-assets/object-board.scene-asset.js';
 import { createRoom } from './scene-assets/room.scene-asset.js';
 import { createRush } from './scene-assets/rush.scene-asset.js';
-import { createScreenProjector } from './scene-assets/screen-projector.scene-asset.js';
 import {
   createStage,
   createStudioFloor,
@@ -77,7 +76,6 @@ export default defineAssets({
     name: 'Display Stand',
   },
   'answer-orb': createAnswerOrb(),
-  'screen-projector': createScreenProjector(),
   rush: createRush(),
   // Loaded in the background so the game starts fast; a miniature still
   // loading shows its code-built version for that round.

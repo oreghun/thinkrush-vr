@@ -16,6 +16,7 @@ import { UITextSystem } from './ui-text.js';
 import { PuzzleSystem } from './puzzle.js';
 import { RushSystem } from './rush.js';
 import { ScreenLookSystem } from './screen-look.js';
+import { FlatViewSystem } from './flat-view.js';
 import { SoundSystem } from './sound.js';
 import { PauseGestureSystem } from './pause-gesture.js';
 import { PerformanceSystem } from './performance.js';
@@ -43,6 +44,7 @@ World.create(
   world.registerSystem(PanelSystem);
   world.registerSystem(MovablePanelSystem);
   world.registerSystem(ScreenLookSystem);
+  world.registerSystem(FlatViewSystem);
   world.registerSystem(PuzzleSystem);
   world.registerSystem(RushSystem);
   world.registerSystem(SoundSystem);
