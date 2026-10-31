@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-40 merged plus the performance PR (6 answer orbs;
+As of 2026-10-31, PRs 1-41 merged plus the demo video plan (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -113,7 +113,8 @@ objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 34 the owner's room set in the back corners; 35 the owner's pedestal
 table as the play table; 36 the pattern puzzle; 37 the sound pass; 38 the
 Daily Challenge and streaks; 39 the palm-up pause; 40 the Meta VR
-Glasses check and layout; then the performance pass):
+Glasses check and layout; 41 the performance pass; then the demo video
+plan):
 
 Live on main
 
@@ -452,7 +453,11 @@ Next up (in order)
    compile and texture upload; renderer.compileAsync could warm them), the
    graphite MeshPhysicalMaterial (clearcoat) on orbs and stands, and the
    screen's see-through glass.
-2. Demo video (RUSH is its face).
+2. Demo video (RUSH is its face): docs/demo-video.md is the shot list
+   (9 shots, about 2 minutes, a 75-second cut), voiceover and recording
+   steps; the owner records on the Quest. The official rules page could not
+   be read from the cloud session (devpost.com is outside its network
+   policy), so the owner confirms the length and hosting rules.
 3. Swahili content drop-in when the owner has written it.
 4. Optional, if time allows: "Complete the object" (see Decisions).
    Cut order if time runs short: leaderboard, misplaced-object puzzle
