@@ -107,7 +107,7 @@ choices; 23 the owner's Meshy stand replacing the code-built one; 24
 the first Meshy miniatures, for the wind puzzle; 25 objects at 10 cm;
 26 Meshy miniatures for the number and beginnings puzzles, swapped in as
 they load; 27 the keys, lock and magnet puzzles' miniatures; then the
-energy and sound puzzles' miniatures):
+energy and sound puzzles' miniatures and the yellow ruler):
 
 Live on main
 
@@ -235,10 +235,10 @@ Open questions (owner deciding, 2026-10-30)
 - Action twist follow-ups: moves for the answer orbs, and a "hold it up to
   RUSH" variant once RUSH exists.
 
-- Two models still to redo (owner): the megaphone (the upload in
+- One model still to redo (owner): the megaphone (the upload in
   art/incoming/megaphone.glb is the untextured 929k-triangle preview, so
-  the code-built megaphone stays) and a bright yellow ruler to replace the
-  wooden one, which disappears on the wooden stand (prompts were given
+  the code-built megaphone stays). The ruler is now a bright yellow one:
+  the first, wooden ruler disappeared on the wooden stand (prompts were given
   in chat: one ChatGPT style message, then one subject line per object;
   Meshy remesh to ~3,000 triangles, symmetry off for asymmetric objects).
   To add one: optimize it to public/models/objects/<model>.glb with
