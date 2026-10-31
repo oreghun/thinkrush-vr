@@ -5,12 +5,16 @@
 // with plain factors. Geometry is copied unchanged.
 //
 //   node scripts/optimize-model.mjs <in.glb> <out.glb> \
-//     [--max-texture 1024] [--flat-roughness 0.55] [--height 0.55]
+//     [--max-texture 1024] [--flat-roughness 0.55]
+//     [--height 0.55 | --size 0.92,0.645,0.462]
 //
 // --height gives the model its real size: its root node is scaled so the
 // model stands that many metres tall, with its origin at the centre of its
 // base, so a scene can stand it on the floor at scale 1. Meshy models come
-// centred on their middle at about 2 units across.
+// centred on their middle at about 2 units across. --size fits it to an
+// exact width, height and depth instead (metres along x, y, z), stretching
+// each axis on its own: for a piece that must match a layout, like the
+// play table.
 //
 // Data maps are kept at half the colour maps' size: metal and roughness
 // change over broad areas, and PNG at full size would dominate the file.
@@ -23,7 +27,7 @@ import sharp from 'sharp';
 const [input, output, ...flags] = process.argv.slice(2);
 if (!input || !output) {
   console.error(
-    'usage: node scripts/optimize-model.mjs <in.glb> <out.glb> [--max-texture N] [--flat-roughness R] [--height M]',
+    'usage: node scripts/optimize-model.mjs <in.glb> <out.glb> [--max-texture N] [--flat-roughness R] [--height M | --size W,H,D]',
   );
   process.exit(1);
 }
@@ -35,6 +39,15 @@ const maxTexture = option('--max-texture', 1024);
 const maxDataTexture = Math.max(128, Math.round(maxTexture / 2));
 const flatRoughness = option('--flat-roughness', undefined);
 const height = option('--height', undefined);
+const sizeAt = flags.indexOf('--size');
+const size =
+  sizeAt === -1 ? undefined : flags[sizeAt + 1].split(',').map(Number);
+if (size && (size.length !== 3 || size.some((n) => !(n > 0)))) {
+  throw new Error('--size takes width,height,depth in metres, e.g. 0.9,0.6,0.45');
+}
+if (size && height !== undefined) {
+  throw new Error('use --height or --size, not both');
+}
 
 // A GLB is a 12-byte header, a JSON chunk and one binary chunk.
 const glb = readFileSync(input);
@@ -65,7 +78,7 @@ if (flatRoughness !== undefined) {
 // Real size: scale the root so the model is `height` metres tall and move
 // its origin to the centre of its base. Only for a single root node with no
 // transform of its own (as Meshy exports), so nothing is silently combined.
-if (height !== undefined) {
+if (height !== undefined || size) {
   const roots = gltf.scenes[gltf.scene ?? 0].nodes;
   const root = gltf.nodes[roots[0]];
   if (roots.length !== 1 || root.matrix || root.rotation || root.scale || root.translation) {
@@ -91,15 +104,21 @@ if (height !== undefined) {
     }
   };
   visit(root);
-  const scale = height / (max[1] - min[1]);
-  root.scale = [scale, scale, scale];
+  const extent = [0, 1, 2].map((i) => max[i] - min[i]);
+  const uniform = size ? 0 : height / extent[1];
+  const scale = size
+    ? size.map((metres, i) => metres / extent[i])
+    : [uniform, uniform, uniform];
+  root.scale = scale;
   root.translation = [
-    -((min[0] + max[0]) / 2) * scale,
-    -min[1] * scale,
-    -((min[2] + max[2]) / 2) * scale,
+    -((min[0] + max[0]) / 2) * scale[0],
+    -min[1] * scale[1],
+    -((min[2] + max[2]) / 2) * scale[2],
   ];
+  const stretch = Math.max(...scale) / Math.min(...scale);
   console.log(
-    `real size: ${((max[0] - min[0]) * scale).toFixed(2)} x ${height} x ${((max[2] - min[2]) * scale).toFixed(2)} m (w x h x d)`,
+    `real size: ${extent.map((e, i) => (e * scale[i]).toFixed(3)).join(' x ')} m (w x h x d)` +
+      (stretch > 1.001 ? `, stretched ${((stretch - 1) * 100).toFixed(0)}% on one axis` : ''),
   );
 }
 

@@ -28,3 +28,14 @@ for (const piece of ROOM_PIECES) {
     );
   });
 }
+
+// The play table is placed by code (it carries the puzzle board), not by
+// the scene, but needs its file and its source row all the same.
+test('play table: optimized model and source record', () => {
+  const file = new URL('../public/models/play-table.glb', import.meta.url);
+  assert.ok(existsSync(file), 'missing public/models/play-table.glb');
+  assert.ok(
+    sources.includes('public/models/play-table.glb'),
+    'art/SOURCES.md has no row for public/models/play-table.glb',
+  );
+});
