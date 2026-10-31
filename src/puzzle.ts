@@ -41,6 +41,8 @@ import {
 } from './moves.js';
 import { type Puzzle, PUZZLES } from './puzzles.js';
 import { Rush } from './rush-component.js';
+import { MovablePanel } from './movable-panel-component.js';
+import { ScreenStop } from './screen-stops.js';
 import {
   isReadAloudOn,
   pauseSpeaking,
@@ -146,6 +148,7 @@ export class PuzzleSystem extends createSystem({
   tiles: { required: [PuzzleTile] },
   heldTiles: { required: [PuzzleTile, Grabbed] },
   rushes: { required: [Rush] },
+  panels: { required: [MovablePanel] },
   orbs: { required: [AnswerOrb] },
   pressedOrbs: { required: [AnswerOrb, Pressed] },
 }) {
@@ -559,6 +562,10 @@ export class PuzzleSystem extends createSystem({
     }
     this.settling.clear();
     this.orbFlash.clear();
+    // A new puzzle sends a beckoned screen back, off the table and objects.
+    for (const panel of this.queries.panels.entities) {
+      panel.setValue(MovablePanel, 'stop', ScreenStop.Far);
+    }
 
     const tileLabels = this.isVisual ? shuffled(puzzle.tiles ?? []) : [];
     this.tileBySlot.forEach((tile, slot) => {

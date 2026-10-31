@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-31 merged plus the one-screen PR (6 answer orbs;
+As of 2026-10-31, PRs 1-32 merged plus the beckon PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -109,7 +109,7 @@ the first Meshy miniatures, for the wind puzzle; 25 objects at 10 cm;
 they load; 27 the keys, lock and magnet puzzles' miniatures; then the
 energy and sound puzzles' miniatures; 29 the yellow ruler and flat
 objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
-then one projected screen with home and puzzle pages):
+32 one projected screen with home and puzzle pages; then beckoning it):
 
 Live on main
 
@@ -167,7 +167,7 @@ Live on main
   after 2.5 s); practice says so and lets you retry. Orb puzzles have no
   moves. The tray stays visible for every move: the habit is the trap.
 - RUSH (src/rush.ts, logic in src/rush-mood.ts with tests, model in
-  src/scene-assets/rush.scene-asset.ts, scene node "rush" at 0.48, 1.25,
+  src/scene-assets/rush.scene-asset.ts, scene node "rush" at 0.52, 1.25,
   -0.8 beside the screen): a deep-gold glowing sphere, 18 cm across,
   with two eyes; it turns to face the player and blinks. It is the timer:
   it shrinks to 45% and warms from gold to red as the clock (the puzzle's
@@ -181,7 +181,8 @@ Live on main
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
-  0.115, 600 cm wide = 0.69 m, centred 0.86 m in front of the seat): two
+  0.115 under a bar at scale 1.6: 600 cm = 1.1 m wide, its centre at
+  y 1.2, 1.4 m in front of the seat, the Far stop): two
   pages, home and puzzle, shown one at a time by PuzzleSystem.render. The
   game opens on home (PuzzleMode.Home, the board's default): the table is
   cleared, no clock runs, RUSH rests full size and nothing is read aloud.
@@ -208,7 +209,22 @@ Live on main
   toward the screen; the fan's mesh ignores rays, so only the bar grabs):
   DistanceGrabbable with MoveFromTarget, rotation locked so the
   single-sided screen keeps facing the player, position clamped near the
-  table by MovablePanelSystem. On flat
+  table by MovablePanelSystem.
+- Beckon (src/screen-stops.ts with tests, MovablePanel.stop, run by
+  MovablePanelSystem): in VR the screen rests at one of two stops. Far is
+  the scene's pose (above). Near puts its centre 0.42 m ahead of and 0.18 m
+  below the eyes at 40% of the Far scale (0.44 m wide), placed from the
+  head when called and never with the bar below 0.72 m (the table top is
+  0.68 m). On letting go of the bar, a pull of 8 cm or more toward the head
+  means Near, a push of 8 cm means Far, a pinch under 0.35 s moving under
+  3 cm switches, and anything else returns to the current stop; the
+  screen glides there (rate 4/s). Each page's header has a Closer / Push
+  back button (VR only) doing the same switch. A new puzzle (startRound)
+  and leaving VR set the stop to Far. The screen carries PokeInteractable,
+  so at Near a fingertip taps its buttons; a hand that close loses its
+  pointer ray (touch takes over), so at Near the bar can't be ray-grabbed
+  from the lap: Push back is the way back. On a flat page the mouse still
+  places the screen freely and nothing snaps. On flat
   screens, ScreenLookSystem turns the camera when empty space is dragged;
   it never runs in an immersive session (comfort), never starts on a press
   that begins over something interactable (so mouse-dragging a grab bar
@@ -284,13 +300,11 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Beckon (screen PR 2, agreed 2026-10-31): pinch the light bar and pull
-   to bring the screen in, push to send it back, with two stops: Far
-   (about 1.4 m, scaled up so text keeps its apparent size) for reading
-   and Near (within the 2 ft reach) where PokeInteractable lets a
-   fingertip tap the buttons; it slides home when a puzzle starts. No
-   free-hand "come here" gesture: it looks like the palm-up pause and
-   fails on controllers and glasses.
+1. Room set (owner uploaded six Meshy models to art/incoming/ on
+   2026-10-31: clay_pot, basket, potted_snake_plant, wooden_cabinet (the
+   console), wooden_stool, wooden_table); replace the
+   starter's Scandinavian decor in the two back corners. The table is
+   fitted to its 0.68 m top and loads as a critical asset.
 2. Pattern puzzle type (decision above).
 3. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
    RUSH's reactions (RUSH itself is built).
@@ -313,6 +327,11 @@ Working notes
   vite.config.ts). Without it, a reload right after a deploy paired new
   code with the old scene ("asset voice-check is not declared"). A new
   public file must go through publicAssetUrl or withBuildId.
+- Fingertip pokes can't be proven in the headless emulator: its slow
+  frames stretch every press past UIKit's 800 ms click window (contactMs
+  over 800 in xr run-sequence). Prove the logic with a ray click from a
+  controller held 0.7 m or more from the screen (closer, touch takes over
+  and the ray stops pressing), and leave the fingertip tap to the Quest.
 - Script edits must assert their match: one silent no-op left MovablePanel
   out of components.ts and every scene load failed with "not present in the
   active component catalog". Components must be declared in system-free
