@@ -180,6 +180,17 @@ streak") or today's result ("done today, 120 points"), and the summary
 shows the score, how many were solved, the streak and the best daily score.
 Everything is saved on the device only (`thinkrush.daily` in localStorage).
 
+## Meta VR Glasses
+
+The game asks for gaze tracking (optionally), so on Meta VR Glasses you look
+at a screen button, an orb or the light bar and pinch with either hand to
+use it; the puzzle pieces on the table are picked up with your hands as on
+a Quest. The glasses see less of the world (37 degrees to each side, 25 up,
+43 down), so the screen sits a little low and RUSH close beside it: seated
+and glancing down at the table, the puzzle page, RUSH (the timer) and the
+pieces are all in view at once. To check it in the emulator, set
+`dev.emulator.device` to `metaVRGlasses` in `iwsdk.config.json`.
+
 ## Pause
 
 Turn either hand palm up, open, in front of you and hold it for a moment:

@@ -53,7 +53,8 @@ const SCALE_RATE = 3;
 // (its usual place beside the panel is beyond the 2 ft airplane-seat test):
 // this far from the head, to the right, below the eyes and in front. The
 // spot is fixed when the move starts, so RUSH does not follow the head.
-const SHOW_OFFSET = new Vector3(0.28, -0.2, -0.42);
+// 0.2 m right (not further) keeps RUSH inside Meta VR Glasses' narrower view.
+const SHOW_OFFSET = new Vector3(0.2, -0.2, -0.42);
 const GLIDE_RATE = 2.5;
 
 interface Eye {

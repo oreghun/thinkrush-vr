@@ -48,7 +48,7 @@ export function releaseStop(
 }
 
 // Near: the screen's centre this far in front of and below the eyes, at
-// this share of its Far size (1.1 m wide at Far becomes about 0.44 m).
+// this share of its Far size (1.0 m wide at Far becomes about 0.40 m).
 // Its buttons, on its lower half, are then about 0.45 m from the shoulder.
 export const NEAR_FORWARD = 0.42;
 export const NEAR_BELOW_EYES = 0.18;
