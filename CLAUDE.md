@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-36 merged plus the sound PR (6 answer orbs;
+As of 2026-10-31, PRs 1-37 merged plus the Daily Challenge PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -111,7 +111,8 @@ energy and sound puzzles' miniatures; 29 the yellow ruler and flat
 objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 32 one projected screen with home and puzzle pages; 33 beckoning it;
 34 the owner's room set in the back corners; 35 the owner's pedestal
-table as the play table; 36 the pattern puzzle; then the sound pass):
+table as the play table; 36 the pattern puzzle; 37 the sound pass; then the
+Daily Challenge and streaks):
 
 Live on main
 
@@ -239,6 +240,23 @@ Live on main
   rule). Levels: music bus 0.3, cues 0.55, master 0.9 (offline render peaks
   at 0.4; music about -24 dB calm, -21 dB urgent; cues -16 to -19 dB).
   Home page "Sound on/off" (thinkrush.sound) also mutes the chime.
+- Daily Challenge (src/daily.ts with tests; PuzzleSystem.startDaily): the
+  home page's gold "Daily Challenge" button (full width, above Pattern Loom)
+  starts a run (mode run, 180 s, category All) over the day's puzzles:
+  one per world with content, picked by a seed from the local date
+  (dayKey, YYYY-MM-DD), sorted easiest first; pattern boards are dealt with
+  dailySeed(day, puzzle id), so everyone gets the same boards. Moves still
+  follow the device's own introduction count. The run ends after the last
+  puzzle or at the clock (advanceRun/endRun), and either counts: endRun
+  records the day (recordDaily) in thinkrush.daily ({lastDay, streak,
+  bestStreak, lastScore, bestScore}; parseRecord falls back to empty on
+  bad data). Streak: +1 when the last day was yesterday, kept on a replay
+  the same day (better score kept), else 1; currentStreak shows it until a
+  whole day is missed. Button text: "done today, {score} points", else
+  "keep your {n}-day streak", else "Daily Challenge" (fill() puts values
+  into {name} slots). Summary: "Daily Challenge done!", score, solved x/5,
+  streak, best daily score; no Run again (Home and Back to practice). The
+  general run best (thinkrush.bestScore) is separate.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
@@ -371,8 +389,7 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Streaks and the Daily Challenge (localStorage only).
-2. Palm-up pause gesture; pause when the session loses visibility.
+1. Palm-up pause gesture; pause when the session loses visibility.
    Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
    real Quest 3, demo video. Cut order if time runs short: leaderboard,
    misplaced-object puzzle variant, extra puzzle count.

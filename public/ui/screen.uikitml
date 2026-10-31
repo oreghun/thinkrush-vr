@@ -157,6 +157,10 @@
     border-color: #e8a06a;
   }
 
+  .world-daily {
+    border-color: #f5d90a;
+  }
+
   .world-pattern {
     border-color: #ff6fa8;
   }
@@ -182,6 +186,14 @@
         <div id="welcome.heading" class="heading">...</div>
         <div id="welcome.body1" class="body">...</div>
         <div id="welcome.body2" class="body">...</div>
+        <div class="button-row">
+          <Button id="daily-button" class="world-button world-daily">
+            <ButtonIcon>
+              <CalendarDays></CalendarDays>
+            </ButtonIcon>
+            <ButtonLabel id="daily-label" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
         <div id="welcome.worldHeading" class="world-heading">...</div>
         <div class="button-row">
           <Button id="world-pattern" class="world-button world-pattern">

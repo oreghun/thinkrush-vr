@@ -51,6 +51,11 @@
   "readAloud.slow": "",
   "readAloud.normal": "",
   "readAloud.fast": "",
+  "daily.start": "",
+  "daily.keep": "",
+  "daily.done": "",
+  "daily.over": "",
+  "daily.streak": "",
   "sound.on": "",
   "sound.off": "",
   "readAloud.noVoice": ""

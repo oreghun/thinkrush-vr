@@ -57,6 +57,16 @@ import { BUILT_TABLE_PARTS } from './scene-assets/puzzle.scene-asset.js';
 import { createSwatch } from './scene-assets/pattern-board.scene-asset.js';
 import { PatternTable } from './pattern-play.js';
 import { isSoundOn } from './sound-settings.js';
+import {
+  currentStreak,
+  dailyPuzzles,
+  dailySeed,
+  dayKey,
+  type DailyRecord,
+  doneToday,
+  parseRecord,
+  recordDaily,
+} from './daily.js';
 import type { Piece } from './patterns.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 import { IMPORTED_OBJECTS, objectAssetId } from './imported-objects.js';
@@ -168,6 +178,8 @@ export class PuzzleSystem extends createSystem({
   // Pattern puzzles also use the tiles, each carrying a piece of cloth.
   private isPattern = false;
   private patternTable?: PatternTable;
+  // The day of the Daily Challenge being played (or just finished), if any.
+  private dailyDay?: string;
   private readonly tilePieces: (Piece | undefined)[] = [];
   // Height above the table where objects rest on the display stand.
   private standSeat = 0;
@@ -240,7 +252,9 @@ export class PuzzleSystem extends createSystem({
     | 'readLabel'
     | 'home'
     | 'homePage'
-    | 'puzzlePage',
+    | 'puzzlePage'
+    | 'daily'
+    | 'dailyLabel',
     UIElement
   > = {
     prompt: null,
@@ -262,6 +276,8 @@ export class PuzzleSystem extends createSystem({
     home: null,
     homePage: null,
     puzzlePage: null,
+    daily: null,
+    dailyLabel: null,
   };
 
   init(): void {
@@ -348,6 +364,8 @@ export class PuzzleSystem extends createSystem({
       home: panel?.getElementById('puzzle-home') ?? null,
       homePage: panel?.getElementById('home-page') ?? null,
       puzzlePage: panel?.getElementById('puzzle-page') ?? null,
+      daily: panel?.getElementById('daily-button') ?? null,
+      dailyLabel: panel?.getElementById('daily-label') ?? null,
     };
     const next = () => this.onNextPressed();
     const run = () => this.startRun();
@@ -355,6 +373,7 @@ export class PuzzleSystem extends createSystem({
     const category = () => this.cycleCategory();
     const read = () => this.readPuzzle(true);
     const home = () => this.goHome();
+    const daily = () => this.startDaily();
 
     // The home page offers direct entry into each puzzle world. Selecting
     // a world filters both practice browsing and the three-minute run draw.
@@ -388,6 +407,7 @@ export class PuzzleSystem extends createSystem({
     this.elements.category?.addEventListener('click', category);
     this.elements.read?.addEventListener('click', read);
     this.elements.home?.addEventListener('click', home);
+    this.elements.daily?.addEventListener('click', daily);
 
     this.cleanupFuncs.push(
       () => this.tileModels.forEach((model, slot) => {
@@ -415,6 +435,7 @@ export class PuzzleSystem extends createSystem({
       () => this.elements.category?.removeEventListener('click', category),
       () => this.elements.read?.removeEventListener('click', read),
       () => this.elements.home?.removeEventListener('click', home),
+      () => this.elements.daily?.removeEventListener('click', daily),
       // Entering VR is the first moment a headset player can hear the
       // puzzle; a blurred session holds the voice along with the clock.
       this.world.visibilityState.subscribe((state) => {
@@ -631,7 +652,12 @@ export class PuzzleSystem extends createSystem({
 
     // A pattern deals a fresh board: the strip on the board, four pieces
     // on the tiles. It stands where the tray does, so they take turns.
-    const deal = this.isPattern ? this.patternTable?.deal(puzzle) : undefined;
+    const deal = this.isPattern
+      ? this.patternTable?.deal(
+          puzzle,
+          this.dailyDay ? dailySeed(this.dailyDay, puzzle.id) : undefined,
+        )
+      : undefined;
     this.patternTable?.show(this.isPattern);
     this.tray?.setValue(Visibility, 'isVisible', !this.isPattern);
     const tileLabels = this.isVisual ? shuffled(puzzle.tiles ?? []) : [];
@@ -1039,6 +1065,7 @@ export class PuzzleSystem extends createSystem({
     if (!board || this.mode() === PuzzleMode.Run) {
       return;
     }
+    this.dailyDay = undefined;
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.Run);
     board.setValue(PuzzleBoard, 'score', 0);
     board.setValue(PuzzleBoard, 'solved', 0);
@@ -1053,6 +1080,11 @@ export class PuzzleSystem extends createSystem({
   private advanceRun(): void {
     this.advanceIn = 0;
     this.runPointer += 1;
+    if (this.runPointer >= this.runOrder.length && this.dailyDay) {
+      // The Daily Challenge ends once all its puzzles are played.
+      this.endRun();
+      return;
+    }
     if (this.runPointer >= this.runOrder.length) {
       this.runOrder = shuffled(this.runOrder);
       this.runPointer = 0;
@@ -1069,10 +1101,52 @@ export class PuzzleSystem extends createSystem({
     board.setValue(PuzzleBoard, 'secondsLeft', 0);
     this.revealCorrectOrb();
     const score = board.getValue(PuzzleBoard, 'score') ?? 0;
-    if (score > readBestScore()) {
+    if (this.dailyDay) {
+      // Played to the end (or the clock): the day counts for the streak.
+      writeDaily(recordDaily(readDaily(), this.dailyDay, score));
+    } else if (score > readBestScore()) {
       writeBestScore(score);
     }
     this.render();
+  }
+
+  /**
+   * Today's Daily Challenge: a run over the day's five puzzles in order,
+   * the same for everyone, ending once all are played or the clock runs
+   * out. Finishing it builds the streak.
+   */
+  private startDaily(): void {
+    const board = this.board;
+    if (!board || this.mode() === PuzzleMode.Run) {
+      return;
+    }
+    const day = dayKey(new Date());
+    const order = dailyPuzzles(PUZZLES, day);
+    if (order.length === 0) {
+      return;
+    }
+    this.dailyDay = day;
+    board.setValue(PuzzleBoard, 'category', PuzzleCategory.All);
+    board.setValue(PuzzleBoard, 'mode', PuzzleMode.Run);
+    board.setValue(PuzzleBoard, 'score', 0);
+    board.setValue(PuzzleBoard, 'solved', 0);
+    board.setValue(PuzzleBoard, 'secondsLeft', RUN_SECONDS);
+    this.runOrder = order;
+    this.runPointer = 0;
+    this.startRound(order[0]);
+  }
+
+  /** The home page's Daily Challenge button: the streak, or today's score. */
+  private renderDailyButton(): void {
+    const record = readDaily();
+    const today = dayKey(new Date());
+    const streak = currentStreak(record, today);
+    const text = doneToday(record, today)
+      ? fill(t('daily.done'), { score: record.lastScore })
+      : streak > 0
+        ? fill(t('daily.keep'), { n: streak })
+        : t('daily.start');
+    this.elements.dailyLabel?.setProperties({ text });
   }
 
   /**
@@ -1085,6 +1159,7 @@ export class PuzzleSystem extends createSystem({
       return;
     }
     stopSpeaking();
+    this.dailyDay = undefined;
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.Home);
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
     board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
@@ -1109,6 +1184,7 @@ export class PuzzleSystem extends createSystem({
     if (!board || this.mode() !== PuzzleMode.RunOver) {
       return;
     }
+    this.dailyDay = undefined;
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.Practice);
     this.startRound(board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0);
   }
@@ -1200,6 +1276,9 @@ export class PuzzleSystem extends createSystem({
     this.elements.puzzlePage?.setProperties({
       display: atHome ? 'none' : 'flex',
     });
+    if (atHome) {
+      this.renderDailyButton();
+    }
     if (!puzzle || !board || atHome) {
       return;
     }
@@ -1215,7 +1294,17 @@ export class PuzzleSystem extends createSystem({
     const accent = CATEGORY_ACCENTS[puzzle.type as Category] ?? CATEGORY_ACCENTS[PuzzleCategory.All];
     let statusColor = accent;
     let detail = '';
-    if (mode === PuzzleMode.RunOver) {
+    if (mode === PuzzleMode.RunOver && this.dailyDay) {
+      const solved = board.getValue(PuzzleBoard, 'solved') ?? 0;
+      const record = readDaily();
+      statusText = t('daily.over');
+      statusColor = STATUS_COLORS.solved;
+      detail =
+        `${t('puzzle.score')}: ${score}. ` +
+        `${t('puzzle.solvedLabel')}: ${solved}/${this.runOrder.length}. ` +
+        `${t('daily.streak')}: ${currentStreak(record, this.dailyDay)}. ` +
+        `${t('puzzle.best')}: ${record.bestScore}.`;
+    } else if (mode === PuzzleMode.RunOver) {
       const solved = board.getValue(PuzzleBoard, 'solved') ?? 0;
       statusText = t('puzzle.runOver');
       statusColor = STATUS_COLORS.timeUp;
@@ -1269,8 +1358,12 @@ export class PuzzleSystem extends createSystem({
       display: mode === PuzzleMode.Practice ? 'none' : 'flex',
     });
     // Start run doubles as Run again on the summary.
+    // The Daily Challenge summary offers Home and practice, not a run.
     this.elements.run?.setProperties({
-      display: mode === PuzzleMode.Run ? 'none' : 'flex',
+      display:
+        mode === PuzzleMode.Run || (mode === PuzzleMode.RunOver && this.dailyDay)
+          ? 'none'
+          : 'flex',
     });
     this.elements.runLabel?.setProperties({
       text:
@@ -1359,6 +1452,31 @@ function cloneMaterials(entity: Entity): MeshStandardMaterial[] {
 }
 
 /** The saved best run score, or 0 when there is none or storage is blocked. */
+const DAILY_KEY = 'thinkrush.daily';
+
+function readDaily(): DailyRecord {
+  try {
+    return parseRecord(localStorage.getItem(DAILY_KEY));
+  } catch {
+    return parseRecord(null);
+  }
+}
+
+function writeDaily(record: DailyRecord): void {
+  try {
+    localStorage.setItem(DAILY_KEY, JSON.stringify(record));
+  } catch {
+    // Storage can be blocked (private mode); the streak then lasts this visit.
+  }
+}
+
+/** Puts values into a message's {name} slots. */
+function fill(text: string, values: Record<string, number>): string {
+  return text.replace(/\{(\w+)\}/gu, (slot, name: string) =>
+    name in values ? String(values[name]) : slot,
+  );
+}
+
 function readBestScore(): number {
   try {
     const value = Number(localStorage.getItem(BEST_SCORE_KEY));
