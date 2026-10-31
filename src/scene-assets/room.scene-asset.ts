@@ -148,13 +148,6 @@ function wallRuns(): WallRun[] {
     run(new Vector3(ROOM_HALF_WIDTH, 0, 0), new Vector3(0, 0, 1), ROOM_BACK, ROOM_FRONT),
     run(new Vector3(0, 0, ROOM_FRONT), new Vector3(-1, 0, 0), -ROOM_HALF_WIDTH, -DOOR_HALF_WIDTH),
     run(new Vector3(0, 0, ROOM_FRONT), new Vector3(-1, 0, 0), DOOR_HALF_WIDTH, ROOM_HALF_WIDTH),
-    // Across the door's planks, so the band runs right round the room.
-    run(
-      new Vector3(0, 0, ROOM_FRONT + DOOR_SET),
-      new Vector3(-1, 0, 0),
-      -DOOR_HALF_WIDTH,
-      DOOR_HALF_WIDTH,
-    ),
   ];
 }
 
