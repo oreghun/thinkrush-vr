@@ -202,7 +202,7 @@ src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/moves.ts              the action twist: which move to ask for, and judging it
 src/rush.ts               RUSH the companion (moods and timer in src/rush-mood.ts)
-public/models/            imported models, optimized (see art/SOURCES.md)
+public/models/            imported models, optimized (see art/SOURCES.md); room/ holds the corner set dressing
 art/                      originals of imported models and how they were made
 src/read-aloud.ts         reads puzzles aloud with on-device voices only
 src/assets.ts             asset manifest; models are built in src/scene-assets/

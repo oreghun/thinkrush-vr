@@ -5,7 +5,12 @@
 // with plain factors. Geometry is copied unchanged.
 //
 //   node scripts/optimize-model.mjs <in.glb> <out.glb> \
-//     [--max-texture 1024] [--flat-roughness 0.55]
+//     [--max-texture 1024] [--flat-roughness 0.55] [--height 0.55]
+//
+// --height gives the model its real size: its root node is scaled so the
+// model stands that many metres tall, with its origin at the centre of its
+// base, so a scene can stand it on the floor at scale 1. Meshy models come
+// centred on their middle at about 2 units across.
 //
 // Data maps are kept at half the colour maps' size: metal and roughness
 // change over broad areas, and PNG at full size would dominate the file.
@@ -18,7 +23,7 @@ import sharp from 'sharp';
 const [input, output, ...flags] = process.argv.slice(2);
 if (!input || !output) {
   console.error(
-    'usage: node scripts/optimize-model.mjs <in.glb> <out.glb> [--max-texture N] [--flat-roughness R]',
+    'usage: node scripts/optimize-model.mjs <in.glb> <out.glb> [--max-texture N] [--flat-roughness R] [--height M]',
   );
   process.exit(1);
 }
@@ -29,6 +34,7 @@ const option = (name, fallback) => {
 const maxTexture = option('--max-texture', 1024);
 const maxDataTexture = Math.max(128, Math.round(maxTexture / 2));
 const flatRoughness = option('--flat-roughness', undefined);
+const height = option('--height', undefined);
 
 // A GLB is a 12-byte header, a JSON chunk and one binary chunk.
 const glb = readFileSync(input);
@@ -54,6 +60,47 @@ if (flatRoughness !== undefined) {
       pbr.roughnessFactor = flatRoughness;
     }
   }
+}
+
+// Real size: scale the root so the model is `height` metres tall and move
+// its origin to the centre of its base. Only for a single root node with no
+// transform of its own (as Meshy exports), so nothing is silently combined.
+if (height !== undefined) {
+  const roots = gltf.scenes[gltf.scene ?? 0].nodes;
+  const root = gltf.nodes[roots[0]];
+  if (roots.length !== 1 || root.matrix || root.rotation || root.scale || root.translation) {
+    throw new Error('--height needs one root node without its own transform');
+  }
+  const min = [Infinity, Infinity, Infinity];
+  const max = [-Infinity, -Infinity, -Infinity];
+  const visit = (node) => {
+    if (node.matrix || node.rotation || node.scale || node.translation) {
+      if (node !== root) {
+        throw new Error('--height needs child nodes without transforms');
+      }
+    }
+    for (const primitive of gltf.meshes[node.mesh]?.primitives ?? []) {
+      const accessor = gltf.accessors[primitive.attributes.POSITION];
+      for (let i = 0; i < 3; i += 1) {
+        min[i] = Math.min(min[i], accessor.min[i]);
+        max[i] = Math.max(max[i], accessor.max[i]);
+      }
+    }
+    for (const child of node.children ?? []) {
+      visit(gltf.nodes[child]);
+    }
+  };
+  visit(root);
+  const scale = height / (max[1] - min[1]);
+  root.scale = [scale, scale, scale];
+  root.translation = [
+    -((min[0] + max[0]) / 2) * scale,
+    -min[1] * scale,
+    -((min[2] + max[2]) / 2) * scale,
+  ];
+  console.log(
+    `real size: ${((max[0] - min[0]) * scale).toFixed(2)} x ${height} x ${((max[2] - min[2]) * scale).toFixed(2)} m (w x h x d)`,
+  );
 }
 
 // Drop textures and images no material uses any more, renumbering the rest.
