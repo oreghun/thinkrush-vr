@@ -69,12 +69,13 @@ export class PatternTable {
   }
 
   /** Deals a fresh board for `puzzle` and lays its strip out. */
-  deal(puzzle: Puzzle): PatternBoard | undefined {
+  /** `seed` deals a set board (the Daily Challenge); without it, a fresh one. */
+  deal(puzzle: Puzzle, seed?: number): PatternBoard | undefined {
     if (!puzzle.family || !puzzle.rule || this.cells.length < PATTERN_CELLS) {
       return undefined;
     }
     this.textures.dispose();
-    const seed = Math.floor(Math.random() * 2 ** 32);
+    seed ??= Math.floor(Math.random() * 2 ** 32);
     const board = generatePattern(puzzle.family, puzzle.rule, makeRandom(seed));
     this.dealt = board;
     board.strip.forEach((piece, i) => {

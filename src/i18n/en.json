@@ -51,6 +51,11 @@
   "readAloud.slow": "Read aloud: Slow",
   "readAloud.normal": "Read aloud: Normal",
   "readAloud.fast": "Read aloud: Fast",
+  "daily.start": "Daily Challenge",
+  "daily.keep": "Daily Challenge - keep your {n}-day streak",
+  "daily.done": "Daily Challenge - done today, {score} points",
+  "daily.over": "Daily Challenge done!",
+  "daily.streak": "Streak",
   "sound.on": "Sound on",
   "sound.off": "Sound off",
   "readAloud.noVoice": "No voice on this device"

@@ -169,6 +169,17 @@ Browsers only allow speech after the first tap or click, so on a flat page
 the first puzzle is read once you interact; in VR, entering the headset
 reads the current puzzle.
 
+## Daily Challenge and streaks
+
+The home page's **Daily Challenge** plays five puzzles, one from each world,
+easiest first, in a 3-minute run that ends once all five are played. The set
+comes from the date alone (`src/daily.ts`), so everyone gets the same
+puzzles that day, pattern boards included. Finishing the challenge on
+consecutive days builds a streak; the button shows it ("keep your 3-day
+streak") or today's result ("done today, 120 points"), and the summary
+shows the score, how many were solved, the streak and the best daily score.
+Everything is saved on the device only (`thinkrush.daily` in localStorage).
+
 ## Sound
 
 All music and sound effects are made in code with the browser's WebAudio
@@ -228,6 +239,7 @@ src/patterns.ts           pattern puzzles: families, rules and dealing a fair bo
 src/pattern-art.ts        draws every pattern piece in code
 src/pattern-play.ts       the pattern board on the table during a pattern puzzle
 src/sound.ts              music and RUSH's voice, synthesized (composition in src/sound-design.ts)
+src/daily.ts              the Daily Challenge's puzzles and the streak (tests in tests/)
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/moves.ts              the action twist: which move to ask for, and judging it
