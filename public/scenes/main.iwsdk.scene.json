@@ -177,6 +177,23 @@
       }
     },
     {
+      "id": "object-board",
+      "name": "Object Board",
+      "content": {
+        "type": "asset",
+        "asset": "object-board",
+        "castShadow": true,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          0,
+          0.68,
+          -0.3
+        ]
+      }
+    },
+    {
       "id": "puzzle-tile-1",
       "name": "Puzzle Tile 1",
       "content": {

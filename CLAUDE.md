@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-41 merged plus the demo video plan (6 answer orbs;
+As of 2026-10-31, PRs 1-42 merged plus the object puzzle PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -113,13 +113,13 @@ objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 34 the owner's room set in the back corners; 35 the owner's pedestal
 table as the play table; 36 the pattern puzzle; 37 the sound pass; 38 the
 Daily Challenge and streaks; 39 the palm-up pause; 40 the Meta VR
-Glasses check and layout; 41 the performance pass; then the demo video
-plan):
+Glasses check and layout; 41 the performance pass; 42 the demo video
+plan; then Complete the object):
 
 Live on main
 
 - Foundation: IWSDK 1.1.0-rc.2 scaffold, Pages deploy on every push to main,
-  en/sw i18n behind t(key), content/puzzles.json (40 English drafts,
+  en/sw i18n behind t(key), content/puzzles.json (60 English drafts,
   ten per type) with validators wired into every build. Ten Swahili methali
   drafts wait in content/methali-drafts.json and are not loaded yet.
 - Playable: every puzzle in the bank, one at a time. Visual puzzles use the
@@ -222,9 +222,42 @@ Live on main
   piece go over the board answers (always a drop, no move twist, and the
   visualSeen count is untouched). Solving fills the gap and hides the right
   tile; time up fills it too. Category "pattern" (accent #FF6FA8, pink
-  floor tint), world button "Pattern Loom - Patterns" as a full-width row
-  above the other four on the home page. Textures: 128 px canvases per
-  distinct piece, freed each round.
+  floor tint), world button "Pattern Loom - Patterns" sharing the top row
+  with "Fix-it Workshop - Objects", above the other four on the home page.
+  Textures: 128 px canvases per distinct piece, freed each round.
+- Object puzzle, "Complete the object" (src/object-puzzle.ts with tests,
+  blocks in src/object-art.ts, board in src/object-play.ts and the
+  object-board scene asset; scene node "object-board" at 0, 0.68, -0.3,
+  where the tray sits; the tray hides for objects): seven original block
+  figures drawn as letter grids in FIGURES (giraffe, elephant, baobab,
+  hut, dhow, drum, kettle; at most 10 x 10, colours in PALETTE), built as
+  one vertex-coloured mesh each at 2.1 cm blocks on a lectern tilted 26
+  degrees (its bed frame ObjectBoard/Bed: x right, y up the slope, z out).
+  Content gives type "object" and a figure (prompts name the thing:
+  "Complete the boat."); the game deals the board: a connected chunk of 4
+  blocks (difficulty 1-2) or 5 (3-5) is cut out (turquoise glow where it
+  was, gold while a held piece is near) and the tiles carry four
+  candidates: the chunk, its mirror image (no turn fits it; flipping it
+  shows its plain wooden back), a chunk from elsewhere, and the chunk with
+  one block moved. Easier boards (1-3) cut chunks of two colours or more.
+  The right chunk is shown as is at difficulty 1, a quarter turn off from
+  2 (others up to a quarter turn either way), so it has to be turned.
+  Letting a piece go with its middle within 11 cm of the gap's middle
+  judges it (judgeFit): a wrong piece is a wrong answer; the right one
+  fits when its face points out (dot >= 0.2 with the board's normal) and
+  its roll in the board's frame is within 35 degrees of a quarter turn
+  that undoes the shown turn; otherwise "Right piece! TURN it until it
+  fits the gap." at no cost. A fit glides the piece in (0.25 s, from where
+  it was let go) and hides its tile; time up fills the gap. Always a drop,
+  no move twist, visualSeen untouched. Category "object" ("Missing
+  pieces", accent #8FD14F, green floor tint). Tests deal 300 boards per
+  figure and difficulty: only the right piece fits under any turn, no two
+  candidates look alike, and every bank entry deals. Daily boards use
+  dailySeed like patterns. Verified in the emulator: wrong piece counted,
+  right piece unturned asked for a turn, turned a quarter turn it snapped
+  in and the fill ended exactly on the gap. Tile models made per round
+  (swatches, pieces) set userData.ownsMaterials so disposePuzzleObject
+  frees their materials too.
 - Sound (src/sound.ts SoundSystem, composition in src/sound-design.ts with
   tests, setting in src/sound-settings.ts): all synthesized with WebAudio
   on three's shared AudioContext, no audio files (only the existing
@@ -256,7 +289,7 @@ Live on main
   the same day (better score kept), else 1; currentStreak shows it until a
   whole day is missed. Button text: "done today, {score} points", else
   "keep your {n}-day streak", else "Daily Challenge" (fill() puts values
-  into {name} slots). Summary: "Daily Challenge done!", score, solved x/5,
+  into {name} slots). Summary: "Daily Challenge done!", score, solved x/6,
   streak, best daily score; no Run again (Home and Back to practice). The
   general run best (thinkrush.bestScore) is separate.
 - Pause (PuzzleBoard.paused; src/pause-gesture.ts PauseGestureSystem, the
@@ -325,7 +358,8 @@ Live on main
   cleared, no clock runs, RUSH rests full size and nothing is read aloud.
   A world button starts that world's first puzzle in practice; the puzzle
   page's Home button (hidden during a run) clears the table and returns.
-  Home holds the welcome text, the four worlds in a 2 x 2 grid, and the
+  Home holds the welcome text, the Daily Challenge, Pattern Loom and
+  Fix-it Workshop side by side, the four other worlds in a 2 x 2 grid, and the
   settings row (Enter/Exit VR, language, read aloud). Look: plain divs, not
   the kit's opaque Panel; two faint turquoise rings around dark glass at
   0.9 alpha with a bright edge (UIKitML takes rgba() colours; it rejects
@@ -393,11 +427,11 @@ Decisions
 - Pattern puzzle (built 2026-10-31, details under Live on main): universal
   "Complete the pattern"; content gives type "pattern", a family and a rule,
   answer "generated"; the game deals the board.
-- Assembly idea (owner, 2026-10-31): joining model pieces. Agreed a light
+- Assembly idea (owner, 2026-10-31): joining model pieces. The light
   version, "Complete the object" (one missing piece of a model, turned and
-  fitted into the gap, snapping when close), after the sound pass and
-  streaks if time allows; full many-piece assembly stays a stretch. Size is
-  no issue: pieces come from code or models already in the game.
+  fitted into the gap, snapping when close), is built (see Live on main):
+  the "model" is a block figure, so pieces cut cleanly and turning is the
+  puzzle. Full many-piece assembly stays a stretch.
 - Competition strategy: polish two mechanics (patterns + orbs) over adding
   more; RUSH is the demo video's face; verify with iwsdk-glasses-test and
   claim Meta VR Glasses readiness; keep the first 60 seconds tutorial-free.
@@ -459,7 +493,6 @@ Next up (in order)
    be read from the cloud session (devpost.com is outside its network
    policy), so the owner confirms the length and hosting rules.
 3. Swahili content drop-in when the owner has written it.
-4. Optional, if time allows: "Complete the object" (see Decisions).
    Cut order if time runs short: leaderboard, misplaced-object puzzle
    variant, extra puzzle count.
 

@@ -17,8 +17,8 @@ tracking turned on in the headset's settings, put the controllers down and the
 game switches to your hands. On a computer, the same link shows a 3D preview
 you can click around in.
 
-> Status: 50 English draft puzzles are playable, one at a time: ten each of
-> visual puzzles, riddles, proverbs, mafumbo stories and patterns. One glass screen,
+> Status: 60 English draft puzzles are playable, one at a time: ten each of
+> visual puzzles, riddles, proverbs, mafumbo stories, patterns and objects. One glass screen,
 > projected from a light bar above the table, opens on the home page: pick
 > a world (visual, riddles, proverbs or mafumbo) and the same screen turns
 > into the puzzle page; its Home button comes back. A visual puzzle
@@ -34,7 +34,11 @@ you can click around in.
 > one gap; the four stands carry candidate pieces, and you drop the right
 > one in the gap. Every pattern is drawn in code in five families (kitenge-
 > and kanga-inspired, beadwork, tessellation, weave, abstract) and each
-> board is dealt fresh from the puzzle's rule. Riddles, proverbs and mafumbo use three answer orbs you
+> board is dealt fresh from the puzzle's rule. Object puzzles ("Complete the
+> giraffe") stand a little figure built of blocks on the lectern with a
+> chunk missing; the four stands carry candidate chunks, shown turned. Pick
+> the right one, turn it to fit and let it go at the gap: it snaps in.
+> Riddles, proverbs and mafumbo use three answer orbs you
 > point at and pinch. Ten Swahili methali drafts are kept separately in
 > `content/methali-drafts.json` for fluent-language review and are not loaded
 > into gameplay yet. Next puzzle (always available) steps through the bank, and a
@@ -53,7 +57,6 @@ you can click around in.
 > only time, points scale with difficulty, and your best score stays on your
 > device. RUSH, a glowing companion beside the puzzle, is the timer: it
 > shrinks and turns red as time runs out, and reacts to every answer.
-> The pattern puzzles come next.
 
 ## Run it locally
 
@@ -171,10 +174,10 @@ reads the current puzzle.
 
 ## Daily Challenge and streaks
 
-The home page's **Daily Challenge** plays five puzzles, one from each world,
-easiest first, in a 3-minute run that ends once all five are played. The set
+The home page's **Daily Challenge** plays six puzzles, one from each world,
+easiest first, in a 3-minute run that ends once all six are played. The set
 comes from the date alone (`src/daily.ts`), so everyone gets the same
-puzzles that day, pattern boards included. Finishing the challenge on
+puzzles that day, pattern and object boards included. Finishing the challenge on
 consecutive days builds a streak; the button shows it ("keep your 3-day
 streak") or today's result ("done today, 120 points"), and the summary
 shows the score, how many were solved, the streak and the best daily score.
@@ -277,6 +280,9 @@ src/screen-stops.ts       beckoning the screen: its Far and Near stops (tests in
 src/patterns.ts           pattern puzzles: families, rules and dealing a fair board (tests in tests/)
 src/pattern-art.ts        draws every pattern piece in code
 src/pattern-play.ts       the pattern board on the table during a pattern puzzle
+src/object-puzzle.ts      object puzzles: the block figures and dealing a fair board (tests in tests/)
+src/object-art.ts         builds the figures and pieces from blocks in code
+src/object-play.ts        the object board on the table: the gap, judging a piece, the snap
 src/sound.ts              music and RUSH's voice, synthesized (composition in src/sound-design.ts)
 src/daily.ts              the Daily Challenge's puzzles and the streak (tests in tests/)
 src/pause-gesture.ts      the palm-up pause (gesture logic in src/palm.ts, tested)

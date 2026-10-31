@@ -140,6 +140,7 @@ export function createPatternBoard(): Group {
 export function createSwatch(texture: Texture): Group {
   const root = new Group();
   root.name = 'Swatch';
+  root.userData.ownsMaterials = true;
   const lean = new Group();
   lean.rotation.x = -0.25;
   root.add(lean);

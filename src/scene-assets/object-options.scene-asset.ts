@@ -319,9 +319,16 @@ export function disposePuzzleObject(root: Group): void {
     root.clear();
     return;
   }
+  // Models made per round (pattern swatches, object pieces) own their
+  // materials too; the miniatures share theirs.
+  const ownsMaterials = root.userData.ownsMaterials === true;
   root.traverse((object) => {
     const part = object as Mesh;
-    if (part.isMesh) part.geometry.dispose();
+    if (!part.isMesh) return;
+    part.geometry.dispose();
+    if (ownsMaterials) {
+      for (const material of [part.material].flat()) material.dispose();
+    }
   });
   root.clear();
 }
