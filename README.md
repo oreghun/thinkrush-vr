@@ -19,7 +19,7 @@ you can click around in.
 
 > Status: 60 English draft puzzles are playable, one at a time: ten each of
 > visual puzzles, riddles, proverbs, mafumbo stories, patterns and objects. One glass screen,
-> projected from a light bar above the table, opens on the home page: pick
+> floating above the table, opens on the home page: pick
 > a world (visual, riddles, proverbs or mafumbo) and the same screen turns
 > into the puzzle page; its Home button comes back. A visual puzzle
 > puts four objects on the table under a clue such as "Three of these let
@@ -45,12 +45,10 @@ you can click around in.
 > Category button narrows browsing and runs to one puzzle type. The
 > 60-second practice timer only runs inside VR; a run's 3-minute clock also
 > ticks on the flat page, so desktop runs end properly. In VR the screen floats
-> about 1.4 m away, sized so its text reads easily. Pinch its light bar and
-> pull toward you (or press **Closer**) to bring it within reach and tap its
-> buttons with a fingertip; push the bar away (or press **Push back**) to
-> send it back. A new puzzle sends it back on its own. On a flat screen,
-> mouse-drag the bar to move the screen, and drag empty space to look
-> around. On a phone held upright the view steps back so the screen and
+> about 1.4 m away, sized so its text reads easily. Press **Closer** to
+> bring it within reach and tap its buttons with a fingertip; press **Push
+> back** to send it back. A new puzzle sends it back on its own. On a flat
+> screen, drag empty space to look around. On a phone held upright the view steps back so the screen and
 > the table still fit. Each new puzzle
 > is read aloud by a voice built into your device (see "Read aloud" below).
 > Press Start a 3-minute run for a
@@ -202,7 +200,7 @@ Everything is saved on the device only (`thinkrush.daily` in localStorage).
 ## Meta VR Glasses
 
 The game asks for gaze tracking (optionally), so on Meta VR Glasses you look
-at a screen button, an orb or the light bar and pinch with either hand to
+at a screen button or an orb and pinch with either hand to
 use it; the puzzle pieces on the table are picked up with your hands as on
 a Quest. The glasses see less of the world (37 degrees to each side, 25 up,
 43 down), so the screen sits a little low and RUSH close beside it: seated
@@ -290,7 +288,7 @@ src/i18n/                 en.json, sw.json and the t() helper
 src/ui-text.ts            fills UIKitML text from src/i18n
 src/input-visuals.ts      code-built hands and controllers for VR
 src/puzzle.ts             gameplay: tiles, tray, answer orbs, timer, progression
-src/movable-panel.ts      the screen hangs above its light bar and can be re-placed
+src/movable-panel.ts      the screen's two stops (Far, and Near within reach) and its glide
 src/screen-look.ts        drag-to-look camera for flat screens
 src/screen-stops.ts       beckoning the screen: its Far and Near stops (tests in tests/)
 src/patterns.ts           pattern puzzles: families, rules and dealing a fair board (tests in tests/)

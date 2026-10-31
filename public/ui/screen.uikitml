@@ -1,5 +1,5 @@
 <!--
-  The one screen above the table, projected from the light bar under it.
+  The one screen floating above the table.
   Two pages share it: home (welcome, the four worlds and the settings) and
   the puzzle page. src/puzzle.ts shows one page at a time.
 

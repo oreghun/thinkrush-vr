@@ -3,10 +3,11 @@
 // size as at arm's length, which is easier on the eyes for reading. Near is
 // within a seated arm's reach, so a fingertip can tap its buttons.
 //
-// Pinch the light bar and pull your hand toward you to bring the screen
-// Near; push it away to send it Far. A quick pinch without moving switches
-// stops. Letting go always glides the screen to a stop, so it never ends up
-// in an awkward place. The screen moves, never the player's view.
+// The screen's Closer / Push back button switches stops. (A grabbable
+// mount would use releaseStop: pull toward you for Near, push away for Far,
+// a quick pinch switches; the light bar that did this was removed, as a
+// projector has no place to stand in the room.) The screen glides to its
+// stop; it moves, never the player's view.
 //
 // No runtime imports, so the ECS component schema and Node's test runner
 // can both use it.

@@ -330,7 +330,7 @@ Live on main
 - Meta VR Glasses (checked 2026-10-31 with iwsdk-glasses-test in the
   emulator's metaVRGlasses profile): gazeTracking is requested (optional)
   in iwsdk.config.json, so gaze + pinch drives every ray target (screen
-  buttons, orbs, the light bar) with no app code; tiles stay near-grab with
+  buttons, orbs) with no app code; tiles stay near-grab with
   the glasses' hand tracking. The view is 37 deg each side, 25 up, 43 down,
   so the layout was lowered and pulled in for everyone: screen centre
   1.2 -> 1.08 m and scale 1.6 -> 1.45; RUSH 0.52, 1.25, -0.8 -> 0.42, 0.98,
@@ -341,7 +341,7 @@ Live on main
   RUSH (the timer) is in view at all three. Gaze hovered the screen and the
   bar (and nothing on the floor), a right-hand pinch pressed the screen, a
   left-hand pinch grabbed the bar and pulling it back brought the screen
-  Near; with gaze disconnected the hand ray targets, and on reconnect gaze
+  Near (the bar has since been removed); with gaze disconnected the hand ray targets, and on reconnect gaze
   takes targeting back (a hand near the Near screen holds it, by design).
   To test again: set dev.emulator.device to metaVRGlasses (the committed
   default stays metaQuest3) and compare atan2(dx, -dz) and atan2(dy, -dz)
@@ -411,31 +411,30 @@ Live on main
   hint. The summary shows score/solved/best, and the best run
   score is kept in localStorage (thinkrush.bestScore). Practice stays the
   default browsing mode with the per-puzzle 60 s timer.
-- The screen hangs above its light bar (screen-projector asset: the
-  graphite grab bar, a turquoise lens and an additive fan of light rising
-  toward the screen; the fan's mesh ignores rays, so only the bar grabs):
-  DistanceGrabbable with MoveFromTarget, rotation locked so the
-  single-sided screen keeps facing the player, position clamped near the
-  table by MovablePanelSystem.
+- The screen floats on its own (owner, 2026-10-31: in the room a projector
+  has nowhere to stand, and on the wall the screen would hide it). Scene
+  node "screen-handle" (name "Screen Mount") is now an invisible anchor
+  with only MovablePanel; the screen-projector asset (grab bar, lens,
+  light fan) and the mount's RayInteractable/DistanceGrabbable are gone.
+  Nothing grabs the screen: the Closer / Push back buttons move it.
 - Beckon (src/screen-stops.ts with tests, MovablePanel.stop, run by
   MovablePanelSystem): in VR the screen rests at one of two stops. Far is
   the scene's pose (above). Near puts its centre 0.42 m ahead of and 0.18 m
   below the eyes at 40% of the Far scale (0.40 m wide), placed from the
-  head when called and never with the bar below 0.72 m (the table top is
-  0.68 m). On letting go of the bar, a pull of 8 cm or more toward the head
-  means Near, a push of 8 cm means Far, a pinch under 0.35 s moving under
-  3 cm switches, and anything else returns to the current stop; the
-  screen glides there (rate 4/s). Each page's header has a Closer / Push
-  back button (VR only) doing the same switch. A new puzzle (startRound)
+  head when called and never with the mount below 0.72 m (the table top is
+  0.68 m). Each page's header has a Closer / Push back button (VR only)
+  that switches stops; the screen glides there (rate 4/s). (releaseStop
+  and MovablePanelSystem's release handling remain for a grabbable mount:
+  a pull of 8 cm toward the head means Near, a push Far, a quick pinch
+  switches; nothing uses them since the bar went.) A new puzzle (startRound)
   and leaving VR set the stop to Far. The screen carries PokeInteractable,
   so at Near a fingertip taps its buttons; a hand that close loses its
-  pointer ray (touch takes over), so at Near the bar can't be ray-grabbed
-  from the lap: Push back is the way back. On a flat page the mouse still
-  places the screen freely and nothing snaps. On flat
+  pointer ray (touch takes over): Push back is the way back. On a flat
+  page the screen stays at its Far pose. On flat
   screens, ScreenLookSystem turns the camera when empty space is dragged;
   it never runs in an immersive session (comfort), never starts on a press
-  that begins over something interactable (so mouse-dragging a grab bar
-  moves only the screen), and we deliberately do not rotate the world in VR.
+  that begins over something interactable (a button, an orb), and we
+  deliberately do not rotate the world in VR.
   The run clock ticks on flat pages too (practice stays VR-only); only a
   blurred XR session pauses everything.
 - Read aloud (src/read-aloud.ts): each new puzzle's prompt (plus the
