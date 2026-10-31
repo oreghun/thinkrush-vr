@@ -10,11 +10,12 @@ export const Move = {
   Drop: 'drop',
   Flip: 'flip',
   Lift: 'lift',
+  Show: 'show',
 } as const;
 
 export type MoveName = (typeof Move)[keyof typeof Move];
 
-const MOVES: MoveName[] = [Move.Drop, Move.Flip, Move.Lift];
+const MOVES: MoveName[] = [Move.Drop, Move.Flip, Move.Lift, Move.Show];
 
 /**
  * The visual puzzle (counted from 0 across visits) where each move first
@@ -25,6 +26,7 @@ const INTRODUCED_AT: Record<MoveName, number> = {
   drop: 0,
   flip: 2,
   lift: 4,
+  show: 6,
 };
 
 /**
