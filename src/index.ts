@@ -17,6 +17,7 @@ import { PuzzleSystem } from './puzzle.js';
 import { RushSystem } from './rush.js';
 import { ScreenLookSystem } from './screen-look.js';
 import { SoundSystem } from './sound.js';
+import { PauseGestureSystem } from './pause-gesture.js';
 
 const updateTitle = () => {
   document.title = t('app.title');
@@ -44,4 +45,5 @@ World.create(
   world.registerSystem(PuzzleSystem);
   world.registerSystem(RushSystem);
   world.registerSystem(SoundSystem);
+  world.registerSystem(PauseGestureSystem);
 });

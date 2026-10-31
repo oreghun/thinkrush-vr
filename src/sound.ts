@@ -279,6 +279,7 @@ export class SoundSystem extends createSystem({
     const atHome = this.now.mode === PuzzleMode.Home;
     const playing =
       isSoundOn() &&
+      !board.getValue(PuzzleBoard, 'paused') &&
       (atHome ||
         ((this.now.mode === PuzzleMode.Practice ||
           this.now.mode === PuzzleMode.Run) &&

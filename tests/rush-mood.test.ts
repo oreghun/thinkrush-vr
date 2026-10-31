@@ -74,3 +74,10 @@ test('RUSH shrinks and warms as the clock runs out', () => {
   const [, greenEnd] = glowColor(0);
   assert.ok(greenEnd < greenFull, 'the glow turns red at the end');
 });
+
+test('RUSH dozes while the game is paused', () => {
+  assert.equal(
+    baseMood({ puzzleIndex: 0, status: 'playing', mode: 'practice', wrongAnswers: 0, wrongMoves: 0, paused: true }),
+    Mood.Sleepy,
+  );
+});

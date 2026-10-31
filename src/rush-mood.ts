@@ -31,10 +31,15 @@ export interface BoardView {
   mode: string;
   wrongAnswers: number;
   wrongMoves: number;
+  /** Paused (palm up, menu button, headset off): RUSH dozes. */
+  paused?: boolean;
 }
 
 /** The mood that lasts while the board stays as it is. */
 export function baseMood(view: BoardView): MoodName {
+  if (view.paused) {
+    return Mood.Sleepy;
+  }
   if (view.mode === 'runOver' || view.status === 'solved') {
     return Mood.Happy;
   }

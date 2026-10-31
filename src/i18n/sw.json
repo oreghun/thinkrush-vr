@@ -56,6 +56,11 @@
   "daily.done": "",
   "daily.over": "",
   "daily.streak": "",
+  "pause.heading": "",
+  "pause.body": "",
+  "pause.resume": "",
+  "pause.home": "",
+  "welcome.pauseHint": "",
   "sound.on": "",
   "sound.off": "",
   "readAloud.noVoice": ""

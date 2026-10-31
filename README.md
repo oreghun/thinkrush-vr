@@ -180,6 +180,17 @@ streak") or today's result ("done today, 120 points"), and the summary
 shows the score, how many were solved, the streak and the best daily score.
 Everything is saved on the device only (`thinkrush.daily` in localStorage).
 
+## Pause
+
+Turn either hand palm up, open, in front of you and hold it for a moment:
+the game pauses. The screen shows **Paused** with **Resume**, **Home** and
+the settings (sound, read aloud, language); the clock, music and voice stop
+and RUSH dozes. Palm up again (or Resume) carries on. With controllers, the
+menu button does the same; on a flat page, Escape. Taking the headset off
+mid-puzzle also pauses it, so nothing is lost while you are away. The
+gesture ignores a hand that is pinching, holding a puzzle piece (flipping
+one turns the palm up) or resting low on the table (`src/palm.ts`).
+
 ## Sound
 
 All music and sound effects are made in code with the browser's WebAudio
@@ -240,6 +251,7 @@ src/pattern-art.ts        draws every pattern piece in code
 src/pattern-play.ts       the pattern board on the table during a pattern puzzle
 src/sound.ts              music and RUSH's voice, synthesized (composition in src/sound-design.ts)
 src/daily.ts              the Daily Challenge's puzzles and the streak (tests in tests/)
+src/pause-gesture.ts      the palm-up pause (gesture logic in src/palm.ts, tested)
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/moves.ts              the action twist: which move to ask for, and judging it
