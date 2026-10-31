@@ -50,7 +50,8 @@ you can click around in.
 > buttons with a fingertip; push the bar away (or press **Push back**) to
 > send it back. A new puzzle sends it back on its own. On a flat screen,
 > mouse-drag the bar to move the screen, and drag empty space to look
-> around. Each new puzzle
+> around. On a phone held upright the view steps back so the screen and
+> the table still fit. Each new puzzle
 > is read aloud by a voice built into your device (see "Read aloud" below).
 > Press Start a 3-minute run for a
 > scored dash through shuffled puzzles: solving auto-advances, Skip costs
