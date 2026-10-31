@@ -19,6 +19,7 @@ import {
   readAloudSpeed,
   setReadAloudSpeed,
 } from './read-aloud.js';
+import { isSoundOn, onSoundChange, setSoundOn } from './sound-settings.js';
 
 export class PanelSystem extends createSystem({}) {
   init(): void {
@@ -29,6 +30,7 @@ export class PanelSystem extends createSystem({}) {
     }
     this.initLanguageButton(panel);
     this.initReadAloudButton(panel);
+    this.initSoundButton(panel);
     this.initXRButtons(panel);
   }
 
@@ -75,6 +77,25 @@ export class PanelSystem extends createSystem({}) {
       () => button.removeEventListener('click', toggle),
       onLanguageChange(updateLabel),
       onVoicesChanged(updateLabel),
+    );
+  }
+
+  private initSoundButton(panel: UIKitMLAsset): void {
+    const button = panel.getElementById('sound-button');
+    const label = panel.getElementById('sound-label');
+    if (button == null || label == null) {
+      return;
+    }
+    // The button shows the current setting; a press switches it.
+    const updateLabel = () =>
+      label.setProperties({ text: t(isSoundOn() ? 'sound.on' : 'sound.off') });
+    const toggle = () => setSoundOn(!isSoundOn());
+    updateLabel();
+    button.addEventListener('click', toggle);
+    this.cleanupFuncs.push(
+      () => button.removeEventListener('click', toggle),
+      onLanguageChange(updateLabel),
+      onSoundChange(updateLabel),
     );
   }
 

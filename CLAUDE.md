@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-35 merged plus the pattern-puzzle PR (6 answer orbs;
+As of 2026-10-31, PRs 1-36 merged plus the sound PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -111,7 +111,7 @@ energy and sound puzzles' miniatures; 29 the yellow ruler and flat
 objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 32 one projected screen with home and puzzle pages; 33 beckoning it;
 34 the owner's room set in the back corners; 35 the owner's pedestal
-table as the play table; then the pattern puzzle):
+table as the play table; 36 the pattern puzzle; then the sound pass):
 
 Live on main
 
@@ -222,6 +222,23 @@ Live on main
   floor tint), world button "Pattern Loom - Patterns" as a full-width row
   above the other four on the home page. Textures: 128 px canvases per
   distinct piece, freed each round.
+- Sound (src/sound.ts SoundSystem, composition in src/sound-design.ts with
+  tests, setting in src/sound-settings.ts): all synthesized with WebAudio
+  on three's shared AudioContext, no audio files (only the existing
+  generated chime.wav on the tray). Instruments are rendered once into
+  buffers (kalimba on two octaves of C major pentatonic, shaker, bass and
+  slap hand drums, RUSH's voice tone at C5); the groove (16 steps, a 4-bar
+  original melody) is scheduled 0.15 s ahead on the audio clock. Tempo
+  92 -> 140 BPM eased by the clock fraction (musicTempo), bass joins below
+  75% of the clock and slaps below 40%; home plays kalimba and shaker at 84
+  BPM; the groove rests on solved/time up/run over. RUSH's cues (present,
+  cheer 0.25 s after the chime, worried, surprised, sleepy at time up,
+  runOver fanfare) come from reactionTo on the board and are panned toward
+  RUSH from the head. Music ducks to 30% while read-aloud speaks; a blurred
+  session suspends the context; a pointer or key press resumes it (browser
+  rule). Levels: music bus 0.3, cues 0.55, master 0.9 (offline render peaks
+  at 0.4; music about -24 dB calm, -21 dB urgent; cues -16 to -19 dB).
+  Home page "Sound on/off" (thinkrush.sound) also mutes the chime.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
@@ -354,10 +371,8 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
-   RUSH's reactions (RUSH itself is built).
-2. Streaks and the Daily Challenge (localStorage only).
-3. Palm-up pause gesture; pause when the session loses visibility.
+1. Streaks and the Daily Challenge (localStorage only).
+2. Palm-up pause gesture; pause when the session loses visibility.
    Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
    real Quest 3, demo video. Cut order if time runs short: leaderboard,
    misplaced-object puzzle variant, extra puzzle count.
