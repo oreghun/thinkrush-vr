@@ -14,6 +14,7 @@ import { MovablePanelSystem } from './movable-panel.js';
 import { PanelSystem } from './panel.js';
 import { UITextSystem } from './ui-text.js';
 import { PuzzleSystem } from './puzzle.js';
+import { RushSystem } from './rush.js';
 import { ScreenLookSystem } from './screen-look.js';
 
 const updateTitle = () => {
@@ -40,4 +41,5 @@ World.create(
   world.registerSystem(MovablePanelSystem);
   world.registerSystem(ScreenLookSystem);
   world.registerSystem(PuzzleSystem);
+  world.registerSystem(RushSystem);
 });

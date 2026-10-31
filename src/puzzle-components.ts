@@ -2,6 +2,10 @@ import { createComponent, Types } from '@iwsdk/core';
 import { PuzzleCategory } from './categories.js';
 import { Move } from './moves.js';
 
+/** Seconds per practice puzzle, and for a whole run. */
+export const ROUND_SECONDS = 60;
+export const RUN_SECONDS = 180;
+
 export const PuzzleStatus = {
   Playing: 'playing',
   Solved: 'solved',
@@ -26,8 +30,10 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
     enum: PuzzleStatus,
     default: PuzzleStatus.Playing,
   },
-  secondsLeft: { type: Types.Float32, default: 60 },
+  secondsLeft: { type: Types.Float32, default: ROUND_SECONDS },
   wrongAnswers: { type: Types.Int8, default: 0 },
+  // Right object, wrong move, this round (RUSH reacts to each one).
+  wrongMoves: { type: Types.Int8, default: 0 },
   // Which puzzle from content/puzzles.json is being played.
   puzzleIndex: { type: Types.Int16, default: 0 },
   mode: {

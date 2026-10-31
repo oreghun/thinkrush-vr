@@ -152,6 +152,11 @@ function speakPending(): void {
   }
 }
 
+/** Whether something is being read out right now (RUSH glows as it talks). */
+export function isSpeaking(): boolean {
+  return synth()?.speaking ?? false;
+}
+
 export function stopSpeaking(): void {
   pending = undefined;
   synth()?.cancel();

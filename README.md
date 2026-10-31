@@ -39,7 +39,9 @@ you can click around in.
 > Press Start a 3-minute run for a
 > scored dash through shuffled puzzles: solving auto-advances, Skip costs
 > only time, points scale with difficulty, and your best score stays on your
-> device. RUSH and the pattern puzzles come next.
+> device. RUSH, a glowing companion beside the puzzle, is the timer: it
+> shrinks and turns red as time runs out, and reacts to every answer.
+> The pattern puzzles come next.
 
 ## Run it locally
 
@@ -191,6 +193,7 @@ src/screen-look.ts        drag-to-look camera for flat screens
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/moves.ts              the action twist: which move to ask for, and judging it
+src/rush.ts               RUSH the companion (moods and timer in src/rush-mood.ts)
 public/models/            imported models, optimized (see art/SOURCES.md)
 art/                      originals of imported models and how they were made
 src/read-aloud.ts         reads puzzles aloud with on-device voices only

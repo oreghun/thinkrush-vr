@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-28 merged plus the yellow-ruler PR (6 answer orbs;
+As of 2026-10-31, PRs 1-29 merged plus the RUSH PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -107,8 +107,8 @@ choices; 23 the owner's Meshy stand replacing the code-built one; 24
 the first Meshy miniatures, for the wind puzzle; 25 objects at 10 cm;
 26 Meshy miniatures for the number and beginnings puzzles, swapped in as
 they load; 27 the keys, lock and magnet puzzles' miniatures; then the
-energy and sound puzzles' miniatures; then the yellow ruler and flat
-objects tilted toward the player):
+energy and sound puzzles' miniatures; 29 the yellow ruler and flat
+objects tilted toward the player; then RUSH):
 
 Live on main
 
@@ -161,6 +161,18 @@ Live on main
   move!": a run loses that puzzle (status wrongMove, no points, moves on
   after 2.5 s); practice says so and lets you retry. Orb puzzles have no
   moves. The tray stays visible for every move: the habit is the trap.
+- RUSH (src/rush.ts, logic in src/rush-mood.ts with tests, model in
+  src/scene-assets/rush.scene-asset.ts, scene node "rush" at 0.45, 1.25,
+  -0.8 beside the puzzle panel): a deep-gold glowing sphere, 18 cm across,
+  with two eyes; it turns to face the player and blinks. It is the timer:
+  it shrinks to 45% and warms from gold to red as the clock (the puzzle's
+  60 s, or the run's 180 s) runs out. Lasting moods follow the board
+  (happy when solved or after a run, sleepy at time up, surprised on a
+  run's wrong move); short reactions play over them: a hop for each new
+  puzzle, a bigger hop with happy eyes for a solve, a shake with worried
+  eyes for a wrong answer, surprised eyes for right-object-wrong-move
+  (PuzzleBoard.wrongMoves counts those). It glows in pulses while a puzzle
+  is read aloud. All motion is RUSH's own, never the player's view.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - Category button on the puzzle panel (practice only): cycles All plus each
@@ -236,7 +248,7 @@ Decisions
 Open questions (owner deciding, 2026-10-30)
 
 - Action twist follow-ups: moves for the answer orbs, and a "hold it up to
-  RUSH" variant once RUSH exists.
+  RUSH" variant now that RUSH exists.
 
 - One model still to redo (owner): the megaphone (the upload in
   art/incoming/megaphone.glb is the untextured 929k-triangle preview, so
@@ -254,8 +266,8 @@ Open questions (owner deciding, 2026-10-30)
 Next up (in order)
 
 1. Pattern puzzle type (decision above).
-2. RUSH companion (glowing sphere with eyes, shrinks as time runs down) and
-   a sound/juice pass.
+2. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
+   RUSH's reactions (RUSH itself is built).
 3. Streaks and the Daily Challenge (localStorage only).
 4. Palm-up pause gesture; pause when the session loses visibility.
    Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a

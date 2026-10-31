@@ -29,6 +29,8 @@ import {
   PuzzleMode,
   PuzzleStatus,
   PuzzleTile,
+  ROUND_SECONDS,
+  RUN_SECONDS,
 } from './puzzle-components.js';
 import {
   judge,
@@ -52,8 +54,6 @@ import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-o
 import { IMPORTED_OBJECTS, objectAssetId } from './imported-objects.js';
 import { type TileModel, tileModelFor } from './tile-models.js';
 
-const ROUND_SECONDS = 60;
-const RUN_SECONDS = 180;
 // A solve scores its difficulty (1-5) times this.
 const POINTS_PER_DIFFICULTY = 10;
 // How long the Correct feedback stays up before a run auto-advances.
@@ -506,6 +506,7 @@ export class PuzzleSystem extends createSystem({
       board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
     }
     board.setValue(PuzzleBoard, 'wrongAnswers', 0);
+    board.setValue(PuzzleBoard, 'wrongMoves', 0);
     this.advanceIn = 0;
     this.wrongMoveShown = false;
     this.liftTime.clear();
@@ -662,6 +663,12 @@ export class PuzzleSystem extends createSystem({
    * and moves on after the usual beat; practice says so and lets you retry.
    */
   private onWrongMove(): void {
+    const board = this.board!;
+    board.setValue(
+      PuzzleBoard,
+      'wrongMoves',
+      (board.getValue(PuzzleBoard, 'wrongMoves') ?? 0) + 1,
+    );
     if (this.mode() === PuzzleMode.Run) {
       stopSpeaking();
       this.board!.setValue(PuzzleBoard, 'status', PuzzleStatus.WrongMove);
