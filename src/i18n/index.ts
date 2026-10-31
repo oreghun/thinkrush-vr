@@ -21,6 +21,16 @@ export function t(key: MessageKey): string {
   return MESSAGES[current][key] || MESSAGES.en[key];
 }
 
+/** Puts values into a message's {name} slots. */
+export function fill(
+  text: string,
+  values: Record<string, number | string>,
+): string {
+  return text.replace(/\{(\w+)\}/gu, (slot, name: string) =>
+    name in values ? String(values[name]) : slot,
+  );
+}
+
 export function getLanguage(): Language {
   return current;
 }

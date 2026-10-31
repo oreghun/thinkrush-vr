@@ -18,6 +18,7 @@ import { RushSystem } from './rush.js';
 import { ScreenLookSystem } from './screen-look.js';
 import { SoundSystem } from './sound.js';
 import { PauseGestureSystem } from './pause-gesture.js';
+import { PerformanceSystem } from './performance.js';
 
 const updateTitle = () => {
   document.title = t('app.title');
@@ -46,4 +47,5 @@ World.create(
   world.registerSystem(RushSystem);
   world.registerSystem(SoundSystem);
   world.registerSystem(PauseGestureSystem);
+  world.registerSystem(PerformanceSystem);
 });

@@ -22,7 +22,7 @@ import {
   nextIndexInCategory,
   PuzzleCategory,
 } from './categories.js';
-import { type MessageKey, onLanguageChange, t } from './i18n/index.js';
+import { fill, type MessageKey, onLanguageChange, t } from './i18n/index.js';
 import {
   AnswerOrb,
   PuzzleBoard,
@@ -1536,13 +1536,6 @@ function writeDaily(record: DailyRecord): void {
   } catch {
     // Storage can be blocked (private mode); the streak then lasts this visit.
   }
-}
-
-/** Puts values into a message's {name} slots. */
-function fill(text: string, values: Record<string, number>): string {
-  return text.replace(/\{(\w+)\}/gu, (slot, name: string) =>
-    name in values ? String(values[name]) : slot,
-  );
 }
 
 function readBestScore(): number {

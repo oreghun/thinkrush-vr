@@ -61,6 +61,7 @@
   "pause.resume": "Resume",
   "pause.home": "Home",
   "welcome.pauseHint": "Turn a palm up any time to pause.",
+  "perf.line": "{fps} fps (display {hz} Hz), slowest frame {worst} ms, {late} late, {calls} draws, {triangles}k triangles",
   "sound.on": "Sound on",
   "sound.off": "Sound off",
   "readAloud.noVoice": "No voice on this device"
