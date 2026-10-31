@@ -12,10 +12,7 @@ import {
   objectAssetId,
   objectFile,
 } from './imported-objects.js';
-import {
-  createGallerySet,
-  createSideboardSet,
-} from './scene-assets/decor.scene-asset.js';
+import { ROOM_PIECES, roomAssetId, roomFile } from './room-pieces.js';
 import {
   createAnswerOrb,
   createAnswerTray,
@@ -40,8 +37,19 @@ const uikitml = (fileName: string, name: string) => ({
 export default defineAssets({
   'studio-floor': createStudioFloor(),
   stage: createStage(),
-  'gallery-set': createGallerySet(),
-  'sideboard-set': createSideboardSet(),
+  // The owner's set dressing for the two back corners (src/room-pieces.ts),
+  // in the background: the room is ready to play before they arrive.
+  ...Object.fromEntries(
+    ROOM_PIECES.map((piece) => [
+      roomAssetId(piece),
+      {
+        url: publicAssetUrl(roomFile(piece)),
+        type: AssetType.GLTF,
+        priority: 'background' as const,
+        name: `Room: ${piece}`,
+      },
+    ]),
+  ),
   'puzzle-table': createPuzzleTable(),
   'answer-tray': createAnswerTray(),
   'puzzle-tile': createPuzzleTile(),

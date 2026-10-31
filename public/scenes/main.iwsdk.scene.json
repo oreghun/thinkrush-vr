@@ -520,14 +520,8 @@
       }
     },
     {
-      "id": "gallery-set",
-      "name": "Gallery Set",
-      "content": {
-        "type": "asset",
-        "asset": "gallery-set",
-        "castShadow": true,
-        "receiveShadow": true
-      },
+      "id": "pottery-corner",
+      "name": "Pottery Corner",
       "transform": {
         "position": [
           -3.5562,
@@ -542,7 +536,93 @@
       },
       "children": [
         {
-          "id": "gallery-set-contact",
+          "id": "low-table",
+          "name": "Low Table",
+          "content": {
+            "type": "asset",
+            "asset": "room-low-table",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "id": "table-pot",
+          "name": "Small Clay Pot",
+          "content": {
+            "type": "asset",
+            "asset": "room-clay-pot",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              0.22,
+              0.42,
+              0.02
+            ],
+            "scale": 0.62
+          }
+        },
+        {
+          "id": "floor-pot",
+          "name": "Clay Pot",
+          "content": {
+            "type": "asset",
+            "asset": "room-clay-pot",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              -0.98,
+              0,
+              0.12
+            ]
+          }
+        },
+        {
+          "id": "basket",
+          "name": "Basket",
+          "content": {
+            "type": "asset",
+            "asset": "room-basket",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              0.95,
+              0,
+              -0.05
+            ]
+          }
+        },
+        {
+          "id": "pottery-plant",
+          "name": "Snake Plant",
+          "content": {
+            "type": "asset",
+            "asset": "room-snake-plant",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              -0.42,
+              0,
+              -0.7
+            ]
+          }
+        },
+        {
+          "id": "low-table-contact",
           "name": "Contact Shadow",
           "transform": {
             "position": [
@@ -554,27 +634,67 @@
           "components": {
             "ContactShadow": {
               "size": [
-                1.9,
-                1
+                1.3,
+                0.95
               ]
             }
           }
         },
         {
-          "id": "gallery-vase-contact",
+          "id": "floor-pot-contact",
           "name": "Contact Shadow",
           "transform": {
             "position": [
-              -0.95,
+              -0.98,
               0.002,
-              -0.15
+              0.12
             ]
           },
           "components": {
             "ContactShadow": {
               "size": [
-                0.55,
-                0.55
+                0.75,
+                0.75
+              ],
+              "height": 0.0011
+            }
+          }
+        },
+        {
+          "id": "basket-contact",
+          "name": "Contact Shadow",
+          "transform": {
+            "position": [
+              0.95,
+              0.002,
+              -0.05
+            ]
+          },
+          "components": {
+            "ContactShadow": {
+              "size": [
+                0.65,
+                0.65
+              ],
+              "height": 0.0011
+            }
+          }
+        },
+        {
+          "id": "pottery-plant-contact",
+          "name": "Contact Shadow",
+          "transform": {
+            "position": [
+              -0.42,
+              0.002,
+              -0.7
+            ]
+          },
+          "components": {
+            "ContactShadow": {
+              "size": [
+                0.6,
+                0.6
               ],
               "height": 0.0011
             }
@@ -583,14 +703,8 @@
       ]
     },
     {
-      "id": "sideboard-set",
-      "name": "Sideboard Set",
-      "content": {
-        "type": "asset",
-        "asset": "sideboard-set",
-        "castShadow": true,
-        "receiveShadow": true
-      },
+      "id": "cabinet-corner",
+      "name": "Cabinet Corner",
       "transform": {
         "position": [
           3.6709,
@@ -605,7 +719,76 @@
       },
       "children": [
         {
-          "id": "sideboard-set-contact",
+          "id": "cabinet",
+          "name": "Cabinet",
+          "content": {
+            "type": "asset",
+            "asset": "room-cabinet",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "id": "cabinet-pot",
+          "name": "Small Clay Pot",
+          "content": {
+            "type": "asset",
+            "asset": "room-clay-pot",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              -0.48,
+              0.72,
+              0.0
+            ],
+            "scale": 0.55
+          }
+        },
+        {
+          "id": "cabinet-plant",
+          "name": "Snake Plant",
+          "content": {
+            "type": "asset",
+            "asset": "room-snake-plant",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              -1.17,
+              0,
+              0.02
+            ]
+          }
+        },
+        {
+          "id": "stool",
+          "name": "Stool",
+          "content": {
+            "type": "asset",
+            "asset": "room-stool",
+            "castShadow": true,
+            "receiveShadow": true
+          },
+          "transform": {
+            "position": [
+              1.14,
+              0,
+              0.2
+            ]
+          }
+        },
+        {
+          "id": "cabinet-contact",
           "name": "Contact Shadow",
           "transform": {
             "position": [
@@ -617,29 +800,49 @@
           "components": {
             "ContactShadow": {
               "size": [
-                2.3,
-                0.9
+                1.85,
+                0.75
               ]
             }
           }
         },
         {
-          "id": "floor-lamp-contact",
+          "id": "cabinet-plant-contact",
           "name": "Contact Shadow",
           "transform": {
             "position": [
-              1.1,
+              -1.17,
               0.002,
-              -0.08
+              0.02
             ]
           },
           "components": {
             "ContactShadow": {
               "size": [
-                0.45,
-                0.45
+                0.6,
+                0.6
               ],
-              "height": 0.0009
+              "height": 0.0011
+            }
+          }
+        },
+        {
+          "id": "stool-contact",
+          "name": "Contact Shadow",
+          "transform": {
+            "position": [
+              1.14,
+              0.002,
+              0.2
+            ]
+          },
+          "components": {
+            "ContactShadow": {
+              "size": [
+                0.58,
+                0.58
+              ],
+              "height": 0.0011
             }
           }
         }

@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-32 merged plus the beckon PR (6 answer orbs;
+As of 2026-10-31, PRs 1-33 merged plus the room-set PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -109,7 +109,8 @@ the first Meshy miniatures, for the wind puzzle; 25 objects at 10 cm;
 they load; 27 the keys, lock and magnet puzzles' miniatures; then the
 energy and sound puzzles' miniatures; 29 the yellow ruler and flat
 objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
-32 one projected screen with home and puzzle pages; then beckoning it):
+32 one projected screen with home and puzzle pages; 33 beckoning it;
+then the owner's room set in the back corners):
 
 Live on main
 
@@ -178,6 +179,18 @@ Live on main
   eyes for a wrong answer, surprised eyes for right-object-wrong-move
   (PuzzleBoard.wrongMoves counts those). It glows in pulses while a puzzle
   is read aloud. All motion is RUSH's own, never the player's view.
+- Room set (src/room-pieces.ts, public/models/room/, tests in
+  tests/room-pieces.test.ts): the owner's Meshy pieces replace the IWSDK
+  starter's Scandinavian decor (decor.scene-asset.ts is gone). Each was
+  optimized with --height to real metres, origin at the centre of its base,
+  textures 512 px, roughness flattened; manifest ids room-<piece>, loaded
+  in the background. Scene groups "pottery-corner" (left, where the
+  starter's gallery set stood: low table with a small clay pot on it, a
+  clay pot, a basket, a snake plant) and "cabinet-corner" (right: cabinet
+  with a small pot on top, a snake plant, the stool), each piece with a
+  ContactShadow node. The low table was meant to be the play table but
+  came out coffee-table height (my prompt said "low"); the play table
+  stays code-built until the owner's pedestal-table regeneration arrives.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
@@ -277,6 +290,10 @@ Decisions
   (textures <= 1024 px JPEG, a flat roughness map becomes factors); the
   originals move to art/source/ with a row in art/SOURCES.md. Ask for about
   5,000 triangles (Meshy remesh) and low-profile shapes for table props.
+  --height <m> scales a model to its real height with its origin at the
+  centre of its base, so the scene places it at scale 1 (room pieces).
+  Describe proportions in prompts ("about three quarters as tall as it is
+  wide"): "low" gave a coffee table.
 - Mafumbo stories are long for a headset: plan for RUSH to reveal them in
   two or three beats. Owner may rework options so the correct answer is not
   always the longest.
@@ -300,11 +317,13 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Room set (owner uploaded six Meshy models to art/incoming/ on
-   2026-10-31: clay_pot, basket, potted_snake_plant, wooden_cabinet (the
-   console), wooden_stool, wooden_table); replace the
-   starter's Scandinavian decor in the two back corners. The table is
-   fitted to its 0.68 m top and loads as a critical asset.
+1. Play table (owner regenerating as dining_table.glb): a narrow
+   rectangular pedestal table like the code-built one (top 0.84 x 0.44 m,
+   top surface at 0.68 m, one round column on a round base). Fit it to that
+   footprint and height (a little non-uniform scaling is fine), hide the
+   code-built table mesh but keep the puzzle-table entity (it carries
+   PuzzleBoard), load it as a critical asset with the code-built table as
+   the fallback, like the display stand.
 2. Pattern puzzle type (decision above).
 3. Sound/juice pass: music that speeds up as RUSH shrinks, sounds for
    RUSH's reactions (RUSH itself is built).
