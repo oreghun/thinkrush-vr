@@ -211,7 +211,8 @@ Live on main
   plank door (owner, 2026-10-31: the open doorway showed an empty void):
   five planks over a dark backing, two rails with six metal studs each, a
   ring handle and a keyhole (materials room-door, room-door-metal, two
-  more draw calls), and the band runs across it, right round the room.
+  more draw calls). The band stops at the door frame (owner: the door
+  doesn't need it).
   The windows look out on the horizon (src/scene-assets/horizon.scene-asset.ts,
   scene node "horizon"): two ridges of low hills (38 m, darker; 46 m,
   paler) and acacia and baobab silhouettes placed so each window frames
