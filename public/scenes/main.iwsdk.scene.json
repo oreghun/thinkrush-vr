@@ -460,9 +460,10 @@
       "transform": {
         "position": [
           0,
-          0.72,
-          -0.86
-        ]
+          0.528,
+          -1.4
+        ],
+        "scale": 1.6
       },
       "components": {
         "RayInteractable": {},
@@ -494,7 +495,8 @@
             "scale": 0.115
           },
           "components": {
-            "RayInteractable": {}
+            "RayInteractable": {},
+            "PokeInteractable": {}
           }
         }
       ]
@@ -508,7 +510,7 @@
       },
       "transform": {
         "position": [
-          0.48,
+          0.52,
           1.25,
           -0.8
         ]

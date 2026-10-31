@@ -9,7 +9,8 @@
   always dark, so every text color is a light one.
 
   Ids that are message keys get their text from src/i18n via
-  src/ui-text.ts; src/panel.ts runs the home page's settings buttons and
+  src/ui-text.ts; src/panel.ts runs the home page's settings buttons,
+  src/movable-panel.ts the Closer / Push back buttons in both headers, and
   src/puzzle.ts fills and colors the rest: prompt, question, score, timer,
   status, detail and the button labels. It shows the buttons that fit the
   mode: practice offers Category, Start run, Next puzzle and Home, a run
@@ -52,6 +53,16 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .header-right {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .reach-button {
+    flex-shrink: 0;
   }
 
   .eyebrow {
@@ -158,7 +169,12 @@
   <div class="glow-inner">
     <div class="glass">
       <div id="home-page" class="page">
-        <div id="welcome.eyebrow" class="eyebrow">...</div>
+        <div class="header">
+          <span id="welcome.eyebrow" class="eyebrow">...</span>
+          <Button id="home-reach" class="reach-button">
+            <ButtonLabel id="home-reach-label" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
         <div id="welcome.heading" class="heading">...</div>
         <div id="welcome.body1" class="body">...</div>
         <div id="welcome.body2" class="body">...</div>
@@ -210,8 +226,13 @@
       <div id="puzzle-page" class="page" style="display: none">
         <div class="header">
           <span id="puzzle.eyebrow" class="eyebrow">...</span>
-          <span id="puzzle-score" class="timer" style="display: none">...</span>
-          <span id="puzzle-timer" class="timer">...</span>
+          <div class="header-right">
+            <span id="puzzle-score" class="timer" style="display: none">...</span>
+            <span id="puzzle-timer" class="timer">...</span>
+            <Button id="puzzle-reach" class="reach-button">
+              <ButtonLabel id="puzzle-reach-label" class="button-label">...</ButtonLabel>
+            </Button>
+          </div>
         </div>
         <div id="puzzle-prompt" class="prompt">...</div>
         <div id="puzzle-question" class="question" style="display: none">...</div>

@@ -35,9 +35,13 @@ you can click around in.
 > into gameplay yet. Next puzzle (always available) steps through the bank, and a
 > Category button narrows browsing and runs to one puzzle type. The
 > 60-second practice timer only runs inside VR; a run's 3-minute clock also
-> ticks on the flat page, so desktop runs end properly. In VR, pinch the light
-> bar under the screen (on a flat screen, mouse-drag it) to move the screen
-> where you like; on a flat screen, drag empty space to look around. Each new puzzle
+> ticks on the flat page, so desktop runs end properly. In VR the screen floats
+> about 1.4 m away, sized so its text reads easily. Pinch its light bar and
+> pull toward you (or press **Closer**) to bring it within reach and tap its
+> buttons with a fingertip; push the bar away (or press **Push back**) to
+> send it back. A new puzzle sends it back on its own. On a flat screen,
+> mouse-drag the bar to move the screen, and drag empty space to look
+> around. Each new puzzle
 > is read aloud by a voice built into your device (see "Read aloud" below).
 > Press Start a 3-minute run for a
 > scored dash through shuffled puzzles: solving auto-advances, Skip costs
@@ -193,6 +197,7 @@ src/input-visuals.ts      code-built hands and controllers for VR
 src/puzzle.ts             gameplay: tiles, tray, answer orbs, timer, progression
 src/movable-panel.ts      the screen hangs above its light bar and can be re-placed
 src/screen-look.ts        drag-to-look camera for flat screens
+src/screen-stops.ts       beckoning the screen: its Far and Near stops (tests in tests/)
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/moves.ts              the action twist: which move to ask for, and judging it
