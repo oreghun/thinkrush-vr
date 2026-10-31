@@ -31,16 +31,18 @@ import {
   panFor,
   SHAKER,
   SLAP,
+  LOOKAHEAD,
   STEPS,
   stepSeconds,
+  stepsToCatchUp,
   TEMPO_HOME,
 } from './sound-design.js';
 import { isSoundOn, onSoundChange } from './sound-settings.js';
 
 const RATE = 22050;
-// Notes are scheduled this far ahead of the audio clock, so a slow frame
-// never makes the groove stumble.
-const LOOKAHEAD = 0.15;
+// Notes booked but not yet played, so a rest (solved, time up, paused) can
+// cancel them: at most a few steps of four layers fit in LOOKAHEAD.
+const PENDING_NOTES = 48;
 const LEVELS = { master: 0.9, music: 0.3, cues: 0.55 };
 // Under the read-aloud voice the music drops to this share, so every word
 // is clear.
@@ -161,8 +163,9 @@ export function createInstruments(context: BaseAudioContext): Instruments {
  * when the headset is taken off, and the home page can switch it off.
  *
  * WebAudio plays each note through a fresh source node (they cannot be
- * restarted), so scheduling creates a few small nodes per beat: the one
+ * restarted), so scheduling creates one small node per note: the one
  * allocation update() makes, and the browser's audio design requires it.
+ * Gain nodes are shared, one per loudness.
  */
 export class SoundSystem extends createSystem({
   boards: { required: [PuzzleBoard] },
@@ -179,6 +182,14 @@ export class SoundSystem extends createSystem({
   private nextStep = 0;
   private step = 0;
   private bar = 0;
+  // Booked notes, a ring of PENDING_NOTES: the source and its start time.
+  private readonly pending: (AudioBufferSourceNode | null)[] = new Array(
+    PENDING_NOTES,
+  ).fill(null);
+  private readonly pendingAt = new Float64Array(PENDING_NOTES);
+  private pendingNext = 0;
+  // One gain node per loudness, shared by every note at that loudness.
+  private readonly loudness = new Map<number, GainNode>();
   private ducked = false;
   private readonly now: BoardView = view();
   private readonly seen: BoardView = view();
@@ -285,7 +296,11 @@ export class SoundSystem extends createSystem({
           this.now.mode === PuzzleMode.Run) &&
           this.now.status === PuzzleStatus.Playing));
     if (!playing) {
-      // The groove rests between puzzles and starts again on the bar.
+      // The groove rests between puzzles and starts again on the bar; notes
+      // already booked ahead are cancelled, so it stops on the moment.
+      if (this.nextStep !== 0) {
+        this.cancelPending(context.currentTime);
+      }
       this.nextStep = 0;
       return;
     }
@@ -293,19 +308,46 @@ export class SoundSystem extends createSystem({
       board.getValue(PuzzleBoard, 'secondsLeft') ?? 0,
       this.now.mode === PuzzleMode.Run ? RUN_SECONDS : ROUND_SECONDS,
     );
-    if (this.nextStep < context.currentTime) {
+    const bpm = atHome ? TEMPO_HOME : musicTempo(fraction);
+    if (this.nextStep === 0) {
+      // Starting (again): on the bar, just ahead of now.
       this.nextStep = context.currentTime + 0.05;
       this.step = 0;
+    } else {
+      // Fallen behind (a long stall): skip whole steps and keep the beat.
+      const skip = stepsToCatchUp(
+        this.nextStep,
+        context.currentTime,
+        stepSeconds(bpm),
+      );
+      for (let i = 0; i < skip; i += 1) {
+        this.nextStep += stepSeconds(bpm);
+        this.advanceStep();
+      }
     }
-    const bpm = atHome ? TEMPO_HOME : musicTempo(fraction);
     const layers = musicLayers(fraction, atHome);
     while (this.nextStep < context.currentTime + LOOKAHEAD) {
       this.playStep(this.nextStep, layers);
       this.nextStep += stepSeconds(bpm);
-      this.step = (this.step + 1) % STEPS;
-      if (this.step === 0) {
-        this.bar = (this.bar + 1) % MELODY.length;
+      this.advanceStep();
+    }
+  }
+
+  private advanceStep(): void {
+    this.step = (this.step + 1) % STEPS;
+    if (this.step === 0) {
+      this.bar = (this.bar + 1) % MELODY.length;
+    }
+  }
+
+  /** Stops every booked note that has not started by `time`. */
+  private cancelPending(time: number): void {
+    for (let i = 0; i < PENDING_NOTES; i += 1) {
+      const source = this.pending[i];
+      if (source && this.pendingAt[i] > time) {
+        source.stop();
       }
+      this.pending[i] = null;
     }
   }
 
@@ -330,10 +372,18 @@ export class SoundSystem extends createSystem({
     const context = this.context!;
     const source = context.createBufferSource();
     source.buffer = buffer;
-    const gain = context.createGain();
-    gain.gain.value = loudness;
-    source.connect(gain).connect(this.music!);
+    let gain = this.loudness.get(loudness);
+    if (!gain) {
+      gain = context.createGain();
+      gain.gain.value = loudness;
+      gain.connect(this.music!);
+      this.loudness.set(loudness, gain);
+    }
+    source.connect(gain);
     source.start(time);
+    this.pending[this.pendingNext] = source;
+    this.pendingAt[this.pendingNext] = time;
+    this.pendingNext = (this.pendingNext + 1) % PENDING_NOTES;
   }
 
   /** RUSH answers what just happened on the board, from where it floats. */
