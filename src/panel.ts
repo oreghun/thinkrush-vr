@@ -7,6 +7,7 @@
 
 import { createSystem, UIKitMLAsset, VisibilityState } from '@iwsdk/core';
 import {
+  LANGUAGE_CHOICE,
   nextLanguage,
   onLanguageChange,
   setLanguage,
@@ -38,6 +39,11 @@ export class PanelSystem extends createSystem({}) {
     const button = panel.getElementById('language-button');
     const label = panel.getElementById('language-label');
     if (button == null || label == null) {
+      return;
+    }
+    if (!LANGUAGE_CHOICE) {
+      // English only until after the competition (see src/i18n).
+      button.setProperties({ display: 'none' });
       return;
     }
     // The button names the language a press switches to.

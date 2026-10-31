@@ -115,6 +115,10 @@ All interface text lives in `src/i18n/en.json` (English, primary) and
 `setLanguage('sw')` switches language; the home page has a toggle button.
 The choice is saved in the browser.
 
+For the competition the game is **English only**: `LANGUAGE_CHOICE` in
+`src/i18n/index.ts` is `false`, which hides the language button and always
+starts in English. Swahili comes after Meta's review; set it to `true` then.
+
 - Never hard-code interface text. Add the English string to `en.json` and the
   same key to `sw.json`.
 - In `sw.json`, an empty string means "not written yet"; the game then shows
