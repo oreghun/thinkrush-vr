@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-45 merged plus the music fix PR (6 answer orbs;
+As of 2026-10-31, PRs 1-46 merged plus the sound quality PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -116,7 +116,7 @@ Daily Challenge and streaks; 39 the palm-up pause; 40 the Meta VR
 Glasses check and layout; 41 the performance pass; 42 the demo video
 plan; 43 Complete the object, unpredictable answer places and one pick
 per puzzle in a run; 44 the room; 45 the phone view and no projector;
-then the music fix):
+46 the music fix (superseded); then the sound quality pass):
 
 Live on main
 
@@ -277,28 +277,41 @@ Live on main
   in and the fill ended exactly on the gap. Tile models made per round
   (swatches, pieces) set userData.ownsMaterials so disposePuzzleObject
   frees their materials too.
-- Sound (src/sound.ts SoundSystem, composition in src/sound-design.ts with
-  tests, setting in src/sound-settings.ts): all synthesized with WebAudio
+- Sound (src/sound.ts SoundSystem; instruments and loop rendering in
+  src/music-render.ts; composition and rules in src/sound-design.ts with
+  tests; setting in src/sound-settings.ts): all synthesized with WebAudio
   on three's shared AudioContext, no audio files (only the existing
-  generated chime.wav on the tray). Instruments are rendered once into
-  buffers (kalimba on two octaves of C major pentatonic, shaker, bass and
-  slap hand drums, RUSH's voice tone at C5); the groove (16 steps, a 4-bar
-  original melody) is scheduled LOOKAHEAD = 0.5 s ahead on the audio clock
-  (owner heard it break up at 0.15 s: the scheduler runs in the frame loop,
-  and model loads or a new puzzle stall frames longer than that). A stall
-  beyond the lookahead skips whole steps (stepsToCatchUp) and keeps the
-  beat instead of restarting the bar; a rest cancels notes already booked
-  (a ring of 48), and notes share one gain node per loudness. Tempo
-  92 -> 140 BPM eased by the clock fraction (musicTempo), bass joins below
-  75% of the clock and slaps below 40%; home plays kalimba and shaker at 84
-  BPM; the groove rests on solved/time up/run over. RUSH's cues (present,
-  cheer 0.25 s after the chime, worried, surprised, sleepy at time up,
-  runOver fanfare) come from reactionTo on the board and are panned toward
-  RUSH from the head. Music ducks to 30% while read-aloud speaks; a blurred
+  generated chime.wav on the tray). Owner heard the old per-note groove
+  stop mid-note and restart (2026-10-31): it was scheduled from the frame
+  loop at 22 kHz, stopped dead on every answer and restarted the bar, and
+  its ducking pumped between read-aloud sentences. Now: instruments at the
+  context's own rate (kalimba with a 1 s ring and inharmonic tine
+  overtones, two-grain shaker, bass and slap hand drums, RUSH's voice with
+  a little vibrato; every buffer ends in a 20 ms fade). At start the
+  groove (16 steps, the 4-bar original melody) is rendered with
+  OfflineAudioContext into four seamless stereo loops through a room echo
+  (roomImpulse, 1.1 s, send 0.28; foldTail adds the ring-out back onto the
+  loop's start), home first: home 84 BPM (kalimba, shaker), calm 92 (clock
+  >= 75%), mid 112 (+ bass, >= 40%), urgent 134 (+ slap). They play as
+  looping AudioBufferSourceNodes on the audio thread, so frame stalls
+  cannot cut them; a level change waits for the next bar line (at least
+  0.12 s ahead), starts the new loop at the same melody bar and crosses
+  over in 80 ms. musicMood: play (home, or a puzzle in play), soft 40%
+  (solved, time up, wrong move, wrong pick), off with a fade (paused, run
+  summary, sound off); the music never stops dead. Ducking: one dip to 35%
+  while read-aloud speaks, held 0.9 s past the last word, released over
+  about 0.5 s. RUSH's cues (present, cheer 0.25 s after the chime,
+  worried, surprised, sleepy at time up, runOver fanfare) come from
+  reactionTo on the board, are panned toward RUSH from the head and get a
+  little room echo (0.18). Everything ends in a gentle compressor
+  (threshold -16 dB, ratio 3). Levels: music bus 0.3, cues 0.55, master
+  0.9; loop peaks 1.0 (home) to 1.8 (urgent) before the bus, about 0.48
+  after it. Loops take about 0.6-1.6 s each to render in desktop Chromium
+  (on the audio thread) and about 14 MB of memory together. A blurred
   session suspends the context; a pointer or key press resumes it (browser
-  rule). Levels: music bus 0.3, cues 0.55, master 0.9 (offline render peaks
-  at 0.4; music about -24 dB calm, -21 dB urgent; cues -16 to -19 dB).
-  Home page "Sound on/off" (thinkrush.sound) also mutes the chime.
+  rule). Home page "Sound on/off" (thinkrush.sound) also mutes the chime.
+  Preview WAVs: render them in Chromium with renderLoop (dynamic import of
+  /src/music-render.ts on the dev server).
 - Daily Challenge (src/daily.ts with tests; PuzzleSystem.startDaily): the
   home page's gold "Daily Challenge" button (full width, above Pattern Loom)
   starts a run (mode run, 180 s, category All) over the day's puzzles:

@@ -30,33 +30,6 @@ export function stepSeconds(bpm: number): number {
   return 60 / bpm / 4;
 }
 
-/**
- * Notes are scheduled this far ahead of the audio clock (seconds). The
- * scheduler runs in the frame loop, so this is how long a stall (a model
- * loading, a new puzzle being built, garbage collection) can last before
- * the groove misses a note. 0.15 s broke up on the headset; tempo and layer
- * changes lag by this much, which the eased tempo hides.
- */
-export const LOOKAHEAD = 0.5;
-
-/**
- * How many steps the groove skips when the next one is due before `now`
- * (plus a little `margin` to schedule it): the fewest whole steps that put
- * it back ahead. Skipping whole steps keeps the beat, so a stalled frame
- * drops a note or two instead of restarting the bar.
- */
-export function stepsToCatchUp(
-  next: number,
-  now: number,
-  step: number,
-  margin = 0.02,
-): number {
-  if (next >= now + margin || step <= 0) {
-    return 0;
-  }
-  return Math.ceil((now + margin - next) / step);
-}
-
 export interface Layers {
   kalimba: boolean;
   shaker: boolean;
@@ -75,6 +48,137 @@ export function musicLayers(fraction: number, atHome: boolean): Layers {
     bass: fraction < 0.75,
     slap: fraction < 0.4,
   };
+}
+
+/** The music's four moods: the home page, then calm, middle and urgent. */
+export const MusicLevel = {
+  Home: 'home',
+  Calm: 'calm',
+  Mid: 'mid',
+  Urgent: 'urgent',
+} as const;
+export type MusicLevelName = (typeof MusicLevel)[keyof typeof MusicLevel];
+export const MUSIC_LEVELS: readonly MusicLevelName[] = ['home', 'calm', 'mid', 'urgent'];
+
+/** Each level's tempo: calmer at home, faster as the clock runs down. */
+export const LEVEL_TEMPO: Record<MusicLevelName, number> = {
+  home: TEMPO_HOME,
+  calm: TEMPO_FULL,
+  mid: 112,
+  urgent: 134,
+};
+
+/** Each level's instruments: drums join as the clock runs down. */
+export function levelLayers(level: MusicLevelName): Layers {
+  return {
+    kalimba: true,
+    shaker: true,
+    bass: level === 'mid' || level === 'urgent',
+    slap: level === 'urgent',
+  };
+}
+
+/** The level for the share of the clock left, or home. */
+export function musicLevel(fraction: number, atHome: boolean): MusicLevelName {
+  if (atHome) return 'home';
+  if (fraction >= 0.75) return 'calm';
+  if (fraction >= 0.4) return 'mid';
+  return 'urgent';
+}
+
+/** Bars in one loop: the whole melody. */
+export const LOOP_BARS = 4;
+
+/** Seconds per bar at `bpm`. */
+export function barSeconds(bpm: number): number {
+  return STEPS * stepSeconds(bpm);
+}
+
+/**
+ * The first bar line at or after `earliest`, for a loop whose bar 0 began
+ * at `loopStart`: its time and how many bars since loopStart. Levels switch
+ * only on bar lines, so the music never jumps mid-phrase.
+ */
+export function nextBarLine(
+  loopStart: number,
+  bar: number,
+  earliest: number,
+): { time: number; bars: number } {
+  const bars = Math.max(0, Math.ceil((earliest - loopStart) / bar - 1e-9));
+  return { time: loopStart + bars * bar, bars };
+}
+
+/**
+ * A seamless loop from one rendered pass that rings on past its end: the
+ * ring-out (note tails, reverb) is added back onto the loop's start, as the
+ * previous pass would have left it there.
+ */
+export function foldTail(
+  samples: Float32Array,
+  loopLength: number,
+): Float32Array<ArrayBuffer> {
+  const loop = new Float32Array(loopLength);
+  loop.set(samples.subarray(0, loopLength));
+  for (let i = loopLength; i < samples.length; i += 1) {
+    loop[(i - loopLength) % loopLength] += samples[i];
+  }
+  return loop;
+}
+
+/**
+ * Whether the music plays, plays softly or is silent. It never stops dead:
+ * after an answer or at time up it plays on softly; it fades out only when
+ * paused, at a run's summary or with sound off.
+ */
+export function musicMood(
+  mode: string,
+  status: string,
+  paused: boolean,
+  soundOn: boolean,
+): 'play' | 'soft' | 'off' {
+  if (!soundOn || paused || mode === 'runOver') return 'off';
+  if (mode === 'home') return 'play';
+  return status === 'playing' ? 'play' : 'soft';
+}
+
+/** The music's share in each mood. */
+export const MOOD_GAIN = { play: 1, soft: 0.4, off: 0 } as const;
+
+/**
+ * The music dips under the read-aloud voice and stays down through the
+ * short gaps between its sentences, rising again only HOLD seconds after
+ * the last word.
+ */
+export const DUCK = { gain: 0.35, hold: 0.9 } as const;
+
+export function duckHeld(speaking: boolean, lastSpokeAt: number, now: number): boolean {
+  return speaking || now - lastSpokeAt < DUCK.hold;
+}
+
+/**
+ * A soft room's echo for the reverb, as `seconds` of decaying noise: different
+ * on each channel (`seed`) for width, a little darker as it fades.
+ */
+export function roomImpulse(
+  sampleRate: number,
+  seconds: number,
+  seed: number,
+): Float32Array<ArrayBuffer> {
+  const length = Math.round(sampleRate * seconds);
+  const data = new Float32Array(length);
+  let state = seed >>> 0;
+  let smooth = 0;
+  for (let i = 0; i < length; i += 1) {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    const white = state / 2147483648 - 1;
+    const t = i / sampleRate;
+    // Darker later: a one-pole low-pass that closes as the echo fades.
+    const keep = Math.min(0.85, 0.2 + t * 0.9);
+    smooth = smooth * keep + white * (1 - keep);
+    // A short pre-delay: the room answers a moment after the note.
+    data[i] = t < 0.012 ? 0 : smooth * Math.exp(-t / (seconds / 6.9)) * 1.6;
+  }
+  return data;
 }
 
 // Pitches of the kalimba, as semitones above its lowest note (C4): two
