@@ -9,6 +9,7 @@ export const PuzzleCategory = {
   Proverb: 'proverb',
   Mafumbo: 'mafumbo',
   Pattern: 'pattern',
+  Object: 'object',
 } as const;
 
 export type Category = (typeof PuzzleCategory)[keyof typeof PuzzleCategory];
@@ -21,6 +22,7 @@ const CYCLE: Category[] = [
   PuzzleCategory.Proverb,
   PuzzleCategory.Mafumbo,
   PuzzleCategory.Pattern,
+  PuzzleCategory.Object,
 ];
 
 /** The bank indices that belong to `category`, in bank order. */

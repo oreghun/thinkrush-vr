@@ -187,6 +187,10 @@
     border-color: #ff6fa8;
   }
 
+  .world-object {
+    border-color: #8fd14f;
+  }
+
   .world-mafumbo {
     border-color: #b9a7ff;
   }
@@ -221,6 +225,9 @@
         <div class="button-row">
           <Button id="world-pattern" class="world-button world-pattern">
             <ButtonLabel id="welcome.world.pattern" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="world-object" class="world-button world-object">
+            <ButtonLabel id="welcome.world.object" class="button-label">...</ButtonLabel>
           </Button>
         </div>
         <div class="button-row">

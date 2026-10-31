@@ -5,7 +5,11 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const LANGS = ['en', 'sw'];
-const TYPES = ['visual', 'riddle', 'proverb', 'mafumbo', 'pattern'];
+const TYPES = ['visual', 'riddle', 'proverb', 'mafumbo', 'pattern', 'object'];
+// Object puzzles: the figure is drawn in code (src/object-puzzle.ts FIGURES)
+// and the game cuts the missing chunk; tests/object-puzzle.test.ts checks
+// every figure deals boards with exactly one piece that fits.
+const OBJECT_FIGURES = ['giraffe', 'elephant', 'baobab', 'hut', 'dhow', 'drum', 'kettle'];
 // Pattern puzzles: the board is generated in code (src/patterns.ts) from a
 // family (the look) and a rule (the logic); tests/patterns.test.ts checks
 // every pairing in the bank deals a fair board.
@@ -32,7 +36,7 @@ const REQUIRED_FIELDS = [
 ];
 // question is for mafumbo only, tiles for visual puzzles only, family and
 // rule for pattern puzzles only.
-const FIELDS = new Set([...REQUIRED_FIELDS, 'question', 'tiles', 'family', 'rule']);
+const FIELDS = new Set([...REQUIRED_FIELDS, 'question', 'tiles', 'family', 'rule', 'figure']);
 
 const errors = [];
 const notes = [];
@@ -137,8 +141,24 @@ function checkPuzzle(puzzle, fail) {
   } else if ('family' in puzzle || 'rule' in puzzle) {
     fail('"family" and "rule" are only for pattern puzzles');
   }
+  if (puzzle.type === 'object') {
+    if (!OBJECT_FIGURES.includes(puzzle.figure)) {
+      fail(`"figure" must be one of ${OBJECT_FIGURES.join(', ')}`);
+    }
+    if (puzzle.answer !== 'generated') {
+      fail('"answer" must be "generated": the game cuts each missing piece');
+    }
+    if (!Array.isArray(puzzle.options) || puzzle.options.length !== 0) {
+      fail('"options" must be [] for object puzzles');
+    }
+    if (puzzle.answer_mode !== 'grab') {
+      fail('"answer_mode" must be "grab" for object puzzles');
+    }
+  } else if ('figure' in puzzle) {
+    fail('"figure" is only for object puzzles');
+  }
 
-  if (puzzle.type === 'pattern') {
+  if (puzzle.type === 'pattern' || puzzle.type === 'object') {
     // Checked above.
   } else if (puzzle.type === 'visual') {
     if (!isTextList(puzzle.tiles, 4) || new Set(puzzle.tiles).size !== 4) {
@@ -162,7 +182,7 @@ function checkPuzzle(puzzle, fail) {
       fail('"options" must list the answer first');
     }
     if (puzzle.answer_mode === 'grab') {
-      fail('"answer_mode" "grab" is only for visual and pattern puzzles');
+      fail('"answer_mode" "grab" is only for visual, pattern and object puzzles');
     }
   }
 

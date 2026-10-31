@@ -8,6 +8,7 @@ import {
   Vector3,
   Visibility,
 } from '@iwsdk/core';
+import { reorder } from './answer-order.js';
 import { PieceTextures } from './pattern-art.js';
 import {
   generatePattern,
@@ -77,6 +78,9 @@ export class PatternTable {
     this.textures.dispose();
     seed ??= Math.floor(Math.random() * 2 ** 32);
     const board = generatePattern(puzzle.family, puzzle.rule, makeRandom(seed));
+    // The seed sets the board (the same for everyone on a Daily Challenge);
+    // where its pieces stand is shuffled afresh on every play.
+    board.answerIndex = reorder(board.options, board.answerIndex);
     this.dealt = board;
     board.strip.forEach((piece, i) => {
       const material = this.cells[i].material as MeshStandardMaterial;

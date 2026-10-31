@@ -32,7 +32,14 @@ function makeRandom(seed: number): () => number {
 }
 
 /** The worlds the challenge draws one puzzle from, in tie-break order. */
-const WORLD_ORDER: Puzzle['type'][] = ['visual', 'pattern', 'riddle', 'proverb', 'mafumbo'];
+const WORLD_ORDER: Puzzle['type'][] = [
+  'visual',
+  'pattern',
+  'object',
+  'riddle',
+  'proverb',
+  'mafumbo',
+];
 
 /** A day as YYYY-MM-DD in the player's own time zone. */
 export function dayKey(date: Date): string {
