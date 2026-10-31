@@ -17,8 +17,8 @@ tracking turned on in the headset's settings, put the controllers down and the
 game switches to your hands. On a computer, the same link shows a 3D preview
 you can click around in.
 
-> Status: 40 English draft puzzles are playable, one at a time: ten each of
-> visual puzzles, riddles, proverbs and mafumbo stories. One glass screen,
+> Status: 50 English draft puzzles are playable, one at a time: ten each of
+> visual puzzles, riddles, proverbs, mafumbo stories and patterns. One glass screen,
 > projected from a light bar above the table, opens on the home page: pick
 > a world (visual, riddles, proverbs or mafumbo) and the same screen turns
 > into the puzzle page; its Home button comes back. A visual puzzle
@@ -29,7 +29,12 @@ you can click around in.
 > wrong move!", so read (or listen) carefully. New moves arrive one at a
 > time. The objects are built in code and stand on identical wooden display
 > stands, all at one size; abstract ones, like a password, appear as a word
-> card set into the stand. Riddles, proverbs and mafumbo use three answer orbs you
+> card set into the stand. Pattern puzzles ("Complete the pattern") lay a
+> strip of six cloth pieces on a small lectern where the tray stands, with
+> one gap; the four stands carry candidate pieces, and you drop the right
+> one in the gap. Every pattern is drawn in code in five families (kitenge-
+> and kanga-inspired, beadwork, tessellation, weave, abstract) and each
+> board is dealt fresh from the puzzle's rule. Riddles, proverbs and mafumbo use three answer orbs you
 > point at and pinch. Ten Swahili methali drafts are kept separately in
 > `content/methali-drafts.json` for fluent-language review and are not loaded
 > into gameplay yet. Next puzzle (always available) steps through the bank, and a
@@ -198,6 +203,9 @@ src/puzzle.ts             gameplay: tiles, tray, answer orbs, timer, progression
 src/movable-panel.ts      the screen hangs above its light bar and can be re-placed
 src/screen-look.ts        drag-to-look camera for flat screens
 src/screen-stops.ts       beckoning the screen: its Far and Near stops (tests in tests/)
+src/patterns.ts           pattern puzzles: families, rules and dealing a fair board (tests in tests/)
+src/pattern-art.ts        draws every pattern piece in code
+src/pattern-play.ts       the pattern board on the table during a pattern puzzle
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/moves.ts              the action twist: which move to ask for, and judging it

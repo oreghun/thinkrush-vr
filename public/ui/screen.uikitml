@@ -157,6 +157,10 @@
     border-color: #e8a06a;
   }
 
+  .world-pattern {
+    border-color: #ff6fa8;
+  }
+
   .world-mafumbo {
     border-color: #b9a7ff;
   }
@@ -179,6 +183,11 @@
         <div id="welcome.body1" class="body">...</div>
         <div id="welcome.body2" class="body">...</div>
         <div id="welcome.worldHeading" class="world-heading">...</div>
+        <div class="button-row">
+          <Button id="world-pattern" class="world-button world-pattern">
+            <ButtonLabel id="welcome.world.pattern" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
         <div class="button-row">
           <Button id="world-visual" class="world-button world-visual">
             <ButtonLabel id="welcome.world.visual" class="button-label">...</ButtonLabel>

@@ -5,7 +5,12 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const LANGS = ['en', 'sw'];
-const TYPES = ['visual', 'riddle', 'proverb', 'mafumbo'];
+const TYPES = ['visual', 'riddle', 'proverb', 'mafumbo', 'pattern'];
+// Pattern puzzles: the board is generated in code (src/patterns.ts) from a
+// family (the look) and a rule (the logic); tests/patterns.test.ts checks
+// every pairing in the bank deals a fair board.
+const PATTERN_FAMILIES = ['kitenge', 'beadwork', 'tessellation', 'weave', 'abstract'];
+const PATTERN_RULES = ['repeat-2', 'repeat-3', 'mirror', 'turn', 'grow', 'two-cycles'];
 const ANSWER_MODES = ['grab', 'voice+orbs', 'orbs'];
 const STATUSES = ['draft', 'tested'];
 const DIFFICULTIES = [1, 2, 3, 4, 5];
@@ -25,8 +30,9 @@ const REQUIRED_FIELDS = [
   'difficulty',
   'status',
 ];
-// question is for mafumbo only, tiles for visual puzzles only.
-const FIELDS = new Set([...REQUIRED_FIELDS, 'question', 'tiles']);
+// question is for mafumbo only, tiles for visual puzzles only, family and
+// rule for pattern puzzles only.
+const FIELDS = new Set([...REQUIRED_FIELDS, 'question', 'tiles', 'family', 'rule']);
 
 const errors = [];
 const notes = [];
@@ -109,7 +115,32 @@ function checkPuzzle(puzzle, fail) {
     fail('"question" is only for mafumbo');
   }
 
-  if (puzzle.type === 'visual') {
+  if (puzzle.type === 'pattern') {
+    if (!PATTERN_FAMILIES.includes(puzzle.family)) {
+      fail(`"family" must be one of ${PATTERN_FAMILIES.join(', ')}`);
+    }
+    if (!PATTERN_RULES.includes(puzzle.rule)) {
+      fail(`"rule" must be one of ${PATTERN_RULES.join(', ')}`);
+    }
+    if (puzzle.answer !== 'generated') {
+      fail('"answer" must be "generated": the game deals each pattern board');
+    }
+    if ('tiles' in puzzle) {
+      fail('"tiles" is only for visual puzzles');
+    }
+    if (!Array.isArray(puzzle.options) || puzzle.options.length !== 0) {
+      fail('"options" must be [] for pattern puzzles');
+    }
+    if (puzzle.answer_mode !== 'grab') {
+      fail('"answer_mode" must be "grab" for pattern puzzles');
+    }
+  } else if ('family' in puzzle || 'rule' in puzzle) {
+    fail('"family" and "rule" are only for pattern puzzles');
+  }
+
+  if (puzzle.type === 'pattern') {
+    // Checked above.
+  } else if (puzzle.type === 'visual') {
     if (!isTextList(puzzle.tiles, 4) || new Set(puzzle.tiles).size !== 4) {
       fail('"tiles" must be 4 different non-empty strings');
     } else if (!puzzle.tiles.includes(puzzle.answer)) {
@@ -131,7 +162,7 @@ function checkPuzzle(puzzle, fail) {
       fail('"options" must list the answer first');
     }
     if (puzzle.answer_mode === 'grab') {
-      fail('"answer_mode" "grab" is only for visual puzzles');
+      fail('"answer_mode" "grab" is only for visual and pattern puzzles');
     }
   }
 

@@ -160,6 +160,23 @@
       }
     },
     {
+      "id": "pattern-board",
+      "name": "Pattern Board",
+      "content": {
+        "type": "asset",
+        "asset": "pattern-board",
+        "castShadow": true,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          0,
+          0.68,
+          -0.29
+        ]
+      }
+    },
+    {
       "id": "puzzle-tile-1",
       "name": "Puzzle Tile 1",
       "content": {

@@ -54,6 +54,9 @@ import {
   fitImportedStand,
 } from './scene-assets/display-stand.scene-asset.js';
 import { BUILT_TABLE_PARTS } from './scene-assets/puzzle.scene-asset.js';
+import { createSwatch } from './scene-assets/pattern-board.scene-asset.js';
+import { PatternTable } from './pattern-play.js';
+import type { Piece } from './patterns.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 import { IMPORTED_OBJECTS, objectAssetId } from './imported-objects.js';
 import { type TileModel, tileModelFor } from './tile-models.js';
@@ -120,6 +123,7 @@ const CATEGORY_LABEL_KEYS: Record<Category, MessageKey> = {
   [PuzzleCategory.Riddle]: 'category.riddle',
   [PuzzleCategory.Proverb]: 'category.proverb',
   [PuzzleCategory.Mafumbo]: 'category.mafumbo',
+  [PuzzleCategory.Pattern]: 'category.pattern',
 };
 
 // Restrained Afro-vibrant accents: each puzzle family gets a recognizable
@@ -130,6 +134,7 @@ const CATEGORY_ACCENTS: Record<Category, string> = {
   [PuzzleCategory.Riddle]: '#35B7AE',
   [PuzzleCategory.Proverb]: '#E8A06A',
   [PuzzleCategory.Mafumbo]: '#B9A7FF',
+  [PuzzleCategory.Pattern]: '#FF6FA8',
 };
 
 type Status = (typeof PuzzleStatus)[keyof typeof PuzzleStatus];
@@ -159,6 +164,10 @@ export class PuzzleSystem extends createSystem({
 }) {
   private puzzle?: Puzzle;
   private isVisual = true;
+  // Pattern puzzles also use the tiles, each carrying a piece of cloth.
+  private isPattern = false;
+  private patternTable?: PatternTable;
+  private readonly tilePieces: (Piece | undefined)[] = [];
   // Height above the table where objects rest on the display stand.
   private standSeat = 0;
   // Set when a "Read it out" press found no on-device voice, until the next
@@ -262,6 +271,9 @@ export class PuzzleSystem extends createSystem({
     }
 
     this.useOwnersTable();
+    this.patternTable = new PatternTable(
+      this.world.getSceneEntity('pattern-board'),
+    );
     for (const tile of this.queries.tiles.entities) {
       const slot = tile.getValue(PuzzleTile, 'slot') ?? 0;
       this.tileBySlot[slot] = tile;
@@ -350,6 +362,7 @@ export class PuzzleSystem extends createSystem({
       ['world-riddle', PuzzleCategory.Riddle],
       ['world-proverb', PuzzleCategory.Proverb],
       ['world-mafumbo', PuzzleCategory.Mafumbo],
+      ['world-pattern', PuzzleCategory.Pattern],
     ];
     const worldCleanup = worldButtons.flatMap(([id, selectedCategory]) => {
       const button = panel?.getElementById(id);
@@ -414,6 +427,7 @@ export class PuzzleSystem extends createSystem({
         this.lastVisibility = state;
       }),
       stopSpeaking,
+      () => this.patternTable?.dispose(),
       ...worldCleanup,
       this.queries.pressedOrbs.subscribe('qualify', (orb) => {
         this.onOrbPressed(orb);
@@ -551,6 +565,7 @@ export class PuzzleSystem extends createSystem({
     }
 
     let overTray = false;
+    let overBoard = false;
     if (this.isVisual && this.status() === PuzzleStatus.Playing) {
       this.player.head.getWorldPosition(this.headPosition);
       for (const tile of this.queries.heldTiles.entities) {
@@ -558,8 +573,13 @@ export class PuzzleSystem extends createSystem({
         this.trackLift(tile, delta);
         this.trackShow(tile, delta);
       }
+    } else if (this.isPattern && this.status() === PuzzleStatus.Playing) {
+      for (const tile of this.queries.heldTiles.entities) {
+        overBoard ||= this.patternTable?.isOver(tile.object3D!.position) ?? false;
+      }
     }
     this.setTrayGlow(overTray);
+    this.patternTable?.setReady(overBoard);
   }
 
   /** Loads puzzle `index` (wrapping), resets the timer and the pieces. */
@@ -573,6 +593,8 @@ export class PuzzleSystem extends createSystem({
     const puzzle = PUZZLES[wrapped];
     this.puzzle = puzzle;
     this.isVisual = puzzle.type === 'visual';
+    this.isPattern = puzzle.type === 'pattern';
+    const usesTiles = this.isVisual || this.isPattern;
     this.applyWorldTheme(this.category());
     board.setValue(PuzzleBoard, 'puzzleIndex', wrapped);
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
@@ -594,6 +616,10 @@ export class PuzzleSystem extends createSystem({
       board.setValue(PuzzleBoard, 'move', move);
       this.moveIsNew = isNew;
       writeMovesSeen(seen + 1);
+    } else if (this.isPattern) {
+      // A pattern piece goes in the gap: always a drop, never a twist.
+      board.setValue(PuzzleBoard, 'move', Move.Drop);
+      this.moveIsNew = false;
     }
     this.settling.clear();
     this.orbFlash.clear();
@@ -602,23 +628,33 @@ export class PuzzleSystem extends createSystem({
       panel.setValue(MovablePanel, 'stop', ScreenStop.Far);
     }
 
+    // A pattern deals a fresh board: the strip on the board, four pieces
+    // on the tiles. It stands where the tray does, so they take turns.
+    const deal = this.isPattern ? this.patternTable?.deal(puzzle) : undefined;
+    this.patternTable?.show(this.isPattern);
+    this.tray?.setValue(Visibility, 'isVisible', !this.isPattern);
     const tileLabels = this.isVisual ? shuffled(puzzle.tiles ?? []) : [];
     this.tileBySlot.forEach((tile, slot) => {
       const label = tileLabels[slot] ?? '';
-      tile.setValue(PuzzleTile, 'correct', label === puzzle.answer);
+      this.tilePieces[slot] = deal?.options[slot];
+      tile.setValue(
+        PuzzleTile,
+        'correct',
+        deal ? slot === deal.answerIndex : label === puzzle.answer,
+      );
       this.tileWords[slot] = this.isVisual ? label : '';
       this.setTileModel(slot);
-      this.place(tile, this.tileHomes[slot], this.isVisual);
+      this.place(tile, this.tileHomes[slot], usesTiles);
       tile.object3D!.quaternion.copy(this.tileRotations[slot]);
     });
 
-    const options = this.isVisual ? [] : shuffled(puzzle.options);
+    const options = usesTiles ? [] : shuffled(puzzle.options);
     this.orbBySlot.forEach((orb, slot) => {
       orb.setValue(AnswerOrb, 'correct', options[slot] === puzzle.answer);
       this.orbLabels[slot]
         ?.getElementById('orb-text')
         ?.setProperties({ text: options[slot] ?? '' });
-      this.place(orb, this.orbHomes[slot], !this.isVisual);
+      this.place(orb, this.orbHomes[slot], !usesTiles);
       this.setOrbGlow(slot, ORB_GLOW.idle);
     });
     this.noVoice = false;
@@ -643,12 +679,12 @@ export class PuzzleSystem extends createSystem({
     }
     // The move is part of what to listen for. Its verb is in capitals on
     // the panel; spoken, it is a plain word (some voices spell capitals).
-    const move = this.moveText().replace(/\b[A-Z]{2,}\b/gu, (word) =>
-      word.toLowerCase(),
-    );
+    const move = spokenMove(this.moveText());
     const text = this.isVisual
       ? `${puzzle.prompt} ${move}`
-      : puzzle.question
+      : this.isPattern
+        ? `${puzzle.prompt} ${spokenMove(t('pattern.drop'))}`
+        : puzzle.question
         ? `${puzzle.prompt} ${puzzle.question}`
         : puzzle.prompt;
     const spoken = speak(text, puzzle.lang);
@@ -663,6 +699,7 @@ export class PuzzleSystem extends createSystem({
     if (
       !board ||
       this.isVisual ||
+      this.isPattern ||
       this.status() !== PuzzleStatus.Playing ||
       this.mode() === PuzzleMode.Home
     ) {
@@ -690,10 +727,14 @@ export class PuzzleSystem extends createSystem({
     const answered = this.answeredInHold.delete(tile);
     const object = tile.object3D!;
     this.tileUp.set(0, 1, 0).applyQuaternion(object.quaternion);
-    const made = releaseMove(
-      this.tileUp.y < FLIPPED_UP_Y,
-      this.isOverTray(object.position),
-    );
+    const made = this.isPattern
+      ? this.patternTable?.isOver(object.position)
+        ? Move.Drop
+        : undefined
+      : releaseMove(
+          this.tileUp.y < FLIPPED_UP_Y,
+          this.isOverTray(object.position),
+        );
     // At home the table is cleared: a tile let go there answers nothing.
     if (!answered && made && this.mode() !== PuzzleMode.Home) {
       this.answer(tile, made);
@@ -749,7 +790,7 @@ export class PuzzleSystem extends createSystem({
     const board = this.board;
     if (
       !board ||
-      !this.isVisual ||
+      !(this.isVisual || this.isPattern) ||
       this.status() !== PuzzleStatus.Playing
     ) {
       return;
@@ -852,6 +893,7 @@ export class PuzzleSystem extends createSystem({
       [PuzzleCategory.Riddle]: { floor: '#172E43', stage: '#35B7AE' },
       [PuzzleCategory.Proverb]: { floor: '#382A32', stage: '#E8A06A' },
       [PuzzleCategory.Mafumbo]: { floor: '#27213F', stage: '#B9A7FF' },
+      [PuzzleCategory.Pattern]: { floor: '#2E1A35', stage: '#FF6FA8' },
     };
     const theme = themes[category] ?? themes[PuzzleCategory.All];
     for (const entry of this.worldMaterials) {
@@ -877,9 +919,14 @@ export class PuzzleSystem extends createSystem({
       disposePuzzleObject(previousModel);
       this.tileModels[slot] = undefined;
     }
-    const model = label
-      ? createPuzzleObject(label, importedObject(label))
-      : undefined;
+    // A pattern piece, a miniature for the tile's word, or nothing.
+    const piece = this.tilePieces[slot];
+    const texture = piece ? this.patternTable?.texture(piece) : undefined;
+    const model = texture
+      ? createSwatch(texture)
+      : label
+        ? createPuzzleObject(label, importedObject(label))
+        : undefined;
     if (model) {
       // On top of the stand, while the tile's slab remains invisible.
       // Add to the offset createPuzzleObject set, which puts the model's
@@ -944,6 +991,15 @@ export class PuzzleSystem extends createSystem({
     stopSpeaking();
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Solved);
     AudioUtils.play(this.tray!);
+    if (this.isPattern) {
+      // The right piece goes into the gap: the strip is whole again.
+      this.patternTable?.fillGap();
+      for (const tile of this.tileBySlot) {
+        if (tile.getValue(PuzzleTile, 'correct')) {
+          tile.setValue(Visibility, 'isVisible', false);
+        }
+      }
+    }
     if (this.mode() === PuzzleMode.Run && this.puzzle) {
       board.setValue(
         PuzzleBoard,
@@ -1040,6 +1096,8 @@ export class PuzzleSystem extends createSystem({
     this.orbBySlot.forEach((orb, slot) =>
       this.place(orb, this.orbHomes[slot], false),
     );
+    this.patternTable?.show(false);
+    this.tray?.setValue(Visibility, 'isVisible', true);
     this.render();
   }
 
@@ -1052,8 +1110,12 @@ export class PuzzleSystem extends createSystem({
     this.startRound(board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0);
   }
 
-  /** Teaches the answer when time runs out on an orb puzzle. */
+  /** Teaches the answer when time runs out: the orb glows, the gap fills. */
   private revealCorrectOrb(): void {
+    if (this.isPattern) {
+      this.patternTable?.fillGap();
+      return;
+    }
     if (this.isVisual) {
       return;
     }
@@ -1076,7 +1138,7 @@ export class PuzzleSystem extends createSystem({
 
   private restingTarget(slot: number): Vector3 {
     this.target.copy(this.tileHomes[slot]);
-    if (!this.isVisual) {
+    if (!this.isVisual && !this.isPattern) {
       this.target.y -= STOW_DROP;
     }
     return this.target;
@@ -1144,7 +1206,9 @@ export class PuzzleSystem extends createSystem({
 
     let statusText = this.isVisual
       ? this.moveText()
-      : t('puzzle.instructionsOrbs');
+      : this.isPattern
+        ? t('pattern.drop')
+        : t('puzzle.instructionsOrbs');
     const accent = CATEGORY_ACCENTS[puzzle.type as Category] ?? CATEGORY_ACCENTS[PuzzleCategory.All];
     let statusColor = accent;
     let detail = '';
@@ -1255,6 +1319,11 @@ export class PuzzleSystem extends createSystem({
         seconds <= LOW_TIME_SECONDS ? TIMER_COLORS.low : TIMER_COLORS.normal,
     });
   }
+}
+
+/** A move line as spoken: its capital verb read as a plain word. */
+function spokenMove(text: string): string {
+  return text.replace(/\b[A-Z]{2,}\b/gu, (word) => word.toLowerCase());
 }
 
 /** The UIKitML label somewhere under `entity`'s object. */
