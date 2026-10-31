@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-47 merged plus the door and horizon PR (6 answer orbs;
+As of 2026-10-31, PRs 1-49 merged plus the English-only PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -117,7 +117,8 @@ Glasses check and layout; 41 the performance pass; 42 the demo video
 plan; 43 Complete the object, unpredictable answer places and one pick
 per puzzle in a run; 44 the room; 45 the phone view and no projector;
 46 the music fix (superseded); 47 the sound quality pass (owner: "the
-sound is better now"); then the door and the horizon):
+sound is better now"); 48 the door and the horizon; 49 the band off the
+door; then English only for the competition):
 
 Live on main
 
@@ -481,6 +482,15 @@ Live on main
 
 Decisions
 
+- Swahili after the competition (owner, 2026-10-31): the game ships English
+  only; Swahili work starts after the submission and Meta's review.
+  LANGUAGE_CHOICE = false in src/i18n/index.ts hides the home page's
+  language button, makes initialLanguage always 'en' (a saved or browser
+  Swahili choice is ignored) and turns setLanguage into a no-op. sw.json,
+  the methali drafts and t() stay as they are; flip the flag to bring the
+  toggle back. This supersedes the "Swahili toggle and pack" item in the
+  Week 2 schedule and the Swahili content drop-in in Next up.
+
 - Comfort contract: nothing may move or rotate the player's viewpoint in VR
   except their own head. No locomotion, no snap turns, no world rotation, no
   camera animation, no screen shake (juice goes on objects, never on the
@@ -569,7 +579,7 @@ Next up (in order)
    steps; the owner records on the Quest. The official rules page could not
    be read from the cloud session (devpost.com is outside its network
    policy), so the owner confirms the length and hosting rules.
-3. Swahili content drop-in when the owner has written it.
+   (Swahili: after the competition, see Decisions.)
    Cut order if time runs short: leaderboard, misplaced-object puzzle
    variant, extra puzzle count.
 

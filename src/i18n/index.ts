@@ -12,6 +12,14 @@ const MESSAGES: Record<Language, Record<MessageKey, string>> = { en, sw };
 export const MESSAGE_KEYS = Object.keys(en) as MessageKey[];
 
 const STORAGE_KEY = 'thinkrush.language';
+
+/**
+ * Swahili waits until after the competition and Meta's review (owner,
+ * 2026-10-31): until then the game is English only and offers no language
+ * choice. Everything for Swahili stays in place (sw.json, the methali
+ * drafts, t()); set this to true to bring the language button back.
+ */
+export const LANGUAGE_CHOICE = false;
 const listeners = new Set<(language: Language) => void>();
 let current: Language = initialLanguage();
 document.documentElement.lang = current;
@@ -36,7 +44,7 @@ export function getLanguage(): Language {
 }
 
 export function setLanguage(language: Language): void {
-  if (language === current) {
+  if (!LANGUAGE_CHOICE || language === current) {
     return;
   }
   current = language;
@@ -68,6 +76,9 @@ function isLanguage(value: unknown): value is Language {
 
 /** A saved choice wins; otherwise the first supported browser language; otherwise English. */
 function initialLanguage(): Language {
+  if (!LANGUAGE_CHOICE) {
+    return 'en';
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (isLanguage(saved)) {
