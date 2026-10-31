@@ -16,6 +16,9 @@
   mode: practice offers Category, Start run, Next puzzle and Home, a run
   offers Skip, and the run-over summary offers Run again, Back to practice
   and Home. "..." is only a placeholder.
+
+  The perf row stays hidden unless the page URL has ?fps: then
+  src/performance.ts fills it with the frame rate once a second.
 -->
 <style>
   .glow-outer {
@@ -95,6 +98,13 @@
     padding-left: 22px;
     padding-right: 22px;
     padding-bottom: 22px;
+  }
+
+  .perf {
+    flex-direction: row;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 16px;
   }
 
   .world-heading {
@@ -338,6 +348,9 @@
             <ButtonLabel id="sound-label" class="button-label">...</ButtonLabel>
           </Button>
         </div>
+      </div>
+      <div id="perf-row" class="perf" style="display: none">
+        <span id="perf-line" class="hint">...</span>
       </div>
     </div>
   </div>

@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-39 merged plus the glasses PR (6 answer orbs;
+As of 2026-10-31, PRs 1-40 merged plus the performance PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -112,8 +112,8 @@ objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 32 one projected screen with home and puzzle pages; 33 beckoning it;
 34 the owner's room set in the back corners; 35 the owner's pedestal
 table as the play table; 36 the pattern puzzle; 37 the sound pass; 38 the
-Daily Challenge and streaks; 39 the palm-up pause; then the Meta VR
-Glasses check and layout):
+Daily Challenge and streaks; 39 the palm-up pause; 40 the Meta VR
+Glasses check and layout; then the performance pass):
 
 Live on main
 
@@ -294,6 +294,26 @@ Live on main
   To test again: set dev.emulator.device to metaVRGlasses (the committed
   default stays metaQuest3) and compare atan2(dx, -dz) and atan2(dy, -dz)
   in the head's frame against the limits.
+- Performance (src/performance.ts PerformanceSystem, timing in
+  src/frame-stats.ts with tests): when VR starts the game asks for 72 Hz if
+  the headset offers it (Quest's baseline; 90 or 120 would leave less time
+  per frame). ?fps in the page URL (live:
+  https://oreghun.github.io/thinkrush-vr/?fps) shows a line at the foot of
+  the screen ("perf-row", hidden otherwise), refreshed every second: fps,
+  the display rate, the slowest frame, late frames (over 1.5 display
+  intervals), draw calls and triangles (renderer.info of the last frame;
+  without multiview, as in the desktop emulator, both eyes count).
+  Shadows: the key light keeps its direction but sits on an axis through
+  the play area (0.05, 0.45, -0.45), 6 m away at (-1.1271, 6.0882, 1.231);
+  its shadow box is 2 m (was 8 m) with a 512 px map (was 2048: the same
+  3.9 mm texels over the table, 1/16 of the memory and fill), near 3.5,
+  far 8.5, radius 7. Only the play area casts real shadows (table, stage,
+  tiles, orbs, pattern board: 21 casters, was 30); the room-corner pieces
+  neither cast nor receive (their ContactShadows ground them), and the
+  5-tap PCF now runs only on pixels near the table instead of the whole
+  floor. Measured in the emulator on a visual puzzle: 55 draw calls, 92k
+  triangles, 29 textures, 21 programs. The renderer already uses
+  multiview, 4x MSAA and full fixed foveation (IWSDK and three defaults).
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
@@ -368,7 +388,7 @@ Decisions
   view); avoid full-field particle bursts; the floor and horizon stay
   static; ScreenLookSystem runs only outside immersive sessions. The other
   half of comfort is frame rate: 60 fps gets verified on a real Quest 3 in
-  Week 3.
+  Week 3 (open the live build with ?fps on the headset).
 - Pattern puzzle (built 2026-10-31, details under Live on main): universal
   "Complete the pattern"; content gives type "pattern", a family and a rule,
   answer "generated"; the game deals the board.
@@ -426,8 +446,12 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. 60 fps on a real Quest 3. Watch the key light's 2048 px PCF shadows
-   (radius 7, 30 casters) and the ~207k triangles the emulator reported.
+1. Measure on a real Quest 3 with ?fps (owner): home, a visual puzzle with
+   imported models, a pattern board, an orb puzzle, and a grab. If frames
+   come late, next suspects: the first sight of each imported model (shader
+   compile and texture upload; renderer.compileAsync could warm them), the
+   graphite MeshPhysicalMaterial (clearcoat) on orbs and stands, and the
+   screen's see-through glass.
 2. Demo video (RUSH is its face).
 3. Swahili content drop-in when the owner has written it.
 4. Optional, if time allows: "Complete the object" (see Decisions).

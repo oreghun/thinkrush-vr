@@ -238,6 +238,23 @@ The full list is in [CLAUDE.md](CLAUDE.md). In short:
   otherwise download from a CDN.
 - Keep the build under 20 MB. The build fails above that.
 
+## Performance
+
+The game must hold at least 60 fps on a Quest 3. To check it on the headset,
+open the live build with `?fps` at the end of the address:
+
+    https://oreghun.github.io/thinkrush-vr/?fps
+
+A line at the foot of the screen then shows, once a second: frames per
+second, the headset's display rate, the slowest frame in milliseconds,
+late frames (when the headset had to show the previous picture again),
+draw calls and triangles. Without `?fps` nothing is shown or measured.
+
+When VR starts, the game asks the headset for 72 Hz (Quest's own baseline),
+which leaves the most time for each frame. Shadows are drawn only around the
+table, where they matter; the furniture in the room corners is grounded by
+soft contact shadows instead.
+
 ## Known gaps
 
 - IWSDK is at 1.1.0-rc.2, a release candidate. That is what `@iwsdk/create@latest`
