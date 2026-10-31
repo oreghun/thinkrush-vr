@@ -172,6 +172,15 @@ Browsers only allow speech after the first tap or click, so on a flat page
 the first puzzle is read once you interact; in VR, entering the headset
 reads the current puzzle.
 
+## Where the answer is
+
+The right answer never sits in a predictable place. Every round shuffles
+the tiles, orbs and pieces afresh with a fair shuffle (`src/answer-order.ts`),
+independent of the round before, so no guessing order (always the first,
+the next one along, the same as last time) does better than chance. The
+Daily Challenge gives everyone the same boards, but replaying it moves the
+pieces. `tests/answer-order.test.ts` checks this over 60,000 rounds.
+
 ## Daily Challenge and streaks
 
 The home page's **Daily Challenge** plays six puzzles, one from each world,

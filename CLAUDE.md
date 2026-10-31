@@ -424,6 +424,18 @@ Decisions
   static; ScreenLookSystem runs only outside immersive sessions. The other
   half of comfort is frame rate: 60 fps gets verified on a real Quest 3 in
   Week 3 (open the live build with ?fps on the headset).
+- Answer placement (owner, 2026-10-31: players must not learn where the next
+  answer will be): every choice (visual tiles, orbs, pattern and object
+  pieces) is placed by one fair Fisher-Yates shuffle, src/answer-order.ts
+  shuffled(), fresh and independent every round. No anti-repeat rule:
+  "never the same place twice" would itself be learnable (with three orbs
+  it lifts a blind guess from 1 in 3 to 1 in 2). Seeded boards (the Daily
+  Challenge) keep their pieces for everyone, but reorder() shuffles where
+  they stand on every play, so a same-day replay can't be answered from
+  memory. tests/answer-order.test.ts checks 60,000 rounds: each place gets
+  1/N, every step from the last answer's place to the next is equally
+  likely, and no guessing order (always first, same as last, the next
+  one, in turn) beats chance.
 - Pattern puzzle (built 2026-10-31, details under Live on main): universal
   "Complete the pattern"; content gives type "pattern", a family and a rule,
   answer "generated"; the game deals the board.

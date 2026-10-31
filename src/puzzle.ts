@@ -55,6 +55,7 @@ import {
 } from './scene-assets/display-stand.scene-asset.js';
 import { BUILT_TABLE_PARTS } from './scene-assets/puzzle.scene-asset.js';
 import { createSwatch } from './scene-assets/pattern-board.scene-asset.js';
+import { shuffled } from './answer-order.js';
 import { PatternTable } from './pattern-play.js';
 import { ObjectTable } from './object-play.js';
 import { isSoundOn } from './sound-settings.js';
@@ -1679,11 +1680,3 @@ function writeBestScore(score: number): void {
   }
 }
 
-function shuffled<T>(items: readonly T[]): T[] {
-  const copy = [...items];
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-}

@@ -7,6 +7,7 @@ import {
   Vector3,
   Visibility,
 } from '@iwsdk/core';
+import { reorder } from './answer-order.js';
 import {
   createFigure,
   createFill,
@@ -65,6 +66,9 @@ export class ObjectTable {
     this.clear();
     seed ??= Math.floor(Math.random() * 2 ** 32);
     const board = dealObject(puzzle.figure, puzzle.difficulty, makeRandom(seed));
+    // The seed sets the board (the same for everyone on a Daily Challenge);
+    // where its pieces stand is shuffled afresh on every play.
+    board.answerIndex = reorder(board.options, board.answerIndex);
     this.dealt = board;
     this.figure = createFigure(board);
     this.bed.add(this.figure.root);
