@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-38 merged plus the pause PR (6 answer orbs;
+As of 2026-10-31, PRs 1-39 merged plus the glasses PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -112,7 +112,8 @@ objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 32 one projected screen with home and puzzle pages; 33 beckoning it;
 34 the owner's room set in the back corners; 35 the owner's pedestal
 table as the play table; 36 the pattern puzzle; 37 the sound pass; 38 the
-Daily Challenge and streaks; then the palm-up pause):
+Daily Challenge and streaks; 39 the palm-up pause; then the Meta VR
+Glasses check and layout):
 
 Live on main
 
@@ -160,7 +161,7 @@ Live on main
   looking closely at it is not an answer), or SHOW it to RUSH (held within
   0.2 m of RUSH's centre for 0.6 s; for this move RUSH glides from beside
   the screen, out of seated reach, to a spot fixed when the move starts:
-  0.28 m right, 0.2 m below and 0.42 m in front of the head). The game
+  0.2 m right, 0.2 m below and 0.42 m in front of the head). The game
   picks the move, never the puzzle file: the first two visual puzzles on a
   device are drops, the 3rd introduces flip, the 5th lift and the 7th show
   ("New move!"), then it is random
@@ -170,8 +171,8 @@ Live on main
   after 2.5 s); practice says so and lets you retry. Orb puzzles have no
   moves. The tray stays visible for every move: the habit is the trap.
 - RUSH (src/rush.ts, logic in src/rush-mood.ts with tests, model in
-  src/scene-assets/rush.scene-asset.ts, scene node "rush" at 0.52, 1.25,
-  -0.8 beside the screen): a deep-gold glowing sphere, 18 cm across,
+  src/scene-assets/rush.scene-asset.ts, scene node "rush" at 0.42, 0.98,
+  -0.75, beside the screen's lower right corner): a deep-gold glowing sphere, 18 cm across,
   with two eyes; it turns to face the player and blinks. It is the timer:
   it shrinks to 45% and warms from gold to red as the clock (the puzzle's
   60 s, or the run's 180 s) runs out. Lasting moods follow the board
@@ -274,11 +275,30 @@ Live on main
   rests and RUSH's base mood is sleepy. Home from the pause page also quits
   a run (unscored). startRound and goHome clear the pause. The home page
   shows the hint "Turn a palm up any time to pause."
+- Meta VR Glasses (checked 2026-10-31 with iwsdk-glasses-test in the
+  emulator's metaVRGlasses profile): gazeTracking is requested (optional)
+  in iwsdk.config.json, so gaze + pinch drives every ray target (screen
+  buttons, orbs, the light bar) with no app code; tiles stay near-grab with
+  the glasses' hand tracking. The view is 37 deg each side, 25 up, 43 down,
+  so the layout was lowered and pulled in for everyone: screen centre
+  1.2 -> 1.08 m and scale 1.6 -> 1.45; RUSH 0.52, 1.25, -0.8 -> 0.42, 0.98,
+  -0.75; the show spot 0.28 -> 0.2 m right. Seated head 1.15 m: looking
+  straight ahead the screen (home page included) and RUSH fit; 15 deg down
+  the whole puzzle page, RUSH, orbs and tiles fit (the tray's near edge is
+  at the bottom of the view); 25 deg down RUSH, orbs, tiles and tray fit.
+  RUSH (the timer) is in view at all three. Gaze hovered the screen and the
+  bar (and nothing on the floor), a right-hand pinch pressed the screen, a
+  left-hand pinch grabbed the bar and pulling it back brought the screen
+  Near; with gaze disconnected the hand ray targets, and on reconnect gaze
+  takes targeting back (a hand near the Near screen holds it, by design).
+  To test again: set dev.emulator.device to metaVRGlasses (the committed
+  default stays metaQuest3) and compare atan2(dx, -dz) and atan2(dy, -dz)
+  in the head's frame against the limits.
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
-  0.115 under a bar at scale 1.6: 600 cm = 1.1 m wide, its centre at
-  y 1.2, 1.4 m in front of the seat, the Far stop): two
+  0.115 under a bar at scale 1.45 (bar at 0, 0.471, -1.4): 600 cm = 1.0 m
+  wide, its centre at y 1.08, 1.4 m in front of the seat, the Far stop): two
   pages, home and puzzle, shown one at a time by PuzzleSystem.render. The
   game opens on home (PuzzleMode.Home, the board's default): the table is
   cleared, no clock runs, RUSH rests full size and nothing is read aloud.
@@ -309,7 +329,7 @@ Live on main
 - Beckon (src/screen-stops.ts with tests, MovablePanel.stop, run by
   MovablePanelSystem): in VR the screen rests at one of two stops. Far is
   the scene's pose (above). Near puts its centre 0.42 m ahead of and 0.18 m
-  below the eyes at 40% of the Far scale (0.44 m wide), placed from the
+  below the eyes at 40% of the Far scale (0.40 m wide), placed from the
   head when called and never with the bar below 0.72 m (the table top is
   0.68 m). On letting go of the bar, a pull of 8 cm or more toward the head
   means Near, a push of 8 cm means Far, a pinch under 0.35 s moving under
@@ -406,12 +426,11 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Glasses check (iwsdk-glasses-test: the narrow view and gaze + pinch).
-2. 60 fps on a real Quest 3. Watch the key light's 2048 px PCF shadows
+1. 60 fps on a real Quest 3. Watch the key light's 2048 px PCF shadows
    (radius 7, 30 casters) and the ~207k triangles the emulator reported.
-3. Demo video (RUSH is its face).
-4. Swahili content drop-in when the owner has written it.
-5. Optional, if time allows: "Complete the object" (see Decisions).
+2. Demo video (RUSH is its face).
+3. Swahili content drop-in when the owner has written it.
+4. Optional, if time allows: "Complete the object" (see Decisions).
    Cut order if time runs short: leaderboard, misplaced-object puzzle
    variant, extra puzzle count.
 

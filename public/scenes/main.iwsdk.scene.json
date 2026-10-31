@@ -477,10 +477,10 @@
       "transform": {
         "position": [
           0,
-          0.528,
+          0.471,
           -1.4
         ],
-        "scale": 1.6
+        "scale": 1.45
       },
       "components": {
         "RayInteractable": {},
@@ -527,9 +527,9 @@
       },
       "transform": {
         "position": [
-          0.52,
-          1.25,
-          -0.8
+          0.42,
+          0.98,
+          -0.75
         ]
       },
       "components": {
