@@ -109,6 +109,24 @@
       }
     },
     {
+      "id": "horizon",
+      "name": "Horizon",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "horizon",
+        "castShadow": false,
+        "receiveShadow": false
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
       "id": "puzzle-table",
       "name": "Puzzle Table",
       "content": {

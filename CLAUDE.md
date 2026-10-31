@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-46 merged plus the sound quality PR (6 answer orbs;
+As of 2026-10-31, PRs 1-47 merged plus the door and horizon PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -116,7 +116,8 @@ Daily Challenge and streaks; 39 the palm-up pause; 40 the Meta VR
 Glasses check and layout; 41 the performance pass; 42 the demo video
 plan; 43 Complete the object, unpredictable answer places and one pick
 per puzzle in a run; 44 the room; 45 the phone view and no projector;
-46 the music fix (superseded); then the sound quality pass):
+46 the music fix (superseded); 47 the sound quality pass (owner: "the
+sound is better now"); then the door and the horizon):
 
 Live on main
 
@@ -206,8 +207,16 @@ Live on main
   strip, dark edges, a row of accent triangles, Room/BandAccent, tinted
   with each world's stage colour by captureWorldMaterials); window
   openings in both side walls (z -2.6..0.4, y 1.15-2.55) and a 1.6 x 2.4 m
-  doorway behind the seat, all framed in wood, showing the sky dome
-  outside. Boxes merged per material: 6 draw calls, no textures; it casts
+  doorway behind the seat, all framed in wood. The doorway is closed by a
+  plank door (owner, 2026-10-31: the open doorway showed an empty void):
+  five planks over a dark backing, two rails with six metal studs each, a
+  ring handle and a keyhole (materials room-door, room-door-metal, two
+  more draw calls), and the band runs across it, right round the room.
+  The windows look out on the horizon (src/scene-assets/horizon.scene-asset.ts,
+  scene node "horizon"): two ridges of low hills (38 m, darker; 46 m,
+  paler) and acacia and baobab silhouettes placed so each window frames
+  three (angles 85-118 degrees each side), one unlit vertex-coloured mesh,
+  one draw call. Boxes merged per material: 6 draw calls, no textures; it casts
   and receives no shadows (the key light shines through the ceiling). The
   studio floor's DomeFade moved from 4-10 m to 7.5-13 m, so the floor is
   solid to the walls (back corners at 7.3 m) and fades outside the
