@@ -58,6 +58,7 @@ import { createSwatch } from './scene-assets/pattern-board.scene-asset.js';
 import { shuffled } from './answer-order.js';
 import { PatternTable } from './pattern-play.js';
 import { ObjectTable } from './object-play.js';
+import { BAND_ACCENT_NAME } from './scene-assets/room.scene-asset.js';
 import { isSoundOn } from './sound-settings.js';
 import {
   currentStreak,
@@ -1017,15 +1018,18 @@ export class PuzzleSystem extends createSystem({
    * source asset or other placements.
    */
   private captureWorldMaterials(): void {
-    const targets: Array<[string, 'floor' | 'stage']> = [
+    // The room's band accent takes the world's colour, like the stage.
+    const targets: Array<[string, 'floor' | 'stage', string?]> = [
       ['studio-floor', 'floor'],
       ['stage', 'stage'],
+      ['room', 'stage', BAND_ACCENT_NAME],
     ];
-    for (const [id, role] of targets) {
+    for (const [id, role, onlyName] of targets) {
       const entity = this.world.getSceneEntity(id);
       if (!entity?.object3D) continue;
       entity.object3D.traverse((object) => {
         if (!(object instanceof Mesh)) return;
+        if (onlyName && object.name !== onlyName) return;
         const original = Array.isArray(object.material)
           ? object.material
           : [object.material];

@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-42 merged plus the object puzzle PR (6 answer orbs;
+As of 2026-10-31, PRs 1-43 merged plus the room PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -114,7 +114,8 @@ objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 table as the play table; 36 the pattern puzzle; 37 the sound pass; 38 the
 Daily Challenge and streaks; 39 the palm-up pause; 40 the Meta VR
 Glasses check and layout; 41 the performance pass; 42 the demo video
-plan; then Complete the object):
+plan; 43 Complete the object, unpredictable answer places and one pick
+per puzzle in a run; then the room):
 
 Live on main
 
@@ -195,6 +196,23 @@ Live on main
   ContactShadow node. The low table was meant to be the play table but
   came out coffee-table height (my prompt said "low"), so it dresses a
   corner.
+- The room (src/scene-assets/room.scene-asset.ts, manifest id and scene
+  node "room" at the origin): the open studio is now enclosed, built in
+  code (no Meshy: generated models are objects, not interiors). Inner
+  faces at x = +-4.9, back z = -5.4, front z = +3.5, ceiling 3.4 m, walls
+  0.2 m; dark clay dado to 0.95 m, ochre plaster above, a lighter ceiling
+  with five dark beams; a band at 0.95-1.08 m on every inner wall (cream
+  strip, dark edges, a row of accent triangles, Room/BandAccent, tinted
+  with each world's stage colour by captureWorldMaterials); window
+  openings in both side walls (z -2.6..0.4, y 1.15-2.55) and a 1.6 x 2.4 m
+  doorway behind the seat, all framed in wood, showing the sky dome
+  outside. Boxes merged per material: 6 draw calls, no textures; it casts
+  and receives no shadows (the key light shines through the ceiling). The
+  studio floor's DomeFade moved from 4-10 m to 7.5-13 m, so the floor is
+  solid to the walls (back corners at 7.3 m) and fades outside the
+  openings. The furniture corners stand inside (the cabinet corner's plant
+  set the back wall at -5.4). Verified on the flat page and in VR looking
+  at a window; 62 draw calls on the home page.
 - Play table: the owner's Meshy pedestal table (public/models/play-table.glb,
   manifest id play-table, critical), optimized with --height 0.645 to
   1.01 x 0.645 x 0.51 m at its own proportions, so its top is at 0.68 m on
