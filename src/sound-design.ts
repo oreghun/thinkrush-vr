@@ -30,6 +30,33 @@ export function stepSeconds(bpm: number): number {
   return 60 / bpm / 4;
 }
 
+/**
+ * Notes are scheduled this far ahead of the audio clock (seconds). The
+ * scheduler runs in the frame loop, so this is how long a stall (a model
+ * loading, a new puzzle being built, garbage collection) can last before
+ * the groove misses a note. 0.15 s broke up on the headset; tempo and layer
+ * changes lag by this much, which the eased tempo hides.
+ */
+export const LOOKAHEAD = 0.5;
+
+/**
+ * How many steps the groove skips when the next one is due before `now`
+ * (plus a little `margin` to schedule it): the fewest whole steps that put
+ * it back ahead. Skipping whole steps keeps the beat, so a stalled frame
+ * drops a note or two instead of restarting the bar.
+ */
+export function stepsToCatchUp(
+  next: number,
+  now: number,
+  step: number,
+  margin = 0.02,
+): number {
+  if (next >= now + margin || step <= 0) {
+    return 0;
+  }
+  return Math.ceil((now + margin - next) / step);
+}
+
 export interface Layers {
   kalimba: boolean;
   shaker: boolean;

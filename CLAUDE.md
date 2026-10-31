@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-44 merged plus the phone view PR (6 answer orbs;
+As of 2026-10-31, PRs 1-45 merged plus the music fix PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -115,7 +115,8 @@ table as the play table; 36 the pattern puzzle; 37 the sound pass; 38 the
 Daily Challenge and streaks; 39 the palm-up pause; 40 the Meta VR
 Glasses check and layout; 41 the performance pass; 42 the demo video
 plan; 43 Complete the object, unpredictable answer places and one pick
-per puzzle in a run; 44 the room; then the phone view):
+per puzzle in a run; 44 the room; 45 the phone view and no projector;
+then the music fix):
 
 Live on main
 
@@ -282,7 +283,12 @@ Live on main
   generated chime.wav on the tray). Instruments are rendered once into
   buffers (kalimba on two octaves of C major pentatonic, shaker, bass and
   slap hand drums, RUSH's voice tone at C5); the groove (16 steps, a 4-bar
-  original melody) is scheduled 0.15 s ahead on the audio clock. Tempo
+  original melody) is scheduled LOOKAHEAD = 0.5 s ahead on the audio clock
+  (owner heard it break up at 0.15 s: the scheduler runs in the frame loop,
+  and model loads or a new puzzle stall frames longer than that). A stall
+  beyond the lookahead skips whole steps (stepsToCatchUp) and keeps the
+  beat instead of restarting the bar; a rest cancels notes already booked
+  (a ring of 48), and notes share one gain node per loudness. Tempo
   92 -> 140 BPM eased by the clock fraction (musicTempo), bass joins below
   75% of the clock and slaps below 40%; home plays kalimba and shaker at 84
   BPM; the groove rests on solved/time up/run over. RUSH's cues (present,
