@@ -57,7 +57,8 @@ you can click around in.
 > device. In a run you get one pick per puzzle: a wrong pick loses it and
 > moves on, so guessing through the choices never pays (practice still
 > lets you try again). You sit in a clay-walled room with a beamed ceiling,
-> two windows and a doorway open to the evening sky, all built in code.
+> a plank door, and two windows looking out on hills and acacia trees
+> against the evening sky, all built in code.
 > RUSH, a glowing companion beside the puzzle, is the timer: it
 > shrinks and turns red as time runs out, and reacts to every answer.
 

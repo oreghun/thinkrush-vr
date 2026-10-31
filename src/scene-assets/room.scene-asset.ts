@@ -12,13 +12,15 @@ import {
 
 /**
  * The room around the studio: clay walls, a beamed ceiling, two windows
- * and a doorway that show the sky dome outside. Origin at the floor under
+ * that show the sky and the horizon outside, and a closed plank door behind
+ * the seat. Origin at the floor under
  * the seat, +Z toward the player's back, inner faces at x = +-ROOM_HALF_WIDTH,
  * z = ROOM_BACK and z = ROOM_FRONT, ceiling at ROOM_HEIGHT. The floor is
  * the studio floor; the furniture corners stand against the back walls.
  *
  * Built from boxes merged per material, so the whole room is six draw
- * calls. It casts no shadows: the key light shines through the ceiling.
+ * calls (eight with the door). It casts no shadows: the key light shines
+ * through the ceiling.
  * The band's accent triangles (BAND_ACCENT_NAME) take each world's colour
  * at runtime, like the stage.
  */
@@ -34,9 +36,11 @@ const BAND_TOP = 1.08;
 // Side windows: their openings along z and from sill to head.
 const WINDOW_Z: readonly [number, number] = [-2.6, 0.4];
 const WINDOW_Y: readonly [number, number] = [1.15, 2.55];
-// The doorway behind the seat.
+// The doorway behind the seat, closed by a plank door whose room-side face
+// stands DOOR_SET into the opening.
 const DOOR_HALF_WIDTH = 0.8;
 const DOOR_TOP = 2.4;
+const DOOR_SET = 0.02;
 const BEAMS_Z = [-4.4, -2.6, -0.8, 1.0, 2.6];
 
 const plaster = createSceneMaterial({
@@ -62,6 +66,20 @@ const wood = createSceneMaterial({
   model: 'standard',
   baseColor: '#4A2C17',
   roughness: 0.75,
+});
+const doorWood = createSceneMaterial({
+  id: 'room-door',
+  model: 'standard',
+  // Lighter than the frames: the back wall gets no direct light.
+  baseColor: '#946038',
+  roughness: 0.8,
+});
+const doorMetal = createSceneMaterial({
+  id: 'room-door-metal',
+  model: 'standard',
+  baseColor: '#9C7A45',
+  roughness: 0.35,
+  metalness: 0.7,
 });
 const accent = createSceneMaterial({
   id: 'room-band-accent',
@@ -130,6 +148,13 @@ function wallRuns(): WallRun[] {
     run(new Vector3(ROOM_HALF_WIDTH, 0, 0), new Vector3(0, 0, 1), ROOM_BACK, ROOM_FRONT),
     run(new Vector3(0, 0, ROOM_FRONT), new Vector3(-1, 0, 0), -ROOM_HALF_WIDTH, -DOOR_HALF_WIDTH),
     run(new Vector3(0, 0, ROOM_FRONT), new Vector3(-1, 0, 0), DOOR_HALF_WIDTH, ROOM_HALF_WIDTH),
+    // Across the door's planks, so the band runs right round the room.
+    run(
+      new Vector3(0, 0, ROOM_FRONT + DOOR_SET),
+      new Vector3(-1, 0, 0),
+      -DOOR_HALF_WIDTH,
+      DOOR_HALF_WIDTH,
+    ),
   ];
 }
 
@@ -241,12 +266,42 @@ export function createRoom(): Group {
     [-door - frame, DOOR_TOP, front - 0.05, door + frame, DOOR_TOP + frame, front + WALL],
   );
 
+  // The door: five planks with dark gaps over a backing, two rails on the
+  // room side with a row of metal studs each, a ring handle and a keyhole.
+  const face = front + DOOR_SET;
+  const doorBoxes: Box[] = [];
+  const metalBoxes: Box[] = [];
+  const gap = 0.012;
+  const plank = (2 * door - 4 * gap) / 5;
+  for (let i = 0; i < 5; i += 1) {
+    const x0 = -door + i * (plank + gap);
+    doorBoxes.push([x0, 0.01, face, x0 + plank, DOOR_TOP - 0.01, face + 0.04]);
+  }
+  woodBoxes.push([-door, 0, face + 0.04, door, DOOR_TOP, face + 0.06]);
+  for (const y of [0.42, 1.98]) {
+    doorBoxes.push([-door + 0.02, y - 0.06, face - 0.02, door - 0.02, y + 0.06, face]);
+    for (let k = 0; k < 6; k += 1) {
+      const x = -door + 0.15 + k * ((2 * door - 0.3) / 5);
+      metalBoxes.push([x - 0.015, y - 0.015, face - 0.032, x + 0.015, y + 0.015, face - 0.02]);
+    }
+  }
+  // The handle on the door's right as you turn to face it (that is -x).
+  const hx = -door + 0.25;
+  metalBoxes.push(
+    [hx - 0.015, 1.17, face - 0.03, hx + 0.015, 1.2, face],
+    [hx - 0.015, 1.34, face - 0.03, hx + 0.015, 1.37, face],
+    [hx - 0.015, 1.17, face - 0.045, hx + 0.015, 1.37, face - 0.03],
+    [hx - 0.02, 1.0, face - 0.006, hx + 0.02, 1.09, face],
+  );
+
   const { band, accent: tips } = bandGeometries();
   const parts: Array<[string, BufferGeometry, Material]> = [
     ['Room/Dado', boxesGeometry(dadoBoxes), dado],
     ['Room/Plaster', boxesGeometry(plasterBoxes), plaster],
     ['Room/Ceiling', boxesGeometry([[-outer, top, back - WALL, outer, top + 0.1, front + WALL]]), ceiling],
     ['Room/Wood', boxesGeometry(woodBoxes), wood],
+    ['Room/Door', boxesGeometry(doorBoxes), doorWood],
+    ['Room/DoorMetal', boxesGeometry(metalBoxes), doorMetal],
     ['Room/Band', band, new MeshStandardMaterial({ vertexColors: true, roughness: 0.85 })],
     [BAND_ACCENT_NAME, tips, accent],
   ];
