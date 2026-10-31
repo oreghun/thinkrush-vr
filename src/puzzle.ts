@@ -56,6 +56,7 @@ import {
 import { BUILT_TABLE_PARTS } from './scene-assets/puzzle.scene-asset.js';
 import { createSwatch } from './scene-assets/pattern-board.scene-asset.js';
 import { PatternTable } from './pattern-play.js';
+import { isSoundOn } from './sound-settings.js';
 import type { Piece } from './patterns.js';
 import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-options.scene-asset.js';
 import { IMPORTED_OBJECTS, objectAssetId } from './imported-objects.js';
@@ -990,7 +991,9 @@ export class PuzzleSystem extends createSystem({
     const board = this.board!;
     stopSpeaking();
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Solved);
-    AudioUtils.play(this.tray!);
+    if (isSoundOn()) {
+      AudioUtils.play(this.tray!);
+    }
     if (this.isPattern) {
       // The right piece goes into the gap: the strip is whole again.
       this.patternTable?.fillGap();

@@ -230,6 +230,12 @@
             </ButtonIcon>
             <ButtonLabel id="read-aloud-label" class="button-label">...</ButtonLabel>
           </Button>
+          <Button id="sound-button" class="button">
+            <ButtonIcon>
+              <Music></Music>
+            </ButtonIcon>
+            <ButtonLabel id="sound-label" class="button-label">...</ButtonLabel>
+          </Button>
         </div>
       </div>
       <div id="puzzle-page" class="page" style="display: none">

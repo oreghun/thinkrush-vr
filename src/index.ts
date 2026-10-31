@@ -16,6 +16,7 @@ import { UITextSystem } from './ui-text.js';
 import { PuzzleSystem } from './puzzle.js';
 import { RushSystem } from './rush.js';
 import { ScreenLookSystem } from './screen-look.js';
+import { SoundSystem } from './sound.js';
 
 const updateTitle = () => {
   document.title = t('app.title');
@@ -42,4 +43,5 @@ World.create(
   world.registerSystem(ScreenLookSystem);
   world.registerSystem(PuzzleSystem);
   world.registerSystem(RushSystem);
+  world.registerSystem(SoundSystem);
 });

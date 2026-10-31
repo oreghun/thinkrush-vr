@@ -51,5 +51,7 @@
   "readAloud.slow": "",
   "readAloud.normal": "",
   "readAloud.fast": "",
+  "sound.on": "",
+  "sound.off": "",
   "readAloud.noVoice": ""
 }

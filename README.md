@@ -169,6 +169,27 @@ Browsers only allow speech after the first tap or click, so on a flat page
 the first puzzle is read once you interact; in VR, entering the headset
 reads the current puzzle.
 
+## Sound
+
+All music and sound effects are made in code with the browser's WebAudio
+synthesizer (`src/sound-design.ts` holds the composition, `src/sound.ts`
+plays it), so no audio files are downloaded and nothing recorded or
+third-party ships. The one exception is the solve chime, also generated
+in code (`scripts/generate-chime.mjs`).
+
+- A light groove on a five-note scale (plucked kalimba-like notes, a
+  shaker, a low and a high hand drum) plays during puzzles. RUSH is the
+  timer and the music is its heartbeat: the tempo rises from 92 to 140 beats
+  a minute as the clock runs down, and the drums join in. Home has a calmer
+  version.
+- RUSH has a voice: a little hop for a new puzzle, a cheer after the solve
+  chime, an "uh-oh" for a wrong answer, a "huh?" for the right object with
+  the wrong move, a yawn when time runs out and a fanfare at the end of a
+  run. It comes from RUSH's side of your view.
+- The music drops while a puzzle is read aloud, so every word is clear.
+- Sound pauses with the game when the headset is taken off. The home page's
+  **Sound on / Sound off** button switches it all, and the choice is saved.
+
 ## Project rules
 
 The full list is in [CLAUDE.md](CLAUDE.md). In short:
@@ -206,6 +227,7 @@ src/screen-stops.ts       beckoning the screen: its Far and Near stops (tests in
 src/patterns.ts           pattern puzzles: families, rules and dealing a fair board (tests in tests/)
 src/pattern-art.ts        draws every pattern piece in code
 src/pattern-play.ts       the pattern board on the table during a pattern puzzle
+src/sound.ts              music and RUSH's voice, synthesized (composition in src/sound-design.ts)
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/moves.ts              the action twist: which move to ask for, and judging it
