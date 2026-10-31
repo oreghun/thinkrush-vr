@@ -55,7 +55,9 @@ you can click around in.
 > Press Start a 3-minute run for a
 > scored dash through shuffled puzzles: solving auto-advances, Skip costs
 > only time, points scale with difficulty, and your best score stays on your
-> device. RUSH, a glowing companion beside the puzzle, is the timer: it
+> device. In a run you get one pick per puzzle: a wrong pick loses it and
+> moves on, so guessing through the choices never pays (practice still
+> lets you try again). RUSH, a glowing companion beside the puzzle, is the timer: it
 > shrinks and turns red as time runs out, and reacts to every answer.
 
 ## Run it locally
@@ -179,7 +181,9 @@ the tiles, orbs and pieces afresh with a fair shuffle (`src/answer-order.ts`),
 independent of the round before, so no guessing order (always the first,
 the next one along, the same as last time) does better than chance. The
 Daily Challenge gives everyone the same boards, but replaying it moves the
-pieces. `tests/answer-order.test.ts` checks this over 60,000 rounds.
+pieces. `tests/answer-order.test.ts` checks this over 60,000 rounds. And in
+a run (the Daily Challenge too) a wrong pick loses the puzzle, so trying
+every choice in turn doesn't pay either.
 
 ## Daily Challenge and streaks
 

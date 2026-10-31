@@ -20,6 +20,7 @@
   "puzzle.instructionsOrbs": "",
   "puzzle.correct": "",
   "puzzle.wrongMove": "",
+  "puzzle.wrongPick": "",
   "puzzle.wrong": "",
   "puzzle.timeUp": "",
   "puzzle.hint": "",

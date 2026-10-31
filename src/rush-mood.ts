@@ -49,6 +49,9 @@ export function baseMood(view: BoardView): MoodName {
   if (view.status === 'wrongMove') {
     return Mood.Surprised;
   }
+  if (view.status === 'wrongPick') {
+    return Mood.Worried;
+  }
   return Mood.Idle;
 }
 

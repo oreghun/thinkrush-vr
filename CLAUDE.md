@@ -167,7 +167,7 @@ Live on main
   device are drops, the 3rd introduces flip, the 5th lift and the 7th show
   ("New move!"), then it is random
   (count kept in localStorage, thinkrush.visualSeen). Wrong object = wrong
-  answer whatever the move. Right object, wrong move = "Right answer, wrong
+  answer whatever the move (in a run it loses the puzzle, see Run mode). Right object, wrong move = "Right answer, wrong
   move!": a run loses that puzzle (status wrongMove, no points, moves on
   after 2.5 s); practice says so and lets you retry. Orb puzzles have no
   moves. The tray stays visible for every move: the habit is the trap.
@@ -372,7 +372,12 @@ Live on main
   current puzzle when it already fits the category.
 - Run mode: Start a 3-minute run draws from the chosen category, shuffled,
   auto-advances 2.5 s after a solve, Skip costs only time, a solve scores
-  difficulty x 10, the summary shows score/solved/best, and the best run
+  difficulty x 10. A wrong pick loses the puzzle (owner, 2026-10-31: no
+  guessing through the choices; PuzzleSystem.onWrongPick, status
+  wrongPick, no points, the right orb glows or the gap fills, RUSH stays
+  worried, "Wrong pick! This one is lost.", moves on after 2.5 s; the
+  Daily Challenge is a run too). Practice keeps free retries with the
+  hint. The summary shows score/solved/best, and the best run
   score is kept in localStorage (thinkrush.bestScore). Practice stays the
   default browsing mode with the per-puzzle 60 s timer.
 - The screen hangs above its light bar (screen-projector asset: the
@@ -435,7 +440,8 @@ Decisions
   memory. tests/answer-order.test.ts checks 60,000 rounds: each place gets
   1/N, every step from the last answer's place to the next is equally
   likely, and no guessing order (always first, same as last, the next
-  one, in turn) beats chance.
+  one, in turn) beats chance. And trying every choice in turn doesn't pay
+  in a run: a wrong pick loses the puzzle (see Run mode).
 - Pattern puzzle (built 2026-10-31, details under Live on main): universal
   "Complete the pattern"; content gives type "pattern", a family and a rule,
   answer "generated"; the game deals the board.

@@ -20,6 +20,7 @@
   "puzzle.instructionsOrbs": "Pick the orb with the right answer.",
   "puzzle.correct": "Correct!",
   "puzzle.wrongMove": "Right answer, wrong move!",
+  "puzzle.wrongPick": "Wrong pick! This one is lost.",
   "puzzle.wrong": "Not quite. Try another tile.",
   "puzzle.timeUp": "Time's up!",
   "puzzle.hint": "Hint:",

@@ -12,6 +12,8 @@ export const PuzzleStatus = {
   TimeUp: 'timeUp',
   /** A run puzzle lost to the right object with the wrong move. */
   WrongMove: 'wrongMove',
+  /** A run puzzle lost to a wrong pick: no guessing your way through. */
+  WrongPick: 'wrongPick',
 } as const;
 
 export const PuzzleMode = {

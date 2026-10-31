@@ -26,6 +26,8 @@ test('the lasting mood follows the round', () => {
   assert.equal(baseMood(board({ status: 'solved' })), Mood.Happy);
   assert.equal(baseMood(board({ status: 'timeUp' })), Mood.Sleepy);
   assert.equal(baseMood(board({ status: 'wrongMove' })), Mood.Surprised);
+  // A run puzzle lost to a wrong pick: RUSH stays worried until the next one.
+  assert.equal(baseMood(board({ status: 'wrongPick' })), Mood.Worried);
   assert.equal(baseMood(board({ mode: 'runOver' })), Mood.Happy);
 });
 

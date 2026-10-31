@@ -828,6 +828,7 @@ export class PuzzleSystem extends createSystem({
       board.setValue(PuzzleBoard, 'wrongAnswers', wrong + 1);
       this.setOrbGlow(slot, ORB_GLOW.wrong);
       this.orbFlash.set(slot, ORB_FLASH_SECONDS);
+      this.onWrongPick();
     }
     this.render();
   }
@@ -950,6 +951,7 @@ export class PuzzleSystem extends createSystem({
       this.turnShown = false;
       const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
       board.setValue(PuzzleBoard, 'wrongAnswers', wrong + 1);
+      this.onWrongPick();
     }
     this.render();
   }
@@ -972,6 +974,21 @@ export class PuzzleSystem extends createSystem({
     } else {
       this.wrongMoveShown = true;
     }
+  }
+
+  /**
+   * A wrong pick. A run counts the puzzle as lost, shows the right answer
+   * and moves on after the usual beat, so trying every choice in turn
+   * never pays; practice keeps its free retries, with the hint.
+   */
+  private onWrongPick(): void {
+    if (this.mode() !== PuzzleMode.Run) {
+      return;
+    }
+    stopSpeaking();
+    this.board!.setValue(PuzzleBoard, 'status', PuzzleStatus.WrongPick);
+    this.revealCorrectOrb();
+    this.advanceIn = SOLVE_BEAT_SECONDS;
   }
 
   /** The move line under the clue, with "New move!" when it is new. */
@@ -1478,6 +1495,10 @@ export class PuzzleSystem extends createSystem({
     } else if (status === PuzzleStatus.TimeUp) {
       statusText = t('puzzle.timeUp');
       statusColor = STATUS_COLORS.timeUp;
+      detail = puzzle.explanation;
+    } else if (status === PuzzleStatus.WrongPick) {
+      statusText = t('puzzle.wrongPick');
+      statusColor = STATUS_COLORS.wrong;
       detail = puzzle.explanation;
     } else if (status === PuzzleStatus.WrongMove || this.wrongMoveShown) {
       statusText = t('puzzle.wrongMove');
