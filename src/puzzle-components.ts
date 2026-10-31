@@ -52,6 +52,9 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
     enum: PuzzleCategory,
     default: PuzzleCategory.All,
   },
+  // Paused by the palm-up gesture, the menu button or taking the headset
+  // off mid-puzzle: the clock, music and voice wait for Resume.
+  paused: { type: Types.Boolean, default: false },
   // What a visual puzzle asks you to do with your pick (see src/moves.ts).
   move: { type: Types.Enum, enum: Move, default: Move.Drop },
 });

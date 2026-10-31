@@ -198,6 +198,7 @@ export class RushSystem extends createSystem({
     this.now.mode = String(board.getValue(PuzzleBoard, 'mode'));
     this.now.wrongAnswers = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
     this.now.wrongMoves = board.getValue(PuzzleBoard, 'wrongMoves') ?? 0;
+    this.now.paused = Boolean(board.getValue(PuzzleBoard, 'paused'));
   }
 
   /** Gold to red with the clock; brighter in pulses while reading aloud. */
@@ -311,4 +312,5 @@ function copyView(from: BoardView, to: BoardView): void {
   to.mode = from.mode;
   to.wrongAnswers = from.wrongAnswers;
   to.wrongMoves = from.wrongMoves;
+  to.paused = from.paused;
 }

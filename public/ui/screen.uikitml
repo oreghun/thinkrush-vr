@@ -85,6 +85,18 @@
     line-height: 27px;
   }
 
+  .hint {
+    color: #9fe8df;
+    font-size: 16px;
+  }
+
+  .settings {
+    flex-direction: column;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 22px;
+  }
+
   .world-heading {
     color: #35b7ae;
     font-size: 17px;
@@ -186,6 +198,7 @@
         <div id="welcome.heading" class="heading">...</div>
         <div id="welcome.body1" class="body">...</div>
         <div id="welcome.body2" class="body">...</div>
+        <div id="welcome.pauseHint" class="hint">...</div>
         <div class="button-row">
           <Button id="daily-button" class="world-button world-daily">
             <ButtonIcon>
@@ -217,38 +230,6 @@
           </Button>
         </div>
         <div class="spacer"></div>
-        <div class="button-row">
-          <Button id="xr-button" class="button">
-            <ButtonIcon>
-              <RectangleGoggles></RectangleGoggles>
-            </ButtonIcon>
-            <ButtonLabel id="welcome.enterVR" class="button-label">...</ButtonLabel>
-          </Button>
-          <Button id="exit-button" class="button" style="display: none">
-            <ButtonIcon>
-              <LogIn></LogIn>
-            </ButtonIcon>
-            <ButtonLabel id="welcome.exitVR" class="button-label">...</ButtonLabel>
-          </Button>
-          <Button id="language-button" class="button">
-            <ButtonIcon>
-              <Languages></Languages>
-            </ButtonIcon>
-            <ButtonLabel id="language-label" class="button-label">...</ButtonLabel>
-          </Button>
-          <Button id="read-aloud-button" class="button">
-            <ButtonIcon>
-              <Volume2></Volume2>
-            </ButtonIcon>
-            <ButtonLabel id="read-aloud-label" class="button-label">...</ButtonLabel>
-          </Button>
-          <Button id="sound-button" class="button">
-            <ButtonIcon>
-              <Music></Music>
-            </ButtonIcon>
-            <ButtonLabel id="sound-label" class="button-label">...</ButtonLabel>
-          </Button>
-        </div>
       </div>
       <div id="puzzle-page" class="page" style="display: none">
         <div class="header">
@@ -302,6 +283,59 @@
               <House></House>
             </ButtonIcon>
             <ButtonLabel id="puzzle.home" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
+      </div>
+      <div id="pause-page" class="page" style="display: none">
+        <div id="pause.heading" class="heading">...</div>
+        <div id="pause.body" class="body">...</div>
+        <div class="spacer"></div>
+        <div class="button-row">
+          <Button id="pause-resume" class="button">
+            <ButtonIcon>
+              <Play></Play>
+            </ButtonIcon>
+            <ButtonLabel id="pause.resume" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="pause-home" class="button">
+            <ButtonIcon>
+              <House></House>
+            </ButtonIcon>
+            <ButtonLabel id="pause.home" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
+      </div>
+      <div id="settings-row" class="settings">
+        <div class="button-row">
+          <Button id="xr-button" class="button">
+            <ButtonIcon>
+              <RectangleGoggles></RectangleGoggles>
+            </ButtonIcon>
+            <ButtonLabel id="welcome.enterVR" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="exit-button" class="button" style="display: none">
+            <ButtonIcon>
+              <LogIn></LogIn>
+            </ButtonIcon>
+            <ButtonLabel id="welcome.exitVR" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="language-button" class="button">
+            <ButtonIcon>
+              <Languages></Languages>
+            </ButtonIcon>
+            <ButtonLabel id="language-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="read-aloud-button" class="button">
+            <ButtonIcon>
+              <Volume2></Volume2>
+            </ButtonIcon>
+            <ButtonLabel id="read-aloud-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="sound-button" class="button">
+            <ButtonIcon>
+              <Music></Music>
+            </ButtonIcon>
+            <ButtonLabel id="sound-label" class="button-label">...</ButtonLabel>
           </Button>
         </div>
       </div>

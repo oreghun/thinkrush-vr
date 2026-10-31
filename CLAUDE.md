@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-37 merged plus the Daily Challenge PR (6 answer orbs;
+As of 2026-10-31, PRs 1-38 merged plus the pause PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -111,8 +111,8 @@ energy and sound puzzles' miniatures; 29 the yellow ruler and flat
 objects tilted toward the player; 30 RUSH; 31 the show-it-to-RUSH move;
 32 one projected screen with home and puzzle pages; 33 beckoning it;
 34 the owner's room set in the back corners; 35 the owner's pedestal
-table as the play table; 36 the pattern puzzle; 37 the sound pass; then the
-Daily Challenge and streaks):
+table as the play table; 36 the pattern puzzle; 37 the sound pass; 38 the
+Daily Challenge and streaks; then the palm-up pause):
 
 Live on main
 
@@ -257,6 +257,23 @@ Live on main
   into {name} slots). Summary: "Daily Challenge done!", score, solved x/5,
   streak, best daily score; no Run again (Home and Back to practice). The
   general run best (thinkrush.bestScore) is separate.
+- Pause (PuzzleBoard.paused; src/pause-gesture.ts PauseGestureSystem, the
+  gesture maths in src/palm.ts with tests): an open hand (thumb and index
+  tips over 3.5 cm apart) turned palm up (palm normal from the wrist and
+  the index and pinky bases, crossed per hand, y >= 0.75), raised (wrist no
+  more than 0.42 m below the eyes) and held 0.8 s toggles the pause; it then
+  must turn away (y < 0.35) before it can fire again, and it is ignored
+  while any tile is held and for 1 s after. Joint positions come from the
+  hand visual adapter's jointTransforms (relative to the grip) and
+  player.gripSpaces. The controllers' Menu button and Escape (flat page)
+  toggle too; a blurred session pauses a puzzle in play. Only practice and
+  run can pause. PuzzleSystem shows the pause page (Paused, Resume, Home)
+  with the settings row (Enter/Exit VR, language, read aloud, sound), which
+  now sits outside the pages and shows on home and pause; the clock and a
+  run's auto-advance stop, answers are ignored, speech pauses, the music
+  rests and RUSH's base mood is sleepy. Home from the pause page also quits
+  a run (unscored). startRound and goHome clear the pause. The home page
+  shows the hint "Turn a palm up any time to pause."
 - Hands and controllers are code-built (src/input-visuals.ts); the app makes
   no outside requests at runtime.
 - One screen (public/ui/screen.uikitml, asset and scene node "screen", scale
@@ -389,10 +406,14 @@ Open questions (owner deciding, 2026-10-30)
 
 Next up (in order)
 
-1. Palm-up pause gesture; pause when the session loses visibility.
-   Then: Swahili content drop-in (owner writes it), glasses check, 60 fps on a
-   real Quest 3, demo video. Cut order if time runs short: leaderboard,
-   misplaced-object puzzle variant, extra puzzle count.
+1. Glasses check (iwsdk-glasses-test: the narrow view and gaze + pinch).
+2. 60 fps on a real Quest 3. Watch the key light's 2048 px PCF shadows
+   (radius 7, 30 casters) and the ~207k triangles the emulator reported.
+3. Demo video (RUSH is its face).
+4. Swahili content drop-in when the owner has written it.
+5. Optional, if time allows: "Complete the object" (see Decisions).
+   Cut order if time runs short: leaderboard, misplaced-object puzzle
+   variant, extra puzzle count.
 
 Working notes
 

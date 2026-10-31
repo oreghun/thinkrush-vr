@@ -180,6 +180,8 @@ export class PuzzleSystem extends createSystem({
   private patternTable?: PatternTable;
   // The day of the Daily Challenge being played (or just finished), if any.
   private dailyDay?: string;
+  // The paused flag as last shown, so a change from any source re-renders.
+  private shownPaused = false;
   private readonly tilePieces: (Piece | undefined)[] = [];
   // Height above the table where objects rest on the display stand.
   private standSeat = 0;
@@ -254,7 +256,11 @@ export class PuzzleSystem extends createSystem({
     | 'homePage'
     | 'puzzlePage'
     | 'daily'
-    | 'dailyLabel',
+    | 'dailyLabel'
+    | 'pausePage'
+    | 'settingsRow'
+    | 'resume'
+    | 'pauseHome',
     UIElement
   > = {
     prompt: null,
@@ -278,6 +284,10 @@ export class PuzzleSystem extends createSystem({
     puzzlePage: null,
     daily: null,
     dailyLabel: null,
+    pausePage: null,
+    settingsRow: null,
+    resume: null,
+    pauseHome: null,
   };
 
   init(): void {
@@ -366,6 +376,10 @@ export class PuzzleSystem extends createSystem({
       puzzlePage: panel?.getElementById('puzzle-page') ?? null,
       daily: panel?.getElementById('daily-button') ?? null,
       dailyLabel: panel?.getElementById('daily-label') ?? null,
+      pausePage: panel?.getElementById('pause-page') ?? null,
+      settingsRow: panel?.getElementById('settings-row') ?? null,
+      resume: panel?.getElementById('pause-resume') ?? null,
+      pauseHome: panel?.getElementById('pause-home') ?? null,
     };
     const next = () => this.onNextPressed();
     const run = () => this.startRun();
@@ -374,6 +388,13 @@ export class PuzzleSystem extends createSystem({
     const read = () => this.readPuzzle(true);
     const home = () => this.goHome();
     const daily = () => this.startDaily();
+    const resume = () => this.setPaused(false);
+    const quit = () => this.goHome();
+    // On a flat page, Escape pauses and resumes (VR uses the palm or menu).
+    const key = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') this.setPaused(!this.puzzlePaused());
+    };
+    document.addEventListener('keydown', key);
 
     // The home page offers direct entry into each puzzle world. Selecting
     // a world filters both practice browsing and the three-minute run draw.
@@ -408,6 +429,8 @@ export class PuzzleSystem extends createSystem({
     this.elements.read?.addEventListener('click', read);
     this.elements.home?.addEventListener('click', home);
     this.elements.daily?.addEventListener('click', daily);
+    this.elements.resume?.addEventListener('click', resume);
+    this.elements.pauseHome?.addEventListener('click', quit);
 
     this.cleanupFuncs.push(
       () => this.tileModels.forEach((model, slot) => {
@@ -436,10 +459,18 @@ export class PuzzleSystem extends createSystem({
       () => this.elements.read?.removeEventListener('click', read),
       () => this.elements.home?.removeEventListener('click', home),
       () => this.elements.daily?.removeEventListener('click', daily),
+      () => this.elements.resume?.removeEventListener('click', resume),
+      () => this.elements.pauseHome?.removeEventListener('click', quit),
+      () => document.removeEventListener('keydown', key),
       // Entering VR is the first moment a headset player can hear the
       // puzzle; a blurred session holds the voice along with the clock.
       this.world.visibilityState.subscribe((state) => {
-        pauseSpeaking(state === VisibilityState.VisibleBlurred);
+        // Taking the headset off mid-puzzle leaves it paused: the player
+        // resumes when ready instead of losing time on return.
+        if (state === VisibilityState.VisibleBlurred) {
+          this.setPaused(true);
+        }
+        pauseSpeaking(state === VisibilityState.VisibleBlurred || this.puzzlePaused());
         if (
           state === VisibilityState.Visible &&
           this.lastVisibility === VisibilityState.NonImmersive
@@ -526,11 +557,19 @@ export class PuzzleSystem extends createSystem({
     // The practice timer also pauses outside VR, where tiles cannot be
     // dragged; a run's clock ticks on the flat page too, or a desktop run
     // would never end. Hidden browser tabs stop the frame loop anyway.
-    const awake = state !== VisibilityState.VisibleBlurred;
+    const paused = this.puzzlePaused();
+    if (paused !== this.shownPaused) {
+      // Paused or resumed (palm, menu button, Escape, Resume, headset).
+      this.shownPaused = paused;
+      pauseSpeaking(paused);
+      this.render();
+    }
+    const awake = state !== VisibilityState.VisibleBlurred && !paused;
     const clockRunning =
       mode === PuzzleMode.Run
         ? awake
         : mode === PuzzleMode.Practice &&
+          !paused &&
           this.status() === PuzzleStatus.Playing &&
           state === VisibilityState.Visible;
     if (clockRunning) {
@@ -620,6 +659,7 @@ export class PuzzleSystem extends createSystem({
     this.applyWorldTheme(this.category());
     board.setValue(PuzzleBoard, 'puzzleIndex', wrapped);
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
+    board.setValue(PuzzleBoard, 'paused', false);
     if (this.mode() !== PuzzleMode.Run) {
       // A run keeps its global clock; practice restarts the per-puzzle one.
       board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
@@ -728,7 +768,8 @@ export class PuzzleSystem extends createSystem({
       this.isVisual ||
       this.isPattern ||
       this.status() !== PuzzleStatus.Playing ||
-      this.mode() === PuzzleMode.Home
+      this.mode() === PuzzleMode.Home ||
+      this.puzzlePaused()
     ) {
       return;
     }
@@ -818,7 +859,8 @@ export class PuzzleSystem extends createSystem({
     if (
       !board ||
       !(this.isVisual || this.isPattern) ||
-      this.status() !== PuzzleStatus.Playing
+      this.status() !== PuzzleStatus.Playing ||
+      this.puzzlePaused()
     ) {
       return;
     }
@@ -1136,6 +1178,21 @@ export class PuzzleSystem extends createSystem({
     this.startRound(order[0]);
   }
 
+  private puzzlePaused(): boolean {
+    return Boolean(this.board?.getValue(PuzzleBoard, 'paused'));
+  }
+
+  /** Pauses or resumes a puzzle in play; home and the summary never pause. */
+  private setPaused(paused: boolean): void {
+    const mode = this.mode();
+    if (
+      this.board &&
+      (mode === PuzzleMode.Practice || mode === PuzzleMode.Run)
+    ) {
+      this.board.setValue(PuzzleBoard, 'paused', paused);
+    }
+  }
+
   /** The home page's Daily Challenge button: the streak, or today's score. */
   private renderDailyButton(): void {
     const record = readDaily();
@@ -1155,10 +1212,15 @@ export class PuzzleSystem extends createSystem({
    */
   private goHome(): void {
     const board = this.board;
-    if (!board || this.mode() === PuzzleMode.Run) {
+    // A run is left from the pause page (quitting it unscored), not from
+    // the puzzle page, where Home is hidden.
+    if (!board || (this.mode() === PuzzleMode.Run && !this.puzzlePaused())) {
       return;
     }
     stopSpeaking();
+    pauseSpeaking(false);
+    board.setValue(PuzzleBoard, 'paused', false);
+    this.shownPaused = false;
     this.dailyDay = undefined;
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.Home);
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
@@ -1272,9 +1334,15 @@ export class PuzzleSystem extends createSystem({
     const mode = this.mode();
     // The screen shows one page at a time.
     const atHome = mode === PuzzleMode.Home;
+    const paused = !atHome && this.puzzlePaused();
     this.elements.homePage?.setProperties({ display: atHome ? 'flex' : 'none' });
+    this.elements.pausePage?.setProperties({ display: paused ? 'flex' : 'none' });
     this.elements.puzzlePage?.setProperties({
-      display: atHome ? 'none' : 'flex',
+      display: atHome || paused ? 'none' : 'flex',
+    });
+    // The settings (VR, language, read aloud, sound) on home and pause.
+    this.elements.settingsRow?.setProperties({
+      display: atHome || paused ? 'flex' : 'none',
     });
     if (atHome) {
       this.renderDailyButton();

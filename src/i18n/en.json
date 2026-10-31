@@ -56,6 +56,11 @@
   "daily.done": "Daily Challenge - done today, {score} points",
   "daily.over": "Daily Challenge done!",
   "daily.streak": "Streak",
+  "pause.heading": "Paused",
+  "pause.body": "Turn your palm up again, or press Resume, to carry on.",
+  "pause.resume": "Resume",
+  "pause.home": "Home",
+  "welcome.pauseHint": "Turn a palm up any time to pause.",
   "sound.on": "Sound on",
   "sound.off": "Sound off",
   "readAloud.noVoice": "No voice on this device"
