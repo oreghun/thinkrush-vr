@@ -14,8 +14,19 @@ import {
   stepSeconds,
   TEMPO_EMPTY,
   TEMPO_FULL,
-  LOOKAHEAD,
-  stepsToCatchUp,
+  barSeconds,
+  DUCK,
+  duckHeld,
+  foldTail,
+  LEVEL_TEMPO,
+  levelLayers,
+  LOOP_BARS,
+  MOOD_GAIN,
+  MUSIC_LEVELS,
+  musicLevel,
+  musicMood,
+  nextBarLine,
+  roomImpulse,
 } from '../src/sound-design.ts';
 
 test('the music speeds up as the clock runs down, and only then', () => {
@@ -69,67 +80,96 @@ test('RUSH on the right is heard on the right', () => {
   assert.equal(panFor(0), 0);
 });
 
-/**
- * The music scheduler as SoundSystem runs it, once per frame: `gaps` are
- * the frame times (seconds). Returns the booked note times and how many
- * steps were skipped because a stall outlasted the lookahead.
- */
-function schedule(gaps: number[], step: number, lookahead: number) {
-  let now = 0;
-  let next = 0;
-  let skipped = 0;
-  const notes: number[] = [];
-  for (const gap of gaps) {
-    now += gap;
-    if (next === 0) {
-      next = now + 0.05;
-    } else {
-      const skip = stepsToCatchUp(next, now, step);
-      next += skip * step;
-      skipped += skip;
-    }
-    while (next < now + lookahead) {
-      notes.push(next);
-      next += step;
-    }
-  }
-  return { notes, skipped };
-}
+test('the music grows calm, middle, urgent as the clock runs down', () => {
+  assert.equal(musicLevel(1, false), 'calm');
+  assert.equal(musicLevel(0.75, false), 'calm');
+  assert.equal(musicLevel(0.6, false), 'mid');
+  assert.equal(musicLevel(0.39, false), 'urgent');
+  assert.equal(musicLevel(0, false), 'urgent');
+  assert.equal(musicLevel(0.1, true), 'home');
+  // Faster and busier at every step up.
+  assert.ok(LEVEL_TEMPO.home < LEVEL_TEMPO.calm);
+  assert.ok(LEVEL_TEMPO.calm < LEVEL_TEMPO.mid && LEVEL_TEMPO.mid < LEVEL_TEMPO.urgent);
+  const count = (level: (typeof MUSIC_LEVELS)[number]) =>
+    Object.values(levelLayers(level)).filter(Boolean).length;
+  assert.ok(count('calm') <= count('mid') && count('mid') < count('urgent'));
+  assert.equal(LOOP_BARS % MELODY.length, 0, 'a loop holds the whole melody');
+});
 
-/** 72 fps frames with a stall of `stall` seconds every two seconds. */
-function framesWithStalls(stall: number): number[] {
-  const gaps: number[] = [];
-  for (let i = 0; i < 72 * 20; i += 1) {
-    gaps.push(i % 144 === 143 ? stall : 1 / 72);
-  }
-  return gaps;
-}
+test('a level change lands on the next bar line, carrying the melody on', () => {
+  const bar = barSeconds(LEVEL_TEMPO.calm);
+  const start = 10;
+  // Asked for mid-bar: waits for the next line.
+  const line = nextBarLine(start, bar, start + 2.5 * bar);
+  assert.equal(line.bars, 3);
+  assert.ok(Math.abs(line.time - (start + 3 * bar)) < 1e-9);
+  // Asked for exactly on a line: that line.
+  assert.equal(nextBarLine(start, bar, start + 2 * bar).bars, 2);
+  // Before the loop began: its first bar.
+  assert.equal(nextBarLine(start, bar, 0).bars, 0);
+  // The new loop starts at the same bar of the melody.
+  const newBar = barSeconds(LEVEL_TEMPO.urgent);
+  const offset = (line.bars % LOOP_BARS) * newBar;
+  assert.ok(Math.abs(offset - 3 * newBar) < 1e-9);
+});
 
-test('stalls shorter than the lookahead never cost a note', () => {
-  const step = stepSeconds(TEMPO_EMPTY);
-  // The old 0.15 s lookahead dropped notes on a 0.4 s stall...
-  assert.ok(schedule(framesWithStalls(0.4), step, 0.15).skipped > 0);
-  // ...the new one does not, and the notes stay evenly spaced.
-  const { notes, skipped } = schedule(framesWithStalls(0.4), step, LOOKAHEAD);
-  assert.equal(skipped, 0);
-  for (let i = 1; i < notes.length; i += 1) {
-    assert.ok(Math.abs(notes[i] - notes[i - 1] - step) < 1e-9);
+test('a folded loop plays seamlessly: it equals a pass in the middle of the music', () => {
+  // Notes every 25 samples ringing for 60: a loop of 100 rings past its end.
+  const loopLength = 100;
+  const ring = 60;
+  const pass = (passes: number) => {
+    const out = new Float32Array(loopLength * passes + ring);
+    for (let p = 0; p < passes; p += 1) {
+      for (let n = 0; n < loopLength; n += 25) {
+        for (let k = 0; k < ring; k += 1) {
+          out[p * loopLength + n + k] += Math.exp(-k / 15) * (1 + n / 100);
+        }
+      }
+    }
+    return out;
+  };
+  const folded = foldTail(pass(1), loopLength);
+  const steady = pass(3).subarray(loopLength, 2 * loopLength);
+  for (let i = 0; i < loopLength; i += 1) {
+    assert.ok(Math.abs(folded[i] - steady[i]) < 1e-6, `sample ${i}`);
   }
 });
 
-test('a longer stall drops notes but keeps the beat', () => {
-  const step = stepSeconds(TEMPO_FULL);
-  const { notes, skipped } = schedule(framesWithStalls(1.2), step, LOOKAHEAD);
-  assert.ok(skipped > 0);
-  // Every note still falls on the original grid: the bar never restarts.
-  for (const time of notes) {
-    const steps = (time - notes[0]) / step;
-    assert.ok(Math.abs(steps - Math.round(steps)) < 1e-6);
+test('the music never stops dead: it softens after an answer, fades only when paused', () => {
+  assert.equal(musicMood('home', 'playing', false, true), 'play');
+  assert.equal(musicMood('practice', 'playing', false, true), 'play');
+  assert.equal(musicMood('run', 'playing', false, true), 'play');
+  for (const status of ['solved', 'timeUp', 'wrongMove', 'wrongPick']) {
+    assert.equal(musicMood('run', status, false, true), 'soft', status);
+    assert.equal(musicMood('practice', status, false, true), 'soft', status);
   }
+  assert.equal(musicMood('practice', 'playing', true, true), 'off');
+  assert.equal(musicMood('runOver', 'playing', false, true), 'off');
+  assert.equal(musicMood('home', 'playing', false, false), 'off');
+  assert.ok(MOOD_GAIN.soft > 0 && MOOD_GAIN.soft < MOOD_GAIN.play);
 });
 
-test('catching up skips the fewest whole steps', () => {
-  assert.equal(stepsToCatchUp(1.0, 0.5, 0.1), 0);
-  assert.equal(stepsToCatchUp(1.0, 1.33, 0.1), 4);
-  assert.equal(stepsToCatchUp(1.0, 1.0, 0.1), 1);
+test('the music stays down through the pauses between read-aloud sentences', () => {
+  assert.equal(duckHeld(true, 0, 5), true);
+  // Half a second after a sentence ends: still down.
+  assert.equal(duckHeld(false, 5, 5.5), true);
+  // Well after the last word: back up.
+  assert.equal(duckHeld(false, 5, 5 + DUCK.hold + 0.01), false);
+  assert.ok(DUCK.gain > 0 && DUCK.gain < 1);
+});
+
+test('the room echo starts after a short gap and fades to silence', () => {
+  const rate = 48000;
+  const echo = roomImpulse(rate, 1.1, 101);
+  assert.equal(echo.length, Math.round(rate * 1.1));
+  assert.equal(echo[0], 0, 'a short pre-delay');
+  const peak = (from: number, to: number) => {
+    let max = 0;
+    for (let i = from; i < to; i += 1) max = Math.max(max, Math.abs(echo[i]));
+    return max;
+  };
+  const early = peak(Math.round(0.02 * rate), Math.round(0.12 * rate));
+  const late = peak(Math.round(1.0 * rate), echo.length);
+  assert.ok(early > 0 && late < early / 300, `${early} vs ${late}`);
+  assert.ok(echo.every((v) => Number.isFinite(v)));
 });

@@ -222,21 +222,28 @@ one turns the palm up) or resting low on the table (`src/palm.ts`).
 ## Sound
 
 All music and sound effects are made in code with the browser's WebAudio
-synthesizer (`src/sound-design.ts` holds the composition, `src/sound.ts`
-plays it), so no audio files are downloaded and nothing recorded or
-third-party ships. The one exception is the solve chime, also generated
+synthesizer (`src/sound-design.ts` holds the composition,
+`src/music-render.ts` synthesizes the instruments and renders the music,
+`src/sound.ts` plays it), so no audio files are downloaded and nothing
+recorded or third-party ships. The one exception is the solve chime, also generated
 in code (`scripts/generate-chime.mjs`).
 
 - A light groove on a five-note scale (plucked kalimba-like notes, a
-  shaker, a low and a high hand drum) plays during puzzles. RUSH is the
-  timer and the music is its heartbeat: the tempo rises from 92 to 140 beats
-  a minute as the clock runs down, and the drums join in. Home has a calmer
-  version.
+  shaker, a low and a high hand drum, with a soft room echo) plays during
+  puzzles. RUSH is the timer and the music is its heartbeat: as the clock
+  runs down it moves from calm (92 beats a minute) to middle (112, the low
+  drum joins) to urgent (134, the slap joins). Home has a calmer version.
+- The music is rendered once, when the game starts, into four seamless
+  loops that play on the browser's audio engine, so a busy moment in the
+  game can never cut a note. It changes level only on a bar line, and it
+  never stops dead: after an answer it plays on softly, and it fades out
+  only when paused, at a run's summary or with sound off.
 - RUSH has a voice: a little hop for a new puzzle, a cheer after the solve
   chime, an "uh-oh" for a wrong answer, a "huh?" for the right object with
   the wrong move, a yawn when time runs out and a fanfare at the end of a
   run. It comes from RUSH's side of your view.
-- The music drops while a puzzle is read aloud, so every word is clear.
+- The music dips while a puzzle is read aloud, so every word is clear, and
+  stays down through the pauses between sentences.
 - Sound pauses with the game when the headset is taken off. The home page's
   **Sound on / Sound off** button switches it all, and the choice is saved.
 
