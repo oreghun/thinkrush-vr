@@ -7,15 +7,18 @@ test('two plain drops, then one new move at a time', () => {
   assert.deepEqual(pickMove(1, 0.9), { move: Move.Drop, isNew: false });
   assert.deepEqual(pickMove(2, 0.1), { move: Move.Flip, isNew: true });
   assert.deepEqual(pickMove(4, 0.1), { move: Move.Lift, isNew: true });
+  assert.deepEqual(pickMove(6, 0.1), { move: Move.Show, isNew: true });
 });
 
 test('between and after introductions, only known moves come up', () => {
   // After flip arrives but before lift: drop or flip.
   assert.equal(pickMove(3, 0).move, Move.Drop);
   assert.equal(pickMove(3, 0.99).move, Move.Flip);
-  // Once all three are known, each can come up.
-  const seen = new Set([0, 0.4, 0.8].map((r) => pickMove(9, r).move));
-  assert.deepEqual(seen, new Set([Move.Drop, Move.Flip, Move.Lift]));
+  // Between lift and show: three moves.
+  assert.equal(pickMove(5, 0.99).move, Move.Lift);
+  // Once all four are known, each can come up.
+  const seen = new Set([0, 0.3, 0.6, 0.9].map((r) => pickMove(9, r).move));
+  assert.deepEqual(seen, new Set([Move.Drop, Move.Flip, Move.Lift, Move.Show]));
   assert.equal(pickMove(9, 0.5).isNew, false);
 });
 

@@ -7,12 +7,15 @@ import {
   type Object3D,
   Vector3,
 } from '@iwsdk/core';
+import { Move } from './moves.js';
 import {
   PuzzleBoard,
   PuzzleMode,
+  PuzzleStatus,
   ROUND_SECONDS,
   RUN_SECONDS,
 } from './puzzle-components.js';
+import { PUZZLES } from './puzzles.js';
 import { isSpeaking } from './read-aloud.js';
 import { Rush } from './rush-component.js';
 import {
@@ -46,6 +49,12 @@ const BLINK_SECONDS = 0.12;
 const TURN_RATE = 6;
 const PITCH_LIMIT = 0.5;
 const SCALE_RATE = 3;
+// For the show move RUSH glides to a spot in easy reach of a seated player
+// (its usual place beside the panel is beyond the 2 ft airplane-seat test):
+// this far from the head, to the right, below the eyes and in front. The
+// spot is fixed when the move starts, so RUSH does not follow the head.
+const SHOW_OFFSET = new Vector3(0.28, -0.2, -0.42);
+const GLIDE_RATE = 2.5;
 
 interface Eye {
   root: Object3D;
@@ -67,7 +76,12 @@ export class RushSystem extends createSystem({
   private board?: Entity;
   private material?: MeshStandardMaterial;
   private readonly eyes: Eye[] = [];
+  // Where RUSH floats beside the panel, the spot it glides to for the
+  // show move, and where it is now on the way between them.
   private readonly home = new Vector3();
+  private readonly showSpot = new Vector3();
+  private readonly anchor = new Vector3();
+  private showing = false;
   private readonly head = new Vector3();
   private readonly here = new Vector3();
   private readonly glow = new Color();
@@ -105,6 +119,7 @@ export class RushSystem extends createSystem({
     }
     this.rush = entity;
     this.home.copy(object.position);
+    this.anchor.copy(object.position);
     object.rotation.order = 'YXZ';
     const body = object.getObjectByName('Rush/Body');
     if (body instanceof Mesh && body.material instanceof MeshStandardMaterial) {
@@ -132,6 +147,17 @@ export class RushSystem extends createSystem({
     }
     this.time += delta;
     this.read(board);
+
+    const wantsShow =
+      this.now.status === PuzzleStatus.Playing &&
+      board.getValue(PuzzleBoard, 'move') === Move.Show &&
+      PUZZLES[this.now.puzzleIndex]?.type === 'visual';
+    if (wantsShow && !this.showing) {
+      this.player.head.getWorldPosition(this.showSpot);
+      this.showSpot.add(SHOW_OFFSET);
+      object.parent?.worldToLocal(this.showSpot);
+    }
+    this.showing = wantsShow;
 
     const reaction = reactionTo(this.seen, this.now);
     if (reaction) {
@@ -204,10 +230,14 @@ export class RushSystem extends createSystem({
     } else if (this.reaction) {
       shake = SHAKE * Math.sin(this.time * 40) * (1 - progress);
     }
+    this.anchor.lerp(
+      this.showing ? this.showSpot : this.home,
+      1 - Math.exp(-GLIDE_RATE * delta),
+    );
     object.position.set(
-      this.home.x + shake,
-      this.home.y + BOB * Math.sin(this.time * 1.8) + Math.max(0, hop),
-      this.home.z,
+      this.anchor.x + shake,
+      this.anchor.y + BOB * Math.sin(this.time * 1.8) + Math.max(0, hop),
+      this.anchor.z,
     );
 
     this.player.head.getWorldPosition(this.head);

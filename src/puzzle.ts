@@ -40,6 +40,7 @@ import {
   releaseMove,
 } from './moves.js';
 import { type Puzzle, PUZZLES } from './puzzles.js';
+import { Rush } from './rush-component.js';
 import {
   isReadAloudOn,
   pauseSpeaking,
@@ -70,6 +71,10 @@ const TILE_FLOOR_Y = -0.044;
 // an answer.
 const LIFT_ABOVE_EYES = 0.1;
 const LIFT_SECONDS = 0.5;
+// Show counts once the held pick is this close to RUSH's centre for this
+// long. RUSH comes within reach for the show move (see RushSystem).
+const SHOW_DISTANCE = 0.2;
+const SHOW_SECONDS = 0.6;
 // A released tile whose up axis points at least this far down was flipped.
 const FLIPPED_UP_Y = -0.5;
 // A tile released within this distance of the tray's center, and not far
@@ -99,6 +104,7 @@ const MOVE_KEYS: Record<MoveName, MessageKey> = {
   [Move.Drop]: 'move.drop',
   [Move.Flip]: 'move.flip',
   [Move.Lift]: 'move.lift',
+  [Move.Show]: 'move.show',
 };
 
 const CATEGORY_LABEL_KEYS: Record<Category, MessageKey> = {
@@ -139,6 +145,7 @@ export class PuzzleSystem extends createSystem({
   boards: { required: [PuzzleBoard] },
   tiles: { required: [PuzzleTile] },
   heldTiles: { required: [PuzzleTile, Grabbed] },
+  rushes: { required: [Rush] },
   orbs: { required: [AnswerOrb] },
   pressedOrbs: { required: [AnswerOrb, Pressed] },
 }) {
@@ -157,7 +164,11 @@ export class PuzzleSystem extends createSystem({
   // Seconds each held tile has been raised above the eyes, and tiles whose
   // lift already counted during the current hold.
   private readonly liftTime = new Map<Entity, number>();
-  private readonly lifted = new Set<Entity>();
+  private readonly showTime = new Map<Entity, number>();
+  // Tiles whose lift or show already answered during the current hold.
+  private readonly answeredInHold = new Set<Entity>();
+  private rush?: Entity;
+  private readonly rushPosition = new Vector3();
   private readonly headPosition = new Vector3();
   private readonly tileUp = new Vector3();
   private board?: Entity;
@@ -389,12 +400,19 @@ export class PuzzleSystem extends createSystem({
       this.queries.heldTiles.subscribe('qualify', (tile) => {
         this.settling.delete(tile);
         this.liftTime.delete(tile);
+        this.showTime.delete(tile);
+      }),
+      this.queries.rushes.subscribe('qualify', (entity) => {
+        this.rush = entity;
       }),
       this.queries.heldTiles.subscribe('disqualify', (tile) => {
         this.onTileReleased(tile);
       }),
       onLanguageChange(() => this.render()),
     );
+    for (const entity of this.queries.rushes.entities) {
+      this.rush = entity;
+    }
     this.startRound(this.board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0);
     for (const model of IMPORTED_OBJECTS) {
       AssetManager.loadGLTFById(objectAssetId(model))
@@ -482,6 +500,7 @@ export class PuzzleSystem extends createSystem({
       for (const tile of this.queries.heldTiles.entities) {
         overTray ||= this.isOverTray(tile.object3D!.position);
         this.trackLift(tile, delta);
+        this.trackShow(tile, delta);
       }
     }
     this.setTrayGlow(overTray);
@@ -510,7 +529,8 @@ export class PuzzleSystem extends createSystem({
     this.advanceIn = 0;
     this.wrongMoveShown = false;
     this.liftTime.clear();
-    this.lifted.clear();
+    this.showTime.clear();
+    this.answeredInHold.clear();
     if (this.isVisual) {
       // The game, not the puzzle, picks the move, one new move at a time.
       const seen = readMovesSeen();
@@ -598,8 +618,10 @@ export class PuzzleSystem extends createSystem({
 
   private onTileReleased(tile: Entity): void {
     this.liftTime.delete(tile);
-    // A lift already answered during this hold; letting go adds nothing.
-    const answered = this.lifted.delete(tile);
+    this.showTime.delete(tile);
+    // A lift or show already answered during this hold; letting go adds
+    // nothing.
+    const answered = this.answeredInHold.delete(tile);
     const object = tile.object3D!;
     this.tileUp.set(0, 1, 0).applyQuaternion(object.quaternion);
     const made = releaseMove(
@@ -615,7 +637,7 @@ export class PuzzleSystem extends createSystem({
   /** Counts a held tile kept above the eyes for LIFT_SECONDS as a lift. */
   private trackLift(tile: Entity, delta: number): void {
     if (
-      this.lifted.has(tile) ||
+      this.answeredInHold.has(tile) ||
       tile.object3D!.position.y < this.headPosition.y + LIFT_ABOVE_EYES
     ) {
       this.liftTime.delete(tile);
@@ -627,8 +649,32 @@ export class PuzzleSystem extends createSystem({
       return;
     }
     this.liftTime.delete(tile);
-    this.lifted.add(tile);
+    this.answeredInHold.add(tile);
     this.answer(tile, Move.Lift);
+  }
+
+  /** Counts a held tile kept up close to RUSH for SHOW_SECONDS as a show. */
+  private trackShow(tile: Entity, delta: number): void {
+    const rush = this.rush?.object3D;
+    if (!rush || this.answeredInHold.has(tile)) {
+      this.showTime.delete(tile);
+      return;
+    }
+    rush.getWorldPosition(this.rushPosition);
+    if (
+      tile.object3D!.position.distanceTo(this.rushPosition) > SHOW_DISTANCE
+    ) {
+      this.showTime.delete(tile);
+      return;
+    }
+    const held = (this.showTime.get(tile) ?? 0) + delta;
+    if (held < SHOW_SECONDS) {
+      this.showTime.set(tile, held);
+      return;
+    }
+    this.showTime.delete(tile);
+    this.answeredInHold.add(tile);
+    this.answer(tile, Move.Show);
   }
 
   /** Judges a tile answered with `made`: object first, then the move. */

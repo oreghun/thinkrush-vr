@@ -94,7 +94,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-29 merged plus the RUSH PR (6 answer orbs;
+As of 2026-10-31, PRs 1-30 merged plus the show-it-to-RUSH PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -108,7 +108,7 @@ the first Meshy miniatures, for the wind puzzle; 25 objects at 10 cm;
 26 Meshy miniatures for the number and beginnings puzzles, swapped in as
 they load; 27 the keys, lock and magnet puzzles' miniatures; then the
 energy and sound puzzles' miniatures; 29 the yellow ruler and flat
-objects tilted toward the player; then RUSH):
+objects tilted toward the player; 30 RUSH; then the show-it-to-RUSH move):
 
 Live on main
 
@@ -152,10 +152,14 @@ Live on main
 - Action twist (src/moves.ts, PuzzleBoard.move): each visual puzzle asks
   for a move with your pick, shown as the panel's instruction line and read
   aloud: DROP it on the tray, FLIP it over (released upside down, anywhere),
-  or LIFT it above your head (held 0.1 m above the eyes for 0.5 s, so
-  looking closely at it is not an answer). The game picks the move, never
-  the puzzle file: the first two visual puzzles on a device are drops, the
-  3rd introduces flip and the 5th lift ("New move!"), then it is random
+  LIFT it above your head (held 0.1 m above the eyes for 0.5 s, so
+  looking closely at it is not an answer), or SHOW it to RUSH (held within
+  0.2 m of RUSH's centre for 0.6 s; for this move RUSH glides from beside
+  the panel, out of seated reach, to a spot fixed when the move starts:
+  0.28 m right, 0.2 m below and 0.42 m in front of the head). The game
+  picks the move, never the puzzle file: the first two visual puzzles on a
+  device are drops, the 3rd introduces flip, the 5th lift and the 7th show
+  ("New move!"), then it is random
   (count kept in localStorage, thinkrush.visualSeen). Wrong object = wrong
   answer whatever the move. Right object, wrong move = "Right answer, wrong
   move!": a run loses that puzzle (status wrongMove, no points, moves on
@@ -247,8 +251,7 @@ Decisions
 
 Open questions (owner deciding, 2026-10-30)
 
-- Action twist follow-ups: moves for the answer orbs, and a "hold it up to
-  RUSH" variant now that RUSH exists.
+- Action twist follow-ups: moves for the answer orbs.
 
 - One model still to redo (owner): the megaphone (the upload in
   art/incoming/megaphone.glb is the untextured 929k-triangle preview, so

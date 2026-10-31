@@ -21,8 +21,8 @@ you can click around in.
 > visual puzzles, riddles, proverbs and mafumbo stories. A visual puzzle
 > puts four objects on the table under a clue such as "Three of these let
 > you in. Which one keeps you out?" Pick the one it points to, then do the
-> move the panel asks for: drop it on the tray, flip it over, or lift it
-> above your head. The right object with the wrong move is "Right answer,
+> move the panel asks for: drop it on the tray, flip it over, lift it
+> above your head, or show it to RUSH, who comes within reach for that. The right object with the wrong move is "Right answer,
 > wrong move!", so read (or listen) carefully. New moves arrive one at a
 > time. The objects are built in code and stand on identical wooden display
 > stands, all at one size; abstract ones, like a password, appear as a word
