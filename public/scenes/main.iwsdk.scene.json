@@ -67,8 +67,8 @@
       "components": {
         "LocomotionEnvironment": {},
         "DomeFade": {
-          "start": 4,
-          "end": 10
+          "start": 7.5,
+          "end": 13
         }
       }
     },
@@ -87,6 +87,24 @@
           0,
           0,
           0.1
+        ]
+      }
+    },
+    {
+      "id": "room",
+      "name": "Room",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "room",
+        "castShadow": false,
+        "receiveShadow": false
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
         ]
       }
     },
