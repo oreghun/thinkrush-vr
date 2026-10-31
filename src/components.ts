@@ -8,10 +8,12 @@
 import { defineComponents } from '@iwsdk/core';
 import { MovablePanel } from './movable-panel-component.js';
 import { AnswerOrb, PuzzleBoard, PuzzleTile } from './puzzle-components.js';
+import { Rush } from './rush-component.js';
 
 export default defineComponents([
   AnswerOrb,
   MovablePanel,
   PuzzleBoard,
   PuzzleTile,
+  Rush,
 ]);

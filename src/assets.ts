@@ -23,6 +23,7 @@ import {
   createPuzzleTable,
   createPuzzleTile,
 } from './scene-assets/puzzle.scene-asset.js';
+import { createRush } from './scene-assets/rush.scene-asset.js';
 import {
   createStage,
   createStudioFloor,
@@ -54,6 +55,7 @@ export default defineAssets({
   },
   'answer-orb': createAnswerOrb(),
   'panel-handle': createPanelHandle(),
+  rush: createRush(),
   // Loaded in the background so the game starts fast; a miniature still
   // loading shows its code-built version for that round.
   ...Object.fromEntries(

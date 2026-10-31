@@ -500,6 +500,24 @@
       ]
     },
     {
+      "id": "rush",
+      "name": "RUSH",
+      "content": {
+        "type": "asset",
+        "asset": "rush"
+      },
+      "transform": {
+        "position": [
+          0.45,
+          1.25,
+          -0.8
+        ]
+      },
+      "components": {
+        "Rush": {}
+      }
+    },
+    {
       "id": "welcome-handle",
       "name": "Welcome Panel Handle",
       "content": {
