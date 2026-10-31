@@ -1,0 +1,262 @@
+<!--
+  The one screen above the table, projected from the light bar under it.
+  Two pages share it: home (welcome, the four worlds and the settings) and
+  the puzzle page. src/puzzle.ts shows one page at a time.
+
+  The look is a projected glass screen: two faint turquoise rings around a
+  dark, slightly see-through surface with a bright edge. Plain divs, not the
+  Horizon kit's Panel, because the kit's surface is opaque. The surface is
+  always dark, so every text color is a light one.
+
+  Ids that are message keys get their text from src/i18n via
+  src/ui-text.ts; src/panel.ts runs the home page's settings buttons and
+  src/puzzle.ts fills and colors the rest: prompt, question, score, timer,
+  status, detail and the button labels. It shows the buttons that fit the
+  mode: practice offers Category, Start run, Next puzzle and Home, a run
+  offers Skip, and the run-over summary offers Run again, Back to practice
+  and Home. "..." is only a placeholder.
+-->
+<style>
+  .glow-outer {
+    flex-direction: column;
+    width: 600px;
+    padding: 5px;
+    border-radius: 34px;
+    background-color: rgba(53, 183, 174, 0.1);
+  }
+
+  .glow-inner {
+    flex-direction: column;
+    padding: 4px;
+    border-radius: 30px;
+    background-color: rgba(53, 183, 174, 0.22);
+  }
+
+  .glass {
+    flex-direction: column;
+    min-height: 330px;
+    border-radius: 26px;
+    border-width: 2px;
+    border-color: #62e3d6;
+    background-color: rgba(10, 21, 36, 0.9);
+  }
+
+  .page {
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 8px;
+    padding: 22px;
+  }
+
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .eyebrow {
+    color: #f5d90a;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+  }
+
+  .heading {
+    color: #fafaf7;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 36px;
+  }
+
+  .body {
+    color: #dddfe3;
+    font-size: 20px;
+    line-height: 27px;
+  }
+
+  .world-heading {
+    color: #35b7ae;
+    font-size: 17px;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+
+  .timer {
+    color: #fafaf7;
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .prompt {
+    color: #fafaf7;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .question {
+    color: #f5d90a;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .status {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .detail {
+    color: #dddfe3;
+    font-size: 20px;
+    line-height: 1.35;
+  }
+
+  .spacer {
+    flex-grow: 1;
+  }
+
+  .button-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .button {
+    flex-grow: 1;
+    justify-content: flex-start;
+  }
+
+  .world-button {
+    flex-grow: 1;
+    flex-basis: 0;
+    justify-content: flex-start;
+  }
+
+  .world-visual {
+    border-color: #f5d90a;
+  }
+
+  .world-riddle {
+    border-color: #35b7ae;
+  }
+
+  .world-proverb {
+    border-color: #e8a06a;
+  }
+
+  .world-mafumbo {
+    border-color: #b9a7ff;
+  }
+
+  .button-label {
+    transform-translate-y: 1px;
+  }
+</style>
+<div class="glow-outer">
+  <div class="glow-inner">
+    <div class="glass">
+      <div id="home-page" class="page">
+        <div id="welcome.eyebrow" class="eyebrow">...</div>
+        <div id="welcome.heading" class="heading">...</div>
+        <div id="welcome.body1" class="body">...</div>
+        <div id="welcome.body2" class="body">...</div>
+        <div id="welcome.worldHeading" class="world-heading">...</div>
+        <div class="button-row">
+          <Button id="world-visual" class="world-button world-visual">
+            <ButtonLabel id="welcome.world.visual" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="world-riddle" class="world-button world-riddle">
+            <ButtonLabel id="welcome.world.riddle" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
+        <div class="button-row">
+          <Button id="world-proverb" class="world-button world-proverb">
+            <ButtonLabel id="welcome.world.proverb" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="world-mafumbo" class="world-button world-mafumbo">
+            <ButtonLabel id="welcome.world.mafumbo" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
+        <div class="spacer"></div>
+        <div class="button-row">
+          <Button id="xr-button" class="button">
+            <ButtonIcon>
+              <RectangleGoggles></RectangleGoggles>
+            </ButtonIcon>
+            <ButtonLabel id="welcome.enterVR" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="exit-button" class="button" style="display: none">
+            <ButtonIcon>
+              <LogIn></LogIn>
+            </ButtonIcon>
+            <ButtonLabel id="welcome.exitVR" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="language-button" class="button">
+            <ButtonIcon>
+              <Languages></Languages>
+            </ButtonIcon>
+            <ButtonLabel id="language-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="read-aloud-button" class="button">
+            <ButtonIcon>
+              <Volume2></Volume2>
+            </ButtonIcon>
+            <ButtonLabel id="read-aloud-label" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
+      </div>
+      <div id="puzzle-page" class="page" style="display: none">
+        <div class="header">
+          <span id="puzzle.eyebrow" class="eyebrow">...</span>
+          <span id="puzzle-score" class="timer" style="display: none">...</span>
+          <span id="puzzle-timer" class="timer">...</span>
+        </div>
+        <div id="puzzle-prompt" class="prompt">...</div>
+        <div id="puzzle-question" class="question" style="display: none">...</div>
+        <div id="puzzle-status" class="status">...</div>
+        <div id="puzzle-detail" class="detail">...</div>
+        <div class="spacer"></div>
+        <div class="button-row">
+          <Button id="puzzle-read" class="button">
+            <ButtonIcon>
+              <Volume2></Volume2>
+            </ButtonIcon>
+            <ButtonLabel id="puzzle-read-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="puzzle-category" class="button">
+            <ButtonIcon>
+              <Layers></Layers>
+            </ButtonIcon>
+            <ButtonLabel id="puzzle-category-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="puzzle-run" class="button">
+            <ButtonIcon>
+              <Play></Play>
+            </ButtonIcon>
+            <ButtonLabel id="puzzle-run-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="puzzle-restart" class="button">
+            <ButtonIcon>
+              <ArrowRight></ArrowRight>
+            </ButtonIcon>
+            <ButtonLabel id="puzzle-next-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="puzzle-exit" class="button" style="display: none">
+            <ButtonIcon>
+              <RotateCcw></RotateCcw>
+            </ButtonIcon>
+            <ButtonLabel id="puzzle-exit-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="puzzle-home" class="button">
+            <ButtonIcon>
+              <House></House>
+            </ButtonIcon>
+            <ButtonLabel id="puzzle.home" class="button-label">...</ButtonLabel>
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

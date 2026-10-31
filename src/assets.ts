@@ -19,11 +19,11 @@ import {
 import {
   createAnswerOrb,
   createAnswerTray,
-  createPanelHandle,
   createPuzzleTable,
   createPuzzleTile,
 } from './scene-assets/puzzle.scene-asset.js';
 import { createRush } from './scene-assets/rush.scene-asset.js';
+import { createScreenProjector } from './scene-assets/screen-projector.scene-asset.js';
 import {
   createStage,
   createStudioFloor,
@@ -54,7 +54,7 @@ export default defineAssets({
     name: 'Display Stand',
   },
   'answer-orb': createAnswerOrb(),
-  'panel-handle': createPanelHandle(),
+  'screen-projector': createScreenProjector(),
   rush: createRush(),
   // Loaded in the background so the game starts fast; a miniature still
   // loading shows its code-built version for that round.
@@ -69,8 +69,7 @@ export default defineAssets({
       },
     ]),
   ),
-  'welcome-panel': uikitml('welcome.uikitml', 'Welcome Panel'),
-  'puzzle-panel': uikitml('puzzle-panel.uikitml', 'Puzzle Panel'),
+  screen: uikitml('screen.uikitml', 'Screen'),
   'tile-label': uikitml('tile-label.uikitml', 'Tile Label'),
   'orb-label': uikitml('orb-label.uikitml', 'Orb Label'),
 });

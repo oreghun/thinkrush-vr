@@ -18,10 +18,13 @@ game switches to your hands. On a computer, the same link shows a 3D preview
 you can click around in.
 
 > Status: 40 English draft puzzles are playable, one at a time: ten each of
-> visual puzzles, riddles, proverbs and mafumbo stories. A visual puzzle
+> visual puzzles, riddles, proverbs and mafumbo stories. One glass screen,
+> projected from a light bar above the table, opens on the home page: pick
+> a world (visual, riddles, proverbs or mafumbo) and the same screen turns
+> into the puzzle page; its Home button comes back. A visual puzzle
 > puts four objects on the table under a clue such as "Three of these let
 > you in. Which one keeps you out?" Pick the one it points to, then do the
-> move the panel asks for: drop it on the tray, flip it over, lift it
+> move the screen asks for: drop it on the tray, flip it over, lift it
 > above your head, or show it to RUSH, who comes within reach for that. The right object with the wrong move is "Right answer,
 > wrong move!", so read (or listen) carefully. New moves arrive one at a
 > time. The objects are built in code and stand on identical wooden display
@@ -32,9 +35,9 @@ you can click around in.
 > into gameplay yet. Next puzzle (always available) steps through the bank, and a
 > Category button narrows browsing and runs to one puzzle type. The
 > 60-second practice timer only runs inside VR; a run's 3-minute clock also
-> ticks on the flat page, so desktop runs end properly. In VR, pinch the bar
-> under any panel (on a screen, mouse-drag it) to move the panel where you
-> like; on a flat screen, drag empty space to look around. Each new puzzle
+> ticks on the flat page, so desktop runs end properly. In VR, pinch the light
+> bar under the screen (on a flat screen, mouse-drag it) to move the screen
+> where you like; on a flat screen, drag empty space to look around. Each new puzzle
 > is read aloud by a voice built into your device (see "Read aloud" below).
 > Press Start a 3-minute run for a
 > scored dash through shuffled puzzles: solving auto-advances, Skip costs
@@ -93,7 +96,7 @@ server stays at `/`.
 
 All interface text lives in `src/i18n/en.json` (English, primary) and
 `src/i18n/sw.json` (Swahili). Code reads it with `t(key)` from `src/i18n`, and
-`setLanguage('sw')` switches language; the welcome panel has a toggle button.
+`setLanguage('sw')` switches language; the home page has a toggle button.
 The choice is saved in the browser.
 
 - Never hard-code interface text. Add the English string to `en.json` and the
@@ -143,11 +146,11 @@ choosing a tile or an orb, never by speaking. It uses the browser's own
 speech synthesis (the Web Speech API) with **voices installed on the device
 only**: online voices send the text to a server, so the game skips them.
 
-- The welcome panel's **Read aloud** button cycles Off, Slow, Normal and
+- The home page's **Read aloud** button cycles Off, Slow, Normal and
   Fast. The choice is saved in the browser. If it says **No voice on this
   device**, the device has no built-in English voice and the game stays
   quiet; the text is always on screen either way.
-- **Read it out** on the puzzle panel reads the current question again,
+- **Read it out** on the puzzle page reads the current question again,
   even with automatic reading off.
 - Reading pauses when the headset is taken off or a system menu opens, and
   stops when the puzzle is solved.
@@ -182,13 +185,13 @@ The full list is in [CLAUDE.md](CLAUDE.md). In short:
 ```
 content/puzzles.json      puzzle bank
 public/scenes/            scene JSON (layout of the world)
-public/ui/                UIKitML panels
+public/ui/                UIKitML: the screen (home and puzzle pages), tile and orb labels
 src/index.ts              entry point: creates the world, registers systems
 src/i18n/                 en.json, sw.json and the t() helper
 src/ui-text.ts            fills UIKitML text from src/i18n
 src/input-visuals.ts      code-built hands and controllers for VR
 src/puzzle.ts             gameplay: tiles, tray, answer orbs, timer, progression
-src/movable-panel.ts      panels hang from grab bars and can be re-placed
+src/movable-panel.ts      the screen hangs above its light bar and can be re-placed
 src/screen-look.ts        drag-to-look camera for flat screens
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)

@@ -15,6 +15,8 @@ export const PuzzleStatus = {
 } as const;
 
 export const PuzzleMode = {
+  /** The home page is up: the table is clear until a world is picked. */
+  Home: 'home',
   /** Browse the bank one puzzle at a time, 60 s each, no score. */
   Practice: 'practice',
   /** A 3-minute run: mixed puzzles, auto-advance on solve, score. */
@@ -39,7 +41,7 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
   mode: {
     type: Types.Enum,
     enum: PuzzleMode,
-    default: PuzzleMode.Practice,
+    default: PuzzleMode.Home,
   },
   // Run totals; both stay 0 outside a run.
   score: { type: Types.Int16, default: 0 },

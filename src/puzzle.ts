@@ -219,7 +219,10 @@ export class PuzzleSystem extends createSystem({
     | 'exit'
     | 'exitLabel'
     | 'read'
-    | 'readLabel',
+    | 'readLabel'
+    | 'home'
+    | 'homePage'
+    | 'puzzlePage',
     UIElement
   > = {
     prompt: null,
@@ -238,6 +241,9 @@ export class PuzzleSystem extends createSystem({
     exitLabel: null,
     read: null,
     readLabel: null,
+    home: null,
+    homePage: null,
+    puzzlePage: null,
   };
 
   init(): void {
@@ -298,7 +304,8 @@ export class PuzzleSystem extends createSystem({
     this.trayMaterials.push(...cloneMaterials(this.tray));
     this.captureWorldMaterials();
 
-    const panel = this.world.getSceneObject<UIKitMLAsset>('puzzle-panel');
+    // One screen with two pages: home, then the puzzle page.
+    const panel = this.world.getSceneObject<UIKitMLAsset>('screen');
     this.elements = {
       prompt: panel?.getElementById('puzzle-prompt') ?? null,
       question: panel?.getElementById('puzzle-question') ?? null,
@@ -316,16 +323,19 @@ export class PuzzleSystem extends createSystem({
       exitLabel: panel?.getElementById('puzzle-exit-label') ?? null,
       read: panel?.getElementById('puzzle-read') ?? null,
       readLabel: panel?.getElementById('puzzle-read-label') ?? null,
+      home: panel?.getElementById('puzzle-home') ?? null,
+      homePage: panel?.getElementById('home-page') ?? null,
+      puzzlePage: panel?.getElementById('puzzle-page') ?? null,
     };
     const next = () => this.onNextPressed();
     const run = () => this.startRun();
     const exit = () => this.exitToPractice();
     const category = () => this.cycleCategory();
     const read = () => this.readPuzzle(true);
+    const home = () => this.goHome();
 
-    // The welcome hub offers direct entry into each puzzle world. Selecting
+    // The home page offers direct entry into each puzzle world. Selecting
     // a world filters both practice browsing and the three-minute run draw.
-    const welcomePanel = this.world.getSceneObject<UIKitMLAsset>('welcome-panel');
     const worldButtons: Array<[string, Category]> = [
       ['world-visual', PuzzleCategory.Visual],
       ['world-riddle', PuzzleCategory.Riddle],
@@ -333,7 +343,7 @@ export class PuzzleSystem extends createSystem({
       ['world-mafumbo', PuzzleCategory.Mafumbo],
     ];
     const worldCleanup = worldButtons.flatMap(([id, selectedCategory]) => {
-      const button = welcomePanel?.getElementById(id);
+      const button = panel?.getElementById(id);
       if (!button) return [];
       const selectWorld = () => {
         const board = this.board;
@@ -354,6 +364,7 @@ export class PuzzleSystem extends createSystem({
     this.elements.exit?.addEventListener('click', exit);
     this.elements.category?.addEventListener('click', category);
     this.elements.read?.addEventListener('click', read);
+    this.elements.home?.addEventListener('click', home);
 
     this.cleanupFuncs.push(
       () => this.tileModels.forEach((model, slot) => {
@@ -380,6 +391,7 @@ export class PuzzleSystem extends createSystem({
       () => this.elements.exit?.removeEventListener('click', exit),
       () => this.elements.category?.removeEventListener('click', category),
       () => this.elements.read?.removeEventListener('click', read),
+      () => this.elements.home?.removeEventListener('click', home),
       // Entering VR is the first moment a headset player can hear the
       // puzzle; a blurred session holds the voice along with the clock.
       this.world.visibilityState.subscribe((state) => {
@@ -413,7 +425,13 @@ export class PuzzleSystem extends createSystem({
     for (const entity of this.queries.rushes.entities) {
       this.rush = entity;
     }
-    this.startRound(this.board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0);
+    // The game opens on the home page; a world's button starts its first
+    // puzzle.
+    if (this.mode() === PuzzleMode.Home) {
+      this.goHome();
+    } else {
+      this.startRound(this.board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0);
+    }
     for (const model of IMPORTED_OBJECTS) {
       AssetManager.loadGLTFById(objectAssetId(model))
         .then(() => this.swapInImported(model))
@@ -576,6 +594,7 @@ export class PuzzleSystem extends createSystem({
     if (
       !puzzle ||
       this.mode() === PuzzleMode.RunOver ||
+      this.mode() === PuzzleMode.Home ||
       (!asked && !isReadAloudOn())
     ) {
       return;
@@ -599,7 +618,12 @@ export class PuzzleSystem extends createSystem({
 
   private onOrbPressed(orb: Entity): void {
     const board = this.board;
-    if (!board || this.isVisual || this.status() !== PuzzleStatus.Playing) {
+    if (
+      !board ||
+      this.isVisual ||
+      this.status() !== PuzzleStatus.Playing ||
+      this.mode() === PuzzleMode.Home
+    ) {
       return;
     }
     const slot = orb.getValue(AnswerOrb, 'slot') ?? 0;
@@ -628,7 +652,8 @@ export class PuzzleSystem extends createSystem({
       this.tileUp.y < FLIPPED_UP_Y,
       this.isOverTray(object.position),
     );
-    if (!answered && made) {
+    // At home the table is cleared: a tile let go there answers nothing.
+    if (!answered && made && this.mode() !== PuzzleMode.Home) {
       this.answer(tile, made);
     }
     this.settling.add(tile);
@@ -949,6 +974,33 @@ export class PuzzleSystem extends createSystem({
     this.render();
   }
 
+  /**
+   * Back to the home page: the voice stops, the table clears and RUSH rests
+   * at full size until a world is picked. Not offered during a run.
+   */
+  private goHome(): void {
+    const board = this.board;
+    if (!board || this.mode() === PuzzleMode.Run) {
+      return;
+    }
+    stopSpeaking();
+    board.setValue(PuzzleBoard, 'mode', PuzzleMode.Home);
+    board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
+    board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
+    board.setValue(PuzzleBoard, 'wrongAnswers', 0);
+    board.setValue(PuzzleBoard, 'wrongMoves', 0);
+    this.advanceIn = 0;
+    this.settling.clear();
+    this.orbFlash.clear();
+    this.tileBySlot.forEach((tile, slot) =>
+      this.place(tile, this.tileHomes[slot], false),
+    );
+    this.orbBySlot.forEach((orb, slot) =>
+      this.place(orb, this.orbHomes[slot], false),
+    );
+    this.render();
+  }
+
   private exitToPractice(): void {
     const board = this.board;
     if (!board || this.mode() !== PuzzleMode.RunOver) {
@@ -1034,11 +1086,17 @@ export class PuzzleSystem extends createSystem({
   private render(): void {
     const puzzle = this.puzzle;
     const board = this.board;
-    if (!puzzle || !board) {
+    const mode = this.mode();
+    // The screen shows one page at a time.
+    const atHome = mode === PuzzleMode.Home;
+    this.elements.homePage?.setProperties({ display: atHome ? 'flex' : 'none' });
+    this.elements.puzzlePage?.setProperties({
+      display: atHome ? 'none' : 'flex',
+    });
+    if (!puzzle || !board || atHome) {
       return;
     }
     const status = this.status();
-    const mode = this.mode();
     const wrong = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
     const score = board.getValue(PuzzleBoard, 'score') ?? 0;
 
@@ -1128,6 +1186,10 @@ export class PuzzleSystem extends createSystem({
     });
     this.elements.read?.setProperties({
       display: mode === PuzzleMode.RunOver ? 'none' : 'flex',
+    });
+    // Home is offered whenever no run is under way.
+    this.elements.home?.setProperties({
+      display: mode === PuzzleMode.Run ? 'none' : 'flex',
     });
     this.elements.readLabel?.setProperties({
       text: this.noVoice ? t('readAloud.noVoice') : t('readAloud.again'),
