@@ -49,8 +49,9 @@ you can click around in.
 > clock starts: 10 seconds for the orbs, 15 for a picture puzzle, 20 for a
 > pattern or a missing piece. Time up, a wrong pick, or the right pick with
 > the wrong move loses the puzzle; in practice, **Try again** replays it
-> with its hint. Practice's clock only runs inside VR; a run's also runs on
-> the flat page, so desktop runs end properly. In VR the screen floats
+> with its hint. The clock starts on its own on any page, in VR or not (on
+> a flat page the pieces on the table need hands, so those puzzles run
+> out of time). In VR the screen floats
 > about 1.4 m away, sized so its text reads easily. Press **Closer** to
 > bring it within reach and tap its buttons with a fingertip; press **Push
 > back** to send it back. A new puzzle sends it back on its own. On a flat

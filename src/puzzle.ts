@@ -689,10 +689,8 @@ export class PuzzleSystem extends createSystem({
 
     const mode = this.mode();
     const state = this.world.visibilityState.peek();
-    // A blurred XR session (headset menu, headset off) pauses everything.
-    // The practice timer also pauses outside VR, where tiles cannot be
-    // dragged; a run's clock ticks on the flat page too, or a desktop run
-    // would never end. Hidden browser tabs stop the frame loop anyway.
+    // A blurred XR session (headset menu, headset off) pauses everything,
+    // as does the pause itself. Hidden browser tabs stop the frame loop.
     const paused = this.puzzlePaused();
     if (paused !== this.shownPaused) {
       // Paused or resumed (palm, menu button, Escape, Resume, headset).
@@ -706,7 +704,10 @@ export class PuzzleSystem extends createSystem({
     }
     const awake = state !== VisibilityState.VisibleBlurred && !paused;
     // The question types out and the choices appear, then the answer clock
-    // runs: in a run on any page, in practice only in VR (tiles need hands).
+    // starts on its own the moment RUSH finishes, on any page, VR or not
+    // (owner, 2026-11-01: a clock that sat at 0:10 on a flat page looked as
+    // if it had to be started). Tiles need hands, so on a flat page a
+    // picture, pattern or piece puzzle simply runs out of time.
     const phase = this.phase();
     const presenting =
       awake &&
@@ -720,11 +721,8 @@ export class PuzzleSystem extends createSystem({
     const clockRunning =
       phase === RoundPhase.Answering &&
       this.status() === PuzzleStatus.Playing &&
-      (mode === PuzzleMode.Run
-        ? awake
-        : mode === PuzzleMode.Practice &&
-          !paused &&
-          state === VisibilityState.Visible);
+      awake &&
+      (mode === PuzzleMode.Run || mode === PuzzleMode.Practice);
     if (clockRunning) {
       const left = Math.max(
         0,
