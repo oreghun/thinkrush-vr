@@ -82,5 +82,9 @@
   "tour.pause": "",
   "tour.pauseDetail": "",
   "tour.done": "",
-  "readAloud.blank": ""
+  "readAloud.blank": "",
+  "choices.last": "",
+  "puzzle.tryAgain": "",
+  "run.eyebrow": "",
+  "daily.eyebrow": ""
 }

@@ -42,21 +42,26 @@ you can click around in.
 > point at and pinch. Ten Swahili methali drafts are kept separately in
 > `content/methali-drafts.json` for fluent-language review and are not loaded
 > into gameplay yet. Next puzzle (always available) steps through the bank, and a
-> Category button narrows browsing and runs to one puzzle type. The
-> 60-second practice timer only runs inside VR; a run's 3-minute clock also
-> ticks on the flat page, so desktop runs end properly. In VR the screen floats
+> Category button narrows browsing and runs to one puzzle type. Each puzzle
+> plays the same way: the question types out word by word while RUSH reads
+> it (the music drops to a background level), then the choices appear one
+> at a time while RUSH names them, and the moment RUSH stops, a short answer
+> clock starts: 10 seconds for the orbs, 15 for a picture puzzle, 20 for a
+> pattern or a missing piece. Time up, a wrong pick, or the right pick with
+> the wrong move loses the puzzle; in practice, **Try again** replays it
+> with its hint. Practice's clock only runs inside VR; a run's also runs on
+> the flat page, so desktop runs end properly. In VR the screen floats
 > about 1.4 m away, sized so its text reads easily. Press **Closer** to
 > bring it within reach and tap its buttons with a fingertip; press **Push
 > back** to send it back. A new puzzle sends it back on its own. On a flat
 > screen, drag empty space to look around. On a phone held upright the view steps back so the screen and
 > the table still fit. Each new puzzle
 > is read aloud by a voice built into your device (see "Read aloud" below).
-> Press Start a 3-minute run for a
-> scored dash through shuffled puzzles: solving auto-advances, Skip costs
-> only time, points scale with difficulty, and your best score stays on your
-> device. In a run you get one pick per puzzle: a wrong pick loses it and
-> moves on, so guessing through the choices never pays (practice still
-> lets you try again). You sit in a clay-walled room with a beamed ceiling,
+> Press Start a 10-puzzle run for a
+> scored set of shuffled puzzles: each moves on by itself, Skip gives one
+> up, a solve scores its difficulty times ten plus a point for every second
+> left, and your best score stays on your device. One pick per puzzle, so
+> guessing through the choices never pays. You sit in a clay-walled room with a beamed ceiling,
 > a plank door, and two windows looking out on hills and acacia trees
 > against the evening sky, all built in code.
 > RUSH, a glowing companion beside the puzzle, is the timer: it
@@ -210,7 +215,7 @@ it along. Once finished or skipped it is remembered on the device
 ## Daily Challenge and streaks
 
 The home page's **Daily Challenge** plays six puzzles, one from each world,
-easiest first, in a 3-minute run that ends once all six are played. The set
+easiest first, as a run of six (each with its own answer clock). The set
 comes from the date alone (`src/daily.ts`), so everyone gets the same
 puzzles that day, pattern and object boards included. Finishing the challenge on
 consecutive days builds a streak; the button shows it ("keep your 3-day

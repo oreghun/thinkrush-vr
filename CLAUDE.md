@@ -45,7 +45,9 @@ Live build: https://oreghun.github.io/thinkrush-vr/
   Orbs are always available; voice is optional.
 - RUSH: a glowing sphere companion with expressive eyes that presents puzzles and
   reacts to answers. RUSH is also the timer: it shrinks and the music speeds up as time runs out.
-- Runs last about 3 minutes. Daily Challenge plus streaks bring players back.
+- Runs are 10 puzzles (about 4 minutes), each with its own short answer
+  clock (owner, 2026-11-01: see Decisions, Round timing). Daily Challenge
+  plus streaks bring players back.
 - The first puzzle is the tutorial. No walls of text. (Built as the How to
   play tour: see Live on main.)
 - Palm-up gesture opens pause and settings. Pause when the XR session loses visibility.
@@ -95,8 +97,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-11-01, PRs 1-51 merged plus the headset checklist and the
-megaphone model (6 answer orbs;
+As of 2026-11-01, PRs 1-52 merged plus the round timing PR (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -121,8 +122,9 @@ per puzzle in a run; 44 the room; 45 the phone view and no projector;
 46 the music fix (superseded); 47 the sound quality pass (owner: "the
 sound is better now"); 48 the door and the horizon; 49 the band off the
 door; 50 English only for the competition; 51 the How to play tour and
-proverb gaps read as "blank"; then docs/headset-checklist.md and the
-owner's megaphone):
+proverb gaps read as "blank"; 52 docs/headset-checklist.md and the
+owner's megaphone; then round timing: read, name, then a short answer
+clock):
 
 Live on main
 
@@ -133,8 +135,8 @@ Live on main
 - Playable: every puzzle in the bank, one at a time. Visual puzzles use the
   four grabbable tiles and the tray; riddles/proverbs/mafumbo use the three
   answer orbs; "Next puzzle" steps through the bank and wraps. The unused
-  set (tiles or orbs) stows below the floor. 60 s timer runs only while the
-  XR session is visible.
+  set (tiles or orbs) stows below the floor. The answer clock (see Round
+  timing) runs in practice only while the XR session is visible.
 - Visual tiles show code-built low-poly miniatures
   (src/scene-assets/object-options.scene-asset.ts), picked by label in
   src/tile-models.ts. A label with no miniature (password, shadow,
@@ -184,8 +186,8 @@ Live on main
   src/scene-assets/rush.scene-asset.ts, scene node "rush" at 0.42, 0.98,
   -0.75, beside the screen's lower right corner): a deep-gold glowing sphere, 18 cm across,
   with two eyes; it turns to face the player and blinks. It is the timer:
-  it shrinks to 45% and warms from gold to red as the clock (the puzzle's
-  60 s, or the run's 180 s) runs out. Lasting moods follow the board
+  it shrinks to 45% and warms from gold to red as the puzzle's answer clock
+  (10-20 s, see Round timing; full while the question is read) runs out. Lasting moods follow the board
   (happy when solved or after a run, sleepy at time up, surprised on a
   run's wrong move); short reactions play over them: a hop for each new
   puzzle, a bigger hop with happy eyes for a solve, a shake with worried
@@ -330,7 +332,8 @@ Live on main
   /src/music-render.ts on the dev server).
 - Daily Challenge (src/daily.ts with tests; PuzzleSystem.startDaily): the
   home page's gold "Daily Challenge" button (full width, above Pattern Loom)
-  starts a run (mode run, 180 s, category All) over the day's puzzles:
+  starts a run (mode run, category All, one answer clock per puzzle) over
+  the day's puzzles:
   one per world with content, picked by a seed from the local date
   (dayKey, YYYY-MM-DD), sorted easiest first; pattern boards are dealt with
   dailySeed(day, puzzle id), so everyone gets the same boards. Moves still
@@ -355,7 +358,8 @@ Live on main
   tile moves on), drop (en-visual-07, the magnet puzzle, all four objects
   owner models; free retries, always a drop, visualSeen untouched), orb
   (en-riddle-01, the mirror riddle), clock (table cleared; secondsLeft
-  follows clockDemoFraction for 7.3 s: full, down to 0 in 2.5 s, out for
+  follows clockDemoFraction over a 10 s clock (TOUR_CLOCK_SECONDS, the
+  screen shows 0:10) for 7.3 s: full, down to 0 in 2.5 s, out for
   2.5 s so the music reaches urgent, back up; it waits for the voice to
   finish, at most 8 s more), pause (palm up, menu button or Escape: the
   pause page shows and the voice says how to carry on, as the tour keeps
@@ -468,16 +472,17 @@ Live on main
   buttons pick a category directly and tint the floor and stage for it.
   Pure logic in src/categories.ts with unit tests. Switching keeps the
   current puzzle when it already fits the category.
-- Run mode: Start a 3-minute run draws from the chosen category, shuffled,
-  auto-advances 2.5 s after a solve, Skip costs only time, a solve scores
-  difficulty x 10. A wrong pick loses the puzzle (owner, 2026-10-31: no
-  guessing through the choices; PuzzleSystem.onWrongPick, status
-  wrongPick, no points, the right orb glows or the gap fills, RUSH stays
-  worried, "Wrong pick! This one is lost.", moves on after 2.5 s; the
-  Daily Challenge is a run too). Practice keeps free retries with the
-  hint. The summary shows score/solved/best, and the best run
-  score is kept in localStorage (thinkrush.bestScore). Practice stays the
-  default browsing mode with the per-puzzle 60 s timer.
+- Run mode: "Start a 10-puzzle run" plays RUN_PUZZLES (10) from the chosen
+  category, shuffled (runTotal; the Daily Challenge plays its own 6). Each
+  puzzle has its own answer clock (Round timing); a solve scores
+  solvePoints = difficulty x 10 + whole seconds left; time up, a wrong pick
+  or a wrong move loses it (no points, the right orb glows or the gap
+  fills); either way the run moves on after 2.5 s. Skip gives a puzzle up.
+  The eyebrow reads "RUN - PUZZLE 3 OF 10" ("DAILY CHALLENGE - PUZZLE 2 OF
+  6"). The summary shows score, solved x/total and best; the best run score
+  is kept in localStorage (thinkrush.bestScore; scores from the old
+  3-minute runs stay in it). Practice is the default browsing mode, with the
+  same one try per puzzle and a Try again button.
 - The screen floats on its own (owner, 2026-10-31: in the room a projector
   has nowhere to stand, and on the wall the screen would hide it). Scene
   node "screen-handle" (name "Screen Mount") is now an invisible anchor
@@ -529,6 +534,44 @@ Decisions
   toggle back. This supersedes the "Swahili toggle and pack" item in the
   Week 2 schedule and the Swahili content drop-in in Next up.
 
+- Round timing (owner, 2026-11-01; src/round-flow.ts with tests,
+  PuzzleBoard.phase and answerSeconds, PuzzleSystem.beginReading /
+  beginChoices / beginAnswering): each puzzle plays in three phases.
+  Reading: the choices are hidden, the question (prompt, mafumbo question,
+  instruction line) types out a whole word at a time at about the voice's
+  pace (12/15/19 characters a second for Slow/Normal/Fast) while RUSH reads
+  it; it ends when all is typed, 0.4 s have passed and the voice has
+  finished (speechPending counts the utterances' own end events), at most
+  8 s after the last word. Choices: orbs and picture tiles appear one at a
+  time, left to right, popping up from small (0.28 s), while RUSH names
+  each ("or {choice}" for the last; an orb glows blue while named), at
+  least 0.35 s each and as soon as the voice is done (0.7 s each without a
+  voice, at most 4 s); pattern and missing pieces have no names, so they
+  appear together and the clock starts 0.5 s later. Grabbing a tile or
+  pinching an orb during the choices starts the clock at once (the rest
+  appear) and the answer counts. Answering: the clock runs from
+  answerSeconds: 10 for riddles, proverbs and mafumbo, 15 for picture
+  puzzles, 20 for patterns and missing pieces (reaching, moving and
+  turning take time in VR; the owner first proposed 10 everywhere). RUSH
+  shrinks and the music speeds up over that window. Time up, a wrong
+  pick, or the right pick with the wrong move loses the puzzle everywhere
+  except the tour (which keeps free retries and no clock); practice then
+  offers Try again (same puzzle, same move, the hint shown from the
+  start). Music (owner): while RUSH reads and names, it drops to a
+  background level (MOOD_GAIN.background 0.22, no extra ducking on top)
+  and comes back up when the clock starts. Entering VR mid-question (or
+  mid-names) hides the choices again and starts the question over. Each
+  frame counts at most 0.25 s (MAX_FRAME_SECONDS): the first frame after VR
+  starts can carry seconds and once typed a whole question at once.
+  Verified in the emulator: a riddle reads, then its orbs appear and the
+  answer phase starts; a wrong pick in practice loses it with Try again,
+  which replays it with the hint; a run's clock ran out at 10 s and moved
+  on; a quick solve with 4.1 s left at difficulty 2 scored 24; a picture
+  puzzle's tiles stayed hidden while reading and its 15 s clock ran in VR;
+  a pattern's pieces appeared together with 20 s; the tour is unchanged.
+  The background music level is unit-tested only (the emulator has no
+  voice or audio check). This replaces the 60 s practice clock and the
+  3-minute run clock.
 - Comfort contract: nothing may move or rotate the player's viewpoint in VR
   except their own head. No locomotion, no snap turns, no world rotation, no
   camera animation, no screen shake (juice goes on objects, never on the

@@ -143,6 +143,12 @@ test('the music never stops dead: it softens after an answer, fades only when pa
     assert.equal(musicMood('run', status, false, true), 'soft', status);
     assert.equal(musicMood('practice', status, false, true), 'soft', status);
   }
+  // While RUSH reads the question and names the choices: background.
+  assert.equal(musicMood('practice', 'playing', false, true, true), 'background');
+  assert.equal(musicMood('run', 'playing', false, true, true), 'background');
+  assert.equal(musicMood('run', 'solved', false, true, true), 'soft');
+  assert.equal(musicMood('practice', 'playing', true, true, true), 'off');
+  assert.ok(MOOD_GAIN.background > 0 && MOOD_GAIN.background < MOOD_GAIN.soft);
   assert.equal(musicMood('practice', 'playing', true, true), 'off');
   assert.equal(musicMood('runOver', 'playing', false, true), 'off');
   assert.equal(musicMood('home', 'playing', false, false), 'off');

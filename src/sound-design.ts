@@ -126,23 +126,28 @@ export function foldTail(
 }
 
 /**
- * Whether the music plays, plays softly or is silent. It never stops dead:
- * after an answer or at time up it plays on softly; it fades out only when
- * paused, at a run's summary or with sound off.
+ * Whether the music plays, plays softly, sits in the background or is
+ * silent. While RUSH reads a question and names its choices it drops to a
+ * background level, like music in a venue when someone speaks, and comes
+ * back up when the answer clock starts. It never stops dead: after an
+ * answer or at time up it plays on softly; it fades out only when paused,
+ * at a run's summary or with sound off.
  */
 export function musicMood(
   mode: string,
   status: string,
   paused: boolean,
   soundOn: boolean,
-): 'play' | 'soft' | 'off' {
+  reading = false,
+): 'play' | 'soft' | 'background' | 'off' {
   if (!soundOn || paused || mode === 'runOver') return 'off';
   if (mode === 'home') return 'play';
-  return status === 'playing' ? 'play' : 'soft';
+  if (status !== 'playing') return 'soft';
+  return reading ? 'background' : 'play';
 }
 
 /** The music's share in each mood. */
-export const MOOD_GAIN = { play: 1, soft: 0.4, off: 0 } as const;
+export const MOOD_GAIN = { play: 1, soft: 0.4, background: 0.22, off: 0 } as const;
 
 /**
  * The music dips under the read-aloud voice and stays down through the

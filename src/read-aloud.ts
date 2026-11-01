@@ -75,6 +75,11 @@ const STORAGE_KEY = 'thinkrush.readAloud';
 
 let speed = loadSpeed();
 let pending: { text: string; language: string } | undefined;
+// Utterances of the latest speak() not yet finished. Each speak() starts a
+// new generation: cancelling the old one reports its utterances ended, late,
+// and those reports must not count against the new one.
+let utterancesLeft = 0;
+let generation = 0;
 
 function synth(): SpeechSynthesis | undefined {
   return typeof speechSynthesis === 'undefined' ? undefined : speechSynthesis;
@@ -136,6 +141,8 @@ export function speak(text: string, language: string): boolean {
   }
   speech.cancel();
   pending = undefined;
+  generation += 1;
+  utterancesLeft = 0;
   if (speech.getVoices().length === 0) {
     pending = { text, language };
     speech.addEventListener('voiceschanged', speakPending, { once: true });
@@ -145,15 +152,31 @@ export function speak(text: string, language: string): boolean {
   if (voice === undefined) {
     return false;
   }
+  const mine = generation;
+  const finished = () => {
+    if (mine === generation) utterancesLeft = Math.max(0, utterancesLeft - 1);
+  };
   for (const sentence of sentences(text)) {
     const utterance = new SpeechSynthesisUtterance(sentence);
     utterance.voice = voice;
     utterance.lang = voice.lang;
     // "Read it out" still works with automatic reading off, at normal pace.
     utterance.rate = RATES[speed === 'off' ? 'normal' : speed];
+    utterance.onend = finished;
+    utterance.onerror = finished;
+    utterancesLeft += 1;
     speech.speak(utterance);
   }
   return true;
+}
+
+/**
+ * Whether the latest speak() is still being read (or waiting to be): the
+ * game waits for RUSH to finish before the choices and the clock. It counts
+ * the utterances' own end events, which a paused voice holds back.
+ */
+export function speechPending(): boolean {
+  return utterancesLeft > 0;
 }
 
 function speakPending(): void {
@@ -169,6 +192,8 @@ export function isSpeaking(): boolean {
 
 export function stopSpeaking(): void {
   pending = undefined;
+  generation += 1;
+  utterancesLeft = 0;
   synth()?.cancel();
 }
 
