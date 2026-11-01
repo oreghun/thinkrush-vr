@@ -22,7 +22,8 @@ Devpost competitions use; cut the optional shots if the limit is shorter.
 
 - Build: the live site (https://oreghun.github.io/thinkrush-vr/) without
   `?fps`. Record only after the fps check on the Quest shows 72 fps, so the
-  footage is smooth.
+  footage is smooth (`docs/headset-checklist.md` has that check and the
+  others that need the headset).
 - Headset: Quest 3, hand tracking on, controllers put away out of reach so
   they never wake up. Good, even room light helps hand tracking.
 - Recording: in the headset's Camera settings, pick landscape (16:9) video
