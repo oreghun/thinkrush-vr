@@ -95,7 +95,8 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-10-31, PRs 1-51 merged plus the headset checklist (6 answer orbs;
+As of 2026-11-01, PRs 1-51 merged plus the headset checklist and the
+megaphone model (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -120,7 +121,8 @@ per puzzle in a run; 44 the room; 45 the phone view and no projector;
 46 the music fix (superseded); 47 the sound quality pass (owner: "the
 sound is better now"); 48 the door and the horizon; 49 the band off the
 door; 50 English only for the competition; 51 the How to play tour and
-proverb gaps read as "blank"; then docs/headset-checklist.md):
+proverb gaps read as "blank"; then docs/headset-checklist.md and the
+owner's megaphone):
 
 Live on main
 
@@ -154,7 +156,8 @@ Live on main
   (a sunflower seed, also used for the dry seed), egg, blueprint, house;
   batch 4: piano, keyboard, typewriter, keyring, key, padlock; batch 5:
   nail, screw, paper clip, wooden block; batch 6: battery, candle, solar
-  panel, trumpet, loudspeaker). They load
+  panel, trumpet, loudspeaker; then the megaphone, 2026-11-01: every
+  visual tile with a miniature now shows an owner model). They load
   with background priority so the game starts fast; until one has loaded,
   its code-built version shows, and PuzzleSystem swaps it onto any tile
   still showing that stand-in as soon as it arrives.
@@ -588,9 +591,10 @@ Open questions (owner deciding, 2026-10-30)
 
 - Action twist follow-ups: moves for the answer orbs.
 
-- One model still to redo (owner): the megaphone (the upload in
-  art/incoming/megaphone.glb is the untextured 929k-triangle preview, so
-  the code-built megaphone stays). The ruler is now a bright yellow one:
+- Models: none left to redo. The megaphone was redone (2026-11-01: the
+  first upload was Meshy's untextured 929k-triangle preview; the new one is
+  textured at 3,000 triangles, cream with a black grip, 0.24 MB, and reads
+  as a megaphone from the seat without turning). The ruler is now a bright yellow one:
   the first, wooden ruler disappeared on the wooden stand (prompts were given
   in chat: one ChatGPT style message, then one subject line per object;
   Meshy remesh to ~3,000 triangles, symmetry off for asymmetric objects).
