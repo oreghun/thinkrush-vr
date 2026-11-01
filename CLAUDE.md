@@ -136,7 +136,7 @@ Live on main
   four grabbable tiles and the tray; riddles/proverbs/mafumbo use the three
   answer orbs; "Next puzzle" steps through the bank and wraps. The unused
   set (tiles or orbs) stows below the floor. The answer clock (see Round
-  timing) runs in practice only while the XR session is visible.
+  timing) starts on its own on every page, VR or flat.
 - Visual tiles show code-built low-poly miniatures
   (src/scene-assets/object-options.scene-asset.ts), picked by label in
   src/tile-models.ts. A label with no miniature (password, shadow,
@@ -526,8 +526,8 @@ Live on main
   it never runs in an immersive session (comfort), never starts on a press
   that begins over something interactable (a button, an orb), and we
   deliberately do not rotate the world in VR.
-  The run clock ticks on flat pages too (practice stays VR-only); only a
-  blurred XR session pauses everything.
+  The answer clock runs on flat pages too (owner, 2026-11-01); only a
+  blurred XR session or the pause stops it.
 - Read aloud (src/read-aloud.ts): each new puzzle's prompt (plus the
   mafumbo question) is read with speechSynthesis (a "____" gap is said as
   "blank": speakableBlanks, key readAloud.blank), one utterance per
@@ -568,7 +568,10 @@ Decisions
   voice, at most 4 s); pattern and missing pieces have no names, so they
   appear together and the clock starts 0.5 s later. Grabbing a tile or
   pinching an orb during the choices starts the clock at once (the rest
-  appear) and the answer counts. Answering: the clock runs from
+  appear) and the answer counts. Answering: the clock starts on its own on
+  any page, VR or flat (owner, 2026-11-01: practice's used to wait for VR,
+  and sitting at 0:10 on a flat page it looked as if it needed starting;
+  on a flat page tile puzzles, which need hands, run out of time), from
   answerSeconds: 10 for riddles, proverbs and mafumbo, 15 for picture
   puzzles, 20 for patterns and missing pieces (reaching, moving and
   turning take time in VR; the owner first proposed 10 everywhere). RUSH
