@@ -71,6 +71,7 @@ import {
   speechPending,
   stopSpeaking,
 } from './read-aloud.js';
+import { type LineEvent, pickLine, solvedEvent } from './rush-lines.js';
 import {
   clockDemoDone,
   clockDemoFraction,
@@ -265,6 +266,8 @@ export class PuzzleSystem extends createSystem({
   private hintShown = false;
   // How many puzzles the current run (or Daily Challenge) has.
   private runTotal = 0;
+  // RUSH's last cheeky line, so she never says the same one twice running.
+  private lastLine?: string;
   private readonly tilePieces: (Piece | undefined)[] = [];
   // Height above the table where objects rest on the display stand.
   private standSeat = 0;
@@ -1177,11 +1180,23 @@ export class PuzzleSystem extends createSystem({
     const board = this.board!;
     stopSpeaking();
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.TimeUp);
+    this.quip('timeUp');
     this.revealCorrectOrb();
     if (this.mode() === PuzzleMode.Run) {
       this.advanceIn = SOLVE_BEAT_SECONDS;
     }
     this.render();
+  }
+
+  /**
+   * RUSH's cheeky line for what just happened, in her voice, when
+   * read-aloud is on (a new question cuts it short).
+   */
+  private quip(event: LineEvent): void {
+    if (!isReadAloudOn()) return;
+    const key = pickLine(event, Math.random(), this.lastLine);
+    this.lastLine = key;
+    speak(t(key as MessageKey), getLanguage());
   }
 
   /** Practice's Try again: the same puzzle afresh, with its hint showing. */
@@ -1420,6 +1435,7 @@ export class PuzzleSystem extends createSystem({
     // One try: the right object with the wrong move loses the puzzle.
     stopSpeaking();
     this.board!.setValue(PuzzleBoard, 'status', PuzzleStatus.WrongMove);
+    this.quip('wrongMove');
     if (this.mode() === PuzzleMode.Run) {
       this.advanceIn = SOLVE_BEAT_SECONDS;
     }
@@ -1439,6 +1455,7 @@ export class PuzzleSystem extends createSystem({
     // moves on; practice offers Try again.
     stopSpeaking();
     this.board!.setValue(PuzzleBoard, 'status', PuzzleStatus.WrongPick);
+    this.quip('wrongPick');
     this.revealCorrectOrb();
     if (this.mode() === PuzzleMode.Run) {
       this.advanceIn = SOLVE_BEAT_SECONDS;
@@ -1612,6 +1629,15 @@ export class PuzzleSystem extends createSystem({
     if (isSoundOn()) {
       AudioUtils.play(this.tray!);
     }
+    // A quick solve gets a "speedy" line (the tour has no clock to beat).
+    this.quip(
+      this.mode() === PuzzleMode.Tour
+        ? 'solved'
+        : solvedEvent(
+            (board.getValue(PuzzleBoard, 'secondsLeft') ?? 0) /
+              Math.max(1, board.getValue(PuzzleBoard, 'answerSeconds') ?? 1),
+          ),
+    );
     if (this.isPattern) {
       // The right piece goes into the gap: the strip is whole again.
       this.patternTable?.fillGap();

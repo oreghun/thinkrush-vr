@@ -97,7 +97,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-11-01, PRs 1-52 merged plus the round timing PR (6 answer orbs;
+As of 2026-11-01, PRs 1-53 merged plus RUSH's mouth and voice (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -123,8 +123,8 @@ per puzzle in a run; 44 the room; 45 the phone view and no projector;
 sound is better now"); 48 the door and the horizon; 49 the band off the
 door; 50 English only for the competition; 51 the How to play tour and
 proverb gaps read as "blank"; 52 docs/headset-checklist.md and the
-owner's megaphone; then round timing: read, name, then a short answer
-clock):
+owner's megaphone; 53 round timing: read, name, then a short answer
+clock; then RUSH's mouth, cheeky lines and voice):
 
 Live on main
 
@@ -194,6 +194,25 @@ Live on main
   eyes for a wrong answer, surprised eyes for right-object-wrong-move
   (PuzzleBoard.wrongMoves counts those). It glows in pulses while a puzzle
   is read aloud. All motion is RUSH's own, never the player's view.
+  RUSH is a girl ("she"; owner, 2026-11-01). Mouth (Rush/Mouth on the face
+  below the eyes, direction (0, -0.22, 1): Open, a dark 2.2 x 1.4 cm oval
+  with a pink Tongue inside, and Smile, a half ring turned over; 3 more
+  draw calls): RushSystem.showMouth chatters it while isSpeaking()
+  (talkOpenness: two sine waves, about five syllables a second, never
+  quite shut) and otherwise shows mouthShape(mood): smile (idle), a bigger
+  smile (happy), a frown (worried: the ring upright, 0.8 size), a small
+  "o" (surprised), a thin line (sleepy), easing at 28/s. Cheeky lines
+  (src/rush-lines.ts with tests, rush.* keys in en.json, empty sw
+  placeholders): after a solve ("fast" when 60% or more of the clock was
+  left, never in the tour), a wrong pick, a wrong move or time up, she says
+  a short line (6 words at most) in her voice when read-aloud is on, never
+  the same twice running; the next question cuts it short. Voice:
+  pickVoice prefers an on-device voice whose name suggests a woman
+  (soundsFemale: "female", "woman", "girl" or a list of names, whole words),
+  then the default; every utterance is pitched 1.3 (RUSH_PITCH). Verified
+  in the emulator: a smile at rest, a frown after a wrong pick, a thin
+  line while paused; the chatter and the lines need a device voice (the
+  emulator has none), so they wait for the headset.
 - Room set (src/room-pieces.ts, public/models/room/, tests in
   tests/room-pieces.test.ts): the owner's Meshy pieces replace the IWSDK
   starter's Scandinavian decor (decor.scene-asset.ts is gone). Each was
@@ -631,6 +650,17 @@ Decisions
   always the longest.
 
 Open questions (owner deciding, 2026-10-30)
+
+- RUSH with a body (owner, 2026-11-01: hands, a body, walking, sitting on
+  the stool, a funny cheeky cartoon girl). Plan agreed so far: the mouth
+  and lines first (done); then the owner makes an original character in
+  Meshy (RUSH's round glowing golden head and big eyes on a small cartoon
+  body, rigged, with idle, walk, sit, wave and cheer animations; check the
+  plan's ownership terms cover the animations), and the game has her
+  wander and sit on the stool at home but stand beside the screen during
+  a puzzle (she is the clock and must stay in view, Meta VR Glasses
+  included), with a glow ring as the timer instead of shrinking her. If
+  the body is not working well by about Nov 12, keep the sphere RUSH.
 
 - Action twist follow-ups: moves for the answer orbs.
 

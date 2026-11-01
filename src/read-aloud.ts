@@ -8,29 +8,57 @@
 /** The parts of a voice that decide whether, and which, we use. */
 export type VoiceInfo = Pick<
   SpeechSynthesisVoice,
-  'lang' | 'localService' | 'default'
+  'lang' | 'localService' | 'default' | 'name'
 >;
+
+// RUSH is a girl: voices carry no gender, but many name it ("Female") or
+// go by a woman's name. A best guess; any voice for the language will do.
+const WOMEN_NAMES = [
+  'samantha', 'victoria', 'karen', 'moira', 'tessa', 'fiona', 'serena',
+  'susan', 'zira', 'hazel', 'jenny', 'aria', 'allison', 'ava', 'kate',
+  'catherine', 'joanna', 'salli', 'kimberly', 'ivy', 'emma', 'amy',
+  'libby', 'sonia', 'natasha', 'linda',
+];
+// Whole words only: "Bavarian" holds "aria" but is no one's name.
+const FEMALE_VOICE = new RegExp(
+  `\\b(female|woman|girl|${WOMEN_NAMES.join('|')})\\b`,
+  'iu',
+);
+
+/** Whether a voice's name suggests a woman's voice. */
+export function soundsFemale(voice: Pick<VoiceInfo, 'name'>): boolean {
+  return FEMALE_VOICE.test(voice.name ?? '');
+}
 
 /**
  * The index of the on-device voice for `language` ("en", "sw"), or -1 when
- * there is none. The device's default voice wins among the matches.
+ * there is none. Among the matches a woman's voice wins (RUSH's), then the
+ * device's default voice.
  */
 export function pickVoice(
   voices: readonly VoiceInfo[],
   language: string,
 ): number {
+  const rank = (voice: VoiceInfo) =>
+    (soundsFemale(voice) ? 2 : 0) + (voice.default ? 1 : 0);
   let best = -1;
   voices.forEach((voice, index) => {
     const base = voice.lang.toLowerCase().split(/[-_]/u)[0];
     if (!voice.localService || base !== language) {
       return;
     }
-    if (best === -1 || (voice.default && !voices[best].default)) {
+    if (best === -1 || rank(voice) > rank(voices[best])) {
       best = index;
     }
   });
   return best;
 }
+
+/**
+ * RUSH's voice is pitched up a little, for a lively cartoon sound (1 is the
+ * voice's own pitch; browsers allow 0 to 2).
+ */
+export const RUSH_PITCH = 1.3;
 
 /**
  * Splits text into sentences, each read as its own utterance: some browsers
@@ -162,6 +190,7 @@ export function speak(text: string, language: string): boolean {
     utterance.lang = voice.lang;
     // "Read it out" still works with automatic reading off, at normal pace.
     utterance.rate = RATES[speed === 'off' ? 'normal' : speed];
+    utterance.pitch = RUSH_PITCH;
     utterance.onend = finished;
     utterance.onerror = finished;
     utterancesLeft += 1;

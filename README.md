@@ -64,8 +64,11 @@ you can click around in.
 > guessing through the choices never pays. You sit in a clay-walled room with a beamed ceiling,
 > a plank door, and two windows looking out on hills and acacia trees
 > against the evening sky, all built in code.
-> RUSH, a glowing companion beside the puzzle, is the timer: it
-> shrinks and turns red as time runs out, and reacts to every answer.
+> RUSH, a glowing companion beside the puzzle, is the timer: she
+> shrinks and turns red as time runs out, and reacts to every answer. Her
+> mouth moves while she talks and shows her mood (a grin, a frown, a
+> surprised "o", a sleepy line), and after each answer she has a cheeky
+> word for you ("Ooh, smarty pants!", "Tick tock, too slow!").
 
 ## Run it locally
 
@@ -179,6 +182,11 @@ A proverb's missing word, drawn as "____" on the screen, is read as "blank"
   quiet; the text is always on screen either way.
 - **Read it out** on the puzzle page reads the current question again,
   even with automatic reading off.
+- The voice is RUSH's: a woman's voice when the device has one (voices
+  carry no gender, so the game goes by the name, such as "Female" or
+  "Samantha"), pitched up a little for a lively cartoon sound. With
+  reading on she also says a short cheeky line after each answer; the
+  lines are in `src/i18n/en.json` (`rush.*`).
 - Reading pauses when the headset is taken off or a system menu opens, and
   stops when the puzzle is solved.
 - Swahili puzzles are read only where the device has a Swahili voice.

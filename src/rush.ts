@@ -20,6 +20,9 @@ import {
   EYE_DEPTH,
   EYE_HEIGHT,
   EYE_WIDTH,
+  MOUTH_DEPTH,
+  MOUTH_HEIGHT,
+  MOUTH_WIDTH,
 } from './scene-assets/rush.scene-asset.js';
 import {
   baseMood,
@@ -27,6 +30,7 @@ import {
   glowColor,
   Mood,
   type MoodName,
+  mouthShape,
   Reaction,
   type ReactionName,
   reactionMood,
@@ -54,6 +58,12 @@ const SCALE_RATE = 3;
 // 0.2 m right (not further) keeps RUSH inside Meta VR Glasses' narrower view.
 const SHOW_OFFSET = new Vector3(0.2, -0.2, -0.42);
 const GLIDE_RATE = 2.5;
+// The mouth eases between shapes this fast, so moods and words never snap.
+const MOUTH_RATE = 28;
+// Where the smile sits: a turned-over half ring (a smile) curves down from
+// its centre, an upright one (a frown) up, so each is set to the same line.
+const SMILE_Y = 0.006;
+const FROWN_Y = -0.011;
 
 interface Eye {
   root: Object3D;
@@ -75,6 +85,11 @@ export class RushSystem extends createSystem({
   private board?: Entity;
   private material?: MeshStandardMaterial;
   private readonly eyes: Eye[] = [];
+  // The mouth's open oval and its smile, and how open and wide it is now.
+  private mouthOpen?: Object3D;
+  private mouthSmile?: Object3D;
+  private mouthAmount = 0;
+  private mouthWidth = 1;
   // Where RUSH floats beside the panel, the spot it glides to for the
   // show move, and where it is now on the way between them.
   private readonly home = new Vector3();
@@ -125,6 +140,9 @@ export class RushSystem extends createSystem({
       this.material = body.material.clone();
       body.material = this.material;
     }
+    const mouth = object.getObjectByName('Rush/Mouth');
+    this.mouthOpen = mouth?.getObjectByName('Open');
+    this.mouthSmile = mouth?.getObjectByName('Smile');
     for (const [name, side] of [
       ['Rush/EyeL', -1],
       ['Rush/EyeR', 1],
@@ -192,6 +210,7 @@ export class RushSystem extends createSystem({
     this.shine(fraction, mood);
     this.move(object, delta);
     this.showEyes(mood, delta);
+    this.showMouth(mood, delta);
   }
 
   private read(board: Entity): void {
@@ -260,6 +279,33 @@ export class RushSystem extends createSystem({
     this.yaw += (yaw - this.yaw) * turn;
     this.pitch += (pitch - this.pitch) * turn;
     object.rotation.set(this.pitch, this.yaw, 0);
+  }
+
+  /**
+   * Chatters while RUSH is reading aloud or saying a line; otherwise shows
+   * the mood: a smile, a bigger one when pleased, a frown when worried, an
+   * "o" when surprised, a thin line when sleepy.
+   */
+  private showMouth(mood: MoodName, delta: number): void {
+    const open = this.mouthOpen;
+    const smile = this.mouthSmile;
+    if (!open || !smile) {
+      return;
+    }
+    const shape = mouthShape(mood, isSpeaking(), this.time);
+    const ease = 1 - Math.exp(-MOUTH_RATE * delta);
+    this.mouthAmount += (shape.open - this.mouthAmount) * ease;
+    this.mouthWidth += (shape.width - this.mouthWidth) * ease;
+    open.visible = this.mouthAmount > 0.06;
+    open.scale.set(
+      MOUTH_WIDTH * this.mouthWidth,
+      MOUTH_HEIGHT * Math.max(0.06, this.mouthAmount),
+      MOUTH_DEPTH,
+    );
+    smile.visible = shape.smile !== 0 && !open.visible;
+    smile.rotation.z = shape.smile > 0 ? Math.PI : 0;
+    smile.position.y = shape.smile > 0 ? SMILE_Y : FROWN_Y;
+    smile.scale.setScalar(shape.smileSize);
   }
 
   /** Sets both eyes for the mood, with a blink every few seconds. */
