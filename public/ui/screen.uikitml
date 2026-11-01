@@ -13,8 +13,8 @@
   src/movable-panel.ts the Closer / Push back buttons in both headers, and
   src/puzzle.ts fills and colors the rest: prompt, question, score, timer,
   status, detail and the button labels. It shows the buttons that fit the
-  mode: practice offers Category, Start run, Next puzzle and Home, a run
-  offers Skip, the run-over summary offers Run again, Back to practice
+  mode: practice offers Category, Start run, Next puzzle and Home (and Try
+  again once a puzzle is lost), a run offers Skip, the run-over summary offers Run again, Back to practice
   and Home, and the How to play tour (src/tour.ts) offers Skip tour, plus
   Next step on a flat page, where there are no hands. "..." is only a
   placeholder.
@@ -301,6 +301,12 @@
               <ArrowRight></ArrowRight>
             </ButtonIcon>
             <ButtonLabel id="puzzle-next-label" class="button-label">...</ButtonLabel>
+          </Button>
+          <Button id="puzzle-retry" class="button" style="display: none">
+            <ButtonIcon>
+              <RotateCcw></RotateCcw>
+            </ButtonIcon>
+            <ButtonLabel id="puzzle.tryAgain" class="button-label">...</ButtonLabel>
           </Button>
           <Button id="puzzle-exit" class="button" style="display: none">
             <ButtonIcon>

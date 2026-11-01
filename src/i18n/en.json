@@ -26,7 +26,7 @@
   "puzzle.hint": "Hint:",
   "puzzle.next": "Next puzzle",
   "puzzle.skip": "Skip",
-  "puzzle.startRun": "Start a 3-minute run",
+  "puzzle.startRun": "Start a {n}-puzzle run",
   "puzzle.runAgain": "Run again",
   "puzzle.backToPractice": "Back to practice",
   "puzzle.home": "Home",
@@ -82,5 +82,9 @@
   "tour.pause": "Need a break?",
   "tour.pauseDetail": "Turn a palm up and hold it to pause.",
   "tour.done": "You're ready! Pick a world to play.",
-  "readAloud.blank": "blank"
+  "readAloud.blank": "blank",
+  "choices.last": "or {choice}",
+  "puzzle.tryAgain": "Try again",
+  "run.eyebrow": "RUN - PUZZLE {n} OF {total}",
+  "daily.eyebrow": "DAILY CHALLENGE - PUZZLE {n} OF {total}"
 }

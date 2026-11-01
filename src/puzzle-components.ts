@@ -2,10 +2,7 @@ import { createComponent, Types } from '@iwsdk/core';
 import { PuzzleCategory } from './categories.js';
 import { Move } from './moves.js';
 import { TourStep } from './tour.js';
-
-/** Seconds per practice puzzle, and for a whole run. */
-export const ROUND_SECONDS = 60;
-export const RUN_SECONDS = 180;
+import { RoundPhase } from './round-flow.js';
 
 export const PuzzleStatus = {
   Playing: 'playing',
@@ -22,7 +19,7 @@ export const PuzzleMode = {
   Home: 'home',
   /** Browse the bank one puzzle at a time, 60 s each, no score. */
   Practice: 'practice',
-  /** A 3-minute run: mixed puzzles, auto-advance on solve, score. */
+  /** A run: a set of puzzles, one try each, auto-advance, score. */
   Run: 'run',
   /** The run ended; the panel shows the summary. */
   RunOver: 'runOver',
@@ -37,7 +34,13 @@ export const PuzzleBoard = createComponent('PuzzleBoard', {
     enum: PuzzleStatus,
     default: PuzzleStatus.Playing,
   },
-  secondsLeft: { type: Types.Float32, default: ROUND_SECONDS },
+  // The answer clock: it runs only in the answering phase, from
+  // answerSeconds (which depends on the kind of puzzle, see round-flow.ts).
+  secondsLeft: { type: Types.Float32, default: 10 },
+  answerSeconds: { type: Types.Float32, default: 10 },
+  // Reading (the question types out and is read), choices (they appear and
+  // are named), answering (the clock runs).
+  phase: { type: Types.Enum, enum: RoundPhase, default: RoundPhase.Reading },
   wrongAnswers: { type: Types.Int8, default: 0 },
   // Right object, wrong move, this round (RUSH reacts to each one).
   wrongMoves: { type: Types.Int8, default: 0 },

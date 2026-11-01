@@ -12,8 +12,6 @@ import {
   PuzzleBoard,
   PuzzleMode,
   PuzzleStatus,
-  ROUND_SECONDS,
-  RUN_SECONDS,
 } from './puzzle-components.js';
 import { PUZZLES } from './puzzles.js';
 import { isSpeaking } from './read-aloud.js';
@@ -177,14 +175,17 @@ export class RushSystem extends createSystem({
     const lasting = baseMood(this.now);
     const mood = this.reaction ? reactionMood(this.reaction, lasting) : lasting;
 
-    // RUSH is the timer: the run's clock in a run, the puzzle's otherwise;
-    // at home and on the run summary no clock runs, so RUSH is full size.
+    // RUSH is the timer: the puzzle's answer clock (full while the question
+    // is read and the choices named); at home and on the run summary no
+    // clock runs, so RUSH is full size.
     const mode = this.now.mode;
-    const total = mode === PuzzleMode.Run ? RUN_SECONDS : ROUND_SECONDS;
     const fraction =
       mode === PuzzleMode.RunOver || mode === PuzzleMode.Home
         ? 1
-        : timeFraction(board.getValue(PuzzleBoard, 'secondsLeft') ?? 0, total);
+        : timeFraction(
+            board.getValue(PuzzleBoard, 'secondsLeft') ?? 0,
+            board.getValue(PuzzleBoard, 'answerSeconds') ?? 0,
+          );
     this.scale +=
       (rushScale(fraction) - this.scale) * (1 - Math.exp(-SCALE_RATE * delta));
     object.scale.setScalar(this.scale);

@@ -35,9 +35,21 @@ import {
   PuzzleMode,
   PuzzleStatus,
   PuzzleTile,
-  ROUND_SECONDS,
-  RUN_SECONDS,
 } from './puzzle-components.js';
+import {
+  answerSeconds,
+  choiceDone,
+  namesChoices,
+  readingDone,
+  RoundPhase,
+  type RoundPhaseName,
+  RUN_PUZZLES,
+  solvePoints,
+  TOUR_CLOCK_SECONDS,
+  typedWords,
+  typingPace,
+  UNNAMED_BEAT,
+} from './round-flow.js';
 import {
   judge,
   Move,
@@ -53,8 +65,10 @@ import {
   isReadAloudOn,
   isSpeaking,
   pauseSpeaking,
+  readAloudSpeed,
   speak,
   speakableBlanks,
+  speechPending,
   stopSpeaking,
 } from './read-aloud.js';
 import {
@@ -97,8 +111,6 @@ import { createPuzzleObject, disposePuzzleObject } from './scene-assets/object-o
 import { IMPORTED_OBJECTS, objectAssetId } from './imported-objects.js';
 import { type TileModel, tileModelFor } from './tile-models.js';
 
-// A solve scores its difficulty (1-5) times this.
-const POINTS_PER_DIFFICULTY = 10;
 // How long the Correct feedback stays up before a run auto-advances.
 const SOLVE_BEAT_SECONDS = 2.5;
 const BEST_SCORE_KEY = 'thinkrush.bestScore';
@@ -136,6 +148,12 @@ const OWNERS_TABLE_BACK = 0.03;
 const STOW_DROP = 2.5;
 // How long a wrongly picked orb glows amber.
 const ORB_FLASH_SECONDS = 0.7;
+// A choice pops up to full size this quickly as it appears.
+const POP_SECONDS = 0.28;
+// The most time one frame may count. A stall (the first frame after VR
+// starts can carry seconds) must not type a whole question at once or eat
+// the answer clock: the game waits for the player instead.
+const MAX_FRAME_SECONDS = 0.25;
 
 const STATUS_COLORS = {
   playing: '#dddfe3',
@@ -144,7 +162,13 @@ const STATUS_COLORS = {
   timeUp: '#ff8a7a',
 };
 const TIMER_COLORS = { normal: '#fafaf7', low: '#f5b14a' };
-const ORB_GLOW = { correct: '#1d5c2a', wrong: '#8a5a00', idle: '#000000' };
+const ORB_GLOW = {
+  correct: '#1d5c2a',
+  wrong: '#8a5a00',
+  // The orb RUSH is naming.
+  named: '#1b4a6b',
+  idle: '#000000',
+};
 
 const MOVE_KEYS: Record<MoveName, MessageKey> = {
   [Move.Drop]: 'move.drop',
@@ -218,6 +242,29 @@ export class PuzzleSystem extends createSystem({
   // current step (the clock demo, or the wait for a pause).
   private tourIndices = { visual: -1, riddle: -1 };
   private tourSeconds = 0;
+  // The round's presentation (src/round-flow.ts): characters of the
+  // question typed so far, seconds since the last word appeared, whether
+  // RUSH is reading it aloud, and the texts as last shown.
+  private typed = 0;
+  private sinceTyped = 0;
+  private voiced = false;
+  private readonly shownTyped = { prompt: '', question: '', status: '' };
+  // The choices in the order they appear (left to right), their names, the
+  // one being named, how long it has been, and whether RUSH says it.
+  private choiceOrder: Entity[] = [];
+  private choiceNames: string[] = [];
+  private choiceAt = -1;
+  private choiceTime = 0;
+  private choiceVoiced = false;
+  private readonly revealed = new Set<Entity>();
+  private readonly orbOptions: string[] = [];
+  // Choices popping up as they appear (seconds in), and their own scales.
+  private readonly popping = new Map<Entity, number>();
+  private readonly baseScales = new Map<Entity, Vector3>();
+  // Practice's Try again shows the hint from the start.
+  private hintShown = false;
+  // How many puzzles the current run (or Daily Challenge) has.
+  private runTotal = 0;
   private readonly tilePieces: (Piece | undefined)[] = [];
   // Height above the table where objects rest on the display stand.
   private standSeat = 0;
@@ -299,7 +346,8 @@ export class PuzzleSystem extends createSystem({
     | 'pauseHome'
     | 'eyebrow'
     | 'tourButton'
-    | 'tourSkip',
+    | 'tourSkip'
+    | 'retry',
     UIElement
   > = {
     prompt: null,
@@ -330,6 +378,7 @@ export class PuzzleSystem extends createSystem({
     eyebrow: null,
     tourButton: null,
     tourSkip: null,
+    retry: null,
   };
 
   init(): void {
@@ -352,6 +401,7 @@ export class PuzzleSystem extends createSystem({
       this.tileHomes[slot] = tile.object3D!.position.clone();
       this.tileRotations[slot] = tile.object3D!.quaternion.clone();
       this.tileLabels[slot] = findUIKitML(tile);
+      this.baseScales.set(tile, tile.object3D!.scale.clone());
       // Every choice sits on the same display stand, picked up with it;
       // a word card stands set into the stand's top. The imported stand
       // when it loaded, else the code-built one.
@@ -388,6 +438,7 @@ export class PuzzleSystem extends createSystem({
       this.orbBySlot[slot] = orb;
       this.orbHomes[slot] = orb.object3D!.position.clone();
       this.orbLabels[slot] = findUIKitML(orb);
+      this.baseScales.set(orb, orb.object3D!.scale.clone());
       // The orb glows green or amber on its own, so it gets its own
       // copies of the shared graphite material.
       this.orbMaterials[slot] = cloneMaterials(orb);
@@ -428,6 +479,7 @@ export class PuzzleSystem extends createSystem({
       eyebrow: panel?.getElementById('puzzle.eyebrow') ?? null,
       tourButton: panel?.getElementById('tour-button') ?? null,
       tourSkip: panel?.getElementById('tour-skip') ?? null,
+      retry: panel?.getElementById('puzzle-retry') ?? null,
     };
     const next = () => this.onNextPressed();
     const run = () => this.startRun();
@@ -440,6 +492,7 @@ export class PuzzleSystem extends createSystem({
     const quit = () => this.goHome();
     const tour = () => this.startTour();
     const skipTour = () => this.finishTour(false);
+    const retry = () => this.tryAgain();
     // On a flat page, Escape pauses and resumes (VR uses the palm or menu).
     const key = (event: KeyboardEvent) => {
       if (event.key === 'Escape') this.setPaused(!this.puzzlePaused());
@@ -484,6 +537,7 @@ export class PuzzleSystem extends createSystem({
     this.elements.pauseHome?.addEventListener('click', quit);
     this.elements.tourButton?.addEventListener('click', tour);
     this.elements.tourSkip?.addEventListener('click', skipTour);
+    this.elements.retry?.addEventListener('click', retry);
 
     this.cleanupFuncs.push(
       () => this.tileModels.forEach((model, slot) => {
@@ -516,6 +570,7 @@ export class PuzzleSystem extends createSystem({
       () => this.elements.pauseHome?.removeEventListener('click', quit),
       () => this.elements.tourButton?.removeEventListener('click', tour),
       () => this.elements.tourSkip?.removeEventListener('click', skipTour),
+      () => this.elements.retry?.removeEventListener('click', retry),
       () => document.removeEventListener('keydown', key),
       // Entering VR is the first moment a headset player can hear the
       // puzzle; a blurred session holds the voice along with the clock.
@@ -533,6 +588,11 @@ export class PuzzleSystem extends createSystem({
           // A device's first time in VR, at home, starts How to play.
           if (startsTourOnEnter(readTourSeen(), this.mode())) {
             this.startTour();
+          } else if (this.presenting()) {
+            // Now the headset can hear it: the question starts over, and
+            // any choices already out wait for it again.
+            this.hideChoices();
+            this.beginReading();
           } else {
             this.readPuzzle(false);
           }
@@ -554,8 +614,12 @@ export class PuzzleSystem extends createSystem({
         this.settling.delete(tile);
         this.liftTime.delete(tile);
         this.showTime.delete(tile);
+        this.endPop(tile);
         if (this.mode() === PuzzleMode.Tour) {
           this.advanceTour('grabbed');
+        } else if (this.phase() === RoundPhase.Choices) {
+          // A choice in hand: no need to hear the rest named.
+          this.beginAnswering();
         }
       }),
       this.queries.rushes.subscribe('qualify', (entity) => {
@@ -613,11 +677,12 @@ export class PuzzleSystem extends createSystem({
     table.add(model);
   }
 
-  update(delta: number): void {
+  update(frameSeconds: number): void {
     const board = this.board;
     if (!board) {
       return;
     }
+    const delta = Math.min(frameSeconds, MAX_FRAME_SECONDS);
 
     const mode = this.mode();
     const state = this.world.visibilityState.peek();
@@ -637,13 +702,26 @@ export class PuzzleSystem extends createSystem({
       this.render();
     }
     const awake = state !== VisibilityState.VisibleBlurred && !paused;
+    // The question types out and the choices appear, then the answer clock
+    // runs: in a run on any page, in practice only in VR (tiles need hands).
+    const phase = this.phase();
+    const presenting =
+      awake &&
+      (mode === PuzzleMode.Practice || mode === PuzzleMode.Run) &&
+      this.status() === PuzzleStatus.Playing;
+    if (presenting && phase === RoundPhase.Reading) {
+      this.updateReading(delta);
+    } else if (presenting && phase === RoundPhase.Choices) {
+      this.updateChoices(delta);
+    }
     const clockRunning =
-      mode === PuzzleMode.Run
+      phase === RoundPhase.Answering &&
+      this.status() === PuzzleStatus.Playing &&
+      (mode === PuzzleMode.Run
         ? awake
         : mode === PuzzleMode.Practice &&
           !paused &&
-          this.status() === PuzzleStatus.Playing &&
-          state === VisibilityState.Visible;
+          state === VisibilityState.Visible);
     if (clockRunning) {
       const left = Math.max(
         0,
@@ -651,17 +729,12 @@ export class PuzzleSystem extends createSystem({
       );
       board.setValue(PuzzleBoard, 'secondsLeft', left);
       if (left === 0) {
-        if (mode === PuzzleMode.Run) {
-          this.endRun();
-        } else {
-          board.setValue(PuzzleBoard, 'status', PuzzleStatus.TimeUp);
-          this.revealCorrectOrb();
-          this.render();
-        }
+        this.onTimeUp();
       } else {
         this.renderTimer();
       }
     }
+    this.updatePops(delta);
 
     if (awake && this.advanceIn > 0) {
       this.advanceIn -= delta;
@@ -728,8 +801,12 @@ export class PuzzleSystem extends createSystem({
     this.objectTable?.update(delta);
   }
 
-  /** Loads puzzle `index` (wrapping), resets the timer and the pieces. */
-  private startRound(index: number): void {
+  /**
+   * Loads puzzle `index` (wrapping), resets the clock and the pieces, and
+   * starts presenting it: the question first, the choices after. `retry`
+   * (practice's Try again) keeps the move and shows the hint.
+   */
+  private startRound(index: number, retry = false): void {
     const board = this.board;
     if (!board) {
       return;
@@ -746,10 +823,21 @@ export class PuzzleSystem extends createSystem({
     board.setValue(PuzzleBoard, 'puzzleIndex', wrapped);
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
     board.setValue(PuzzleBoard, 'paused', false);
-    if (this.mode() !== PuzzleMode.Run) {
-      // A run keeps its global clock; practice restarts the per-puzzle one.
-      board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
-    }
+    // Each puzzle has its own answer clock, sized for its kind. The tour
+    // shows one in its clock step but never runs it.
+    const inTour = this.mode() === PuzzleMode.Tour;
+    const seconds = inTour ? TOUR_CLOCK_SECONDS : answerSeconds(puzzle.type);
+    board.setValue(PuzzleBoard, 'answerSeconds', seconds);
+    board.setValue(PuzzleBoard, 'secondsLeft', seconds);
+    // The tour puts its choices out at once; anything else is presented.
+    board.setValue(
+      PuzzleBoard,
+      'phase',
+      inTour ? RoundPhase.Answering : RoundPhase.Reading,
+    );
+    this.hintShown = retry;
+    this.endPops();
+    this.revealed.clear();
     board.setValue(PuzzleBoard, 'wrongAnswers', 0);
     board.setValue(PuzzleBoard, 'wrongMoves', 0);
     this.advanceIn = 0;
@@ -758,7 +846,10 @@ export class PuzzleSystem extends createSystem({
     this.liftTime.clear();
     this.showTime.clear();
     this.answeredInHold.clear();
-    if (this.isVisual && this.mode() !== PuzzleMode.Tour) {
+    if (this.isVisual && !inTour && retry) {
+      // Try again keeps the move it asked for.
+      this.moveIsNew = false;
+    } else if (this.isVisual && !inTour) {
       // The game, not the puzzle, picks the move, one new move at a time.
       // (The tour's picture puzzle is always a drop and is not counted.)
       const seen = readMovesSeen();
@@ -817,22 +908,305 @@ export class PuzzleSystem extends createSystem({
       );
       this.tileWords[slot] = this.isVisual ? label : '';
       this.setTileModel(slot);
-      this.place(tile, this.tileHomes[slot], usesTiles);
+      // Out at once in the tour; otherwise once the question is read.
+      this.place(tile, this.tileHomes[slot], usesTiles && inTour);
+      if (usesTiles && inTour) this.revealed.add(tile);
       tile.object3D!.quaternion.copy(this.tileRotations[slot]);
     });
 
     const options = usesTiles ? [] : shuffled(puzzle.options);
     this.orbBySlot.forEach((orb, slot) => {
+      this.orbOptions[slot] = options[slot] ?? '';
       orb.setValue(AnswerOrb, 'correct', options[slot] === puzzle.answer);
       this.orbLabels[slot]
         ?.getElementById('orb-text')
         ?.setProperties({ text: options[slot] ?? '' });
-      this.place(orb, this.orbHomes[slot], !usesTiles);
+      this.place(orb, this.orbHomes[slot], !usesTiles && inTour);
+      if (!usesTiles && inTour) this.revealed.add(orb);
       this.setOrbGlow(slot, ORB_GLOW.idle);
     });
     this.noVoice = false;
+    if (inTour) {
+      this.render();
+      this.readPuzzle(false);
+    } else {
+      this.beginReading();
+    }
+  }
+
+  /** Whether a puzzle is still being read or its choices named. */
+  private presenting(): boolean {
+    const mode = this.mode();
+    return (
+      (mode === PuzzleMode.Practice || mode === PuzzleMode.Run) &&
+      this.status() === PuzzleStatus.Playing &&
+      this.phase() !== RoundPhase.Answering
+    );
+  }
+
+  /** Puts any choices already out back out of sight. */
+  private hideChoices(): void {
+    this.endPops();
+    for (const choice of this.revealed) {
+      const tileSlot = choice.hasComponent(PuzzleTile)
+        ? (choice.getValue(PuzzleTile, 'slot') ?? 0)
+        : -1;
+      const home =
+        tileSlot >= 0
+          ? this.tileHomes[tileSlot]
+          : this.orbHomes[choice.getValue(AnswerOrb, 'slot') ?? 0];
+      this.place(choice, home, false);
+    }
+    this.revealed.clear();
+    this.orbBySlot.forEach((_, slot) => this.setOrbGlow(slot, ORB_GLOW.idle));
+  }
+
+  private phase(): RoundPhaseName {
+    return (this.board?.getValue(PuzzleBoard, 'phase') ??
+      RoundPhase.Answering) as RoundPhaseName;
+  }
+
+  /** The question starts typing out, and RUSH starts reading it. */
+  private beginReading(): void {
+    this.board?.setValue(PuzzleBoard, 'phase', RoundPhase.Reading);
+    this.typed = 0;
+    this.sinceTyped = 0;
+    // Whatever RUSH was saying (a skipped puzzle's names) stops here.
+    stopSpeaking();
     this.render();
-    this.readPuzzle(false);
+    this.voiced = this.readPuzzle(false);
+  }
+
+  /** The texts the question types out, in order. */
+  private readingParts(): { prompt: string; question: string; status: string } {
+    return {
+      prompt: this.puzzle?.prompt ?? '',
+      question: this.puzzle?.question ?? '',
+      status: this.instruction(),
+    };
+  }
+
+  /** Each part as far as it has been typed, a whole word at a time. */
+  private typedParts(): { prompt: string; question: string; status: string } {
+    const parts = this.readingParts();
+    // One character's pause between parts, so each ends on a whole word.
+    const afterPrompt = this.typed - parts.prompt.length - 1;
+    const afterQuestion = afterPrompt - parts.question.length - (parts.question ? 1 : 0);
+    return {
+      prompt: typedWords(parts.prompt, this.typed),
+      question: typedWords(parts.question, afterPrompt),
+      status: typedWords(parts.status, afterQuestion),
+    };
+  }
+
+  /** Types the question on; when it is all out and read, the choices come. */
+  private updateReading(delta: number): void {
+    const parts = this.readingParts();
+    const length =
+      parts.prompt.length + parts.question.length + parts.status.length + 2;
+    if (this.typed < length) {
+      this.typed += typingPace(readAloudSpeed()) * delta;
+      this.renderTyping();
+      return;
+    }
+    this.sinceTyped += delta;
+    if (readingDone(true, this.sinceTyped, this.voiced && speechPending())) {
+      this.beginChoices();
+    }
+  }
+
+  /** Rewrites the typed lines when a new word has appeared. */
+  private renderTyping(): void {
+    const shown = this.typedParts();
+    const accent = this.accent();
+    if (shown.prompt !== this.shownTyped.prompt) {
+      this.shownTyped.prompt = shown.prompt;
+      this.elements.prompt?.setProperties({ text: shown.prompt || ' ' });
+    }
+    if (shown.question !== this.shownTyped.question) {
+      this.shownTyped.question = shown.question;
+      this.elements.question?.setProperties({
+        text: shown.question || ' ',
+        display: shown.question ? 'flex' : 'none',
+        color: accent,
+      });
+    }
+    if (shown.status !== this.shownTyped.status) {
+      this.shownTyped.status = shown.status;
+      this.elements.status?.setProperties({
+        text: shown.status || ' ',
+        color: accent,
+      });
+    }
+  }
+
+  /**
+   * The choices come out one at a time, left to right, while RUSH names
+   * each ("a mirror, a window, or a camera"); pattern and missing pieces
+   * have no names, so they come out together.
+   */
+  private beginChoices(): void {
+    const puzzle = this.puzzle;
+    const board = this.board;
+    if (!puzzle || !board) return;
+    board.setValue(PuzzleBoard, 'phase', RoundPhase.Choices);
+    this.render();
+    const usesTiles = this.isVisual || this.isPattern || this.isObject;
+    this.choiceOrder = usesTiles ? [...this.tileBySlot] : [...this.orbBySlot];
+    this.choiceNames = usesTiles ? [...this.tileWords] : [...this.orbOptions];
+    this.choiceTime = 0;
+    if (!namesChoices(puzzle.type)) {
+      this.choiceOrder.forEach((choice) => this.reveal(choice));
+      this.choiceAt = this.choiceOrder.length;
+      return;
+    }
+    this.choiceAt = -1;
+    this.nextChoice();
+  }
+
+  /** Brings out the next choice and has RUSH name it. */
+  private nextChoice(): void {
+    const puzzle = this.puzzle!;
+    const previous = this.choiceOrder[this.choiceAt];
+    if (previous?.hasComponent(AnswerOrb)) {
+      this.setOrbGlow(previous.getValue(AnswerOrb, 'slot') ?? 0, ORB_GLOW.idle);
+    }
+    this.choiceAt += 1;
+    this.choiceTime = 0;
+    const choice = this.choiceOrder[this.choiceAt];
+    if (!choice) {
+      this.beginAnswering();
+      return;
+    }
+    this.reveal(choice);
+    if (choice.hasComponent(AnswerOrb)) {
+      this.setOrbGlow(choice.getValue(AnswerOrb, 'slot') ?? 0, ORB_GLOW.named);
+    }
+    const name = this.choiceNames[this.choiceAt] ?? '';
+    const last =
+      this.choiceOrder.length > 1 && this.choiceAt === this.choiceOrder.length - 1;
+    const said = last ? fill(t('choices.last'), { choice: name }) : name;
+    this.choiceVoiced =
+      isReadAloudOn() && name.length > 0 && speak(said, puzzle.lang);
+  }
+
+  private updateChoices(delta: number): void {
+    this.choiceTime += delta;
+    if (this.choiceAt >= this.choiceOrder.length) {
+      // Unnamed pieces: a moment to see them, then the clock.
+      if (this.choiceTime >= UNNAMED_BEAT) this.beginAnswering();
+      return;
+    }
+    if (
+      choiceDone(
+        this.choiceTime,
+        this.choiceVoiced,
+        this.choiceVoiced && speechPending(),
+      )
+    ) {
+      this.nextChoice();
+    }
+  }
+
+  /**
+   * The answer clock starts: when RUSH has named the last choice, or as
+   * soon as the player reaches for one (the rest then come out at once).
+   */
+  private beginAnswering(): void {
+    const board = this.board;
+    if (!board || this.phase() === RoundPhase.Answering) return;
+    const early =
+      this.phase() === RoundPhase.Reading ||
+      this.choiceAt < this.choiceOrder.length - 1;
+    if (early) stopSpeaking();
+    for (const choice of this.choiceOrder) this.reveal(choice);
+    this.orbBySlot.forEach((orb, slot) => {
+      if (!this.orbFlash.has(slot)) this.setOrbGlow(slot, ORB_GLOW.idle);
+    });
+    board.setValue(PuzzleBoard, 'phase', RoundPhase.Answering);
+    this.render();
+  }
+
+  /** Shows a choice at its place, popping up from small. */
+  private reveal(choice: Entity): void {
+    if (this.revealed.has(choice)) return;
+    this.revealed.add(choice);
+    const tileSlot = choice.hasComponent(PuzzleTile)
+      ? (choice.getValue(PuzzleTile, 'slot') ?? 0)
+      : -1;
+    const home =
+      tileSlot >= 0
+        ? this.tileHomes[tileSlot]
+        : this.orbHomes[choice.getValue(AnswerOrb, 'slot') ?? 0];
+    this.place(choice, home, true);
+    this.popping.set(choice, 0);
+    choice.object3D!.scale.setScalar(0.001);
+  }
+
+  /** Grows each appearing choice to its full size, with a little overshoot. */
+  private updatePops(delta: number): void {
+    for (const [choice, seconds] of this.popping) {
+      const t = Math.min(1, (seconds + delta) / POP_SECONDS);
+      const base = this.baseScales.get(choice);
+      if (t >= 1 || !base) {
+        this.endPop(choice);
+        continue;
+      }
+      this.popping.set(choice, seconds + delta);
+      // Ease out with a slight overshoot (back easing).
+      const k = 1.70158;
+      const u = t - 1;
+      const grow = 1 + (k + 1) * u * u * u + k * u * u;
+      choice.object3D!.scale.copy(base).multiplyScalar(Math.max(0.001, grow));
+    }
+  }
+
+  /** Puts a choice at its own scale at once (picked up, or a new round). */
+  private endPop(choice: Entity): void {
+    if (!this.popping.delete(choice)) return;
+    const base = this.baseScales.get(choice);
+    if (base) choice.object3D!.scale.copy(base);
+  }
+
+  private endPops(): void {
+    for (const choice of [...this.popping.keys()]) this.endPop(choice);
+  }
+
+  /** The answer clock ran out: the puzzle is lost and the answer shown. */
+  private onTimeUp(): void {
+    const board = this.board!;
+    stopSpeaking();
+    board.setValue(PuzzleBoard, 'status', PuzzleStatus.TimeUp);
+    this.revealCorrectOrb();
+    if (this.mode() === PuzzleMode.Run) {
+      this.advanceIn = SOLVE_BEAT_SECONDS;
+    }
+    this.render();
+  }
+
+  /** Practice's Try again: the same puzzle afresh, with its hint showing. */
+  private tryAgain(): void {
+    const board = this.board;
+    if (!board || this.mode() !== PuzzleMode.Practice) return;
+    this.startRound(board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0, true);
+  }
+
+  /** The line under the question: how to answer. */
+  private instruction(): string {
+    return this.isVisual
+      ? this.moveText()
+      : this.isPattern
+        ? t('pattern.drop')
+        : this.isObject
+          ? t('object.drop')
+          : t('puzzle.instructionsOrbs');
+  }
+
+  private accent(): string {
+    return (
+      CATEGORY_ACCENTS[this.puzzle?.type as Category] ??
+      CATEGORY_ACCENTS[PuzzleCategory.All]
+    );
   }
 
   /**
@@ -840,7 +1214,7 @@ export class PuzzleSystem extends createSystem({
    * is on, or whenever the player presses "Read it out". The player still
    * answers by choosing a tile or an orb.
    */
-  private readPuzzle(asked: boolean): void {
+  private readPuzzle(asked: boolean): boolean {
     const puzzle = this.puzzle;
     if (
       !puzzle ||
@@ -848,7 +1222,7 @@ export class PuzzleSystem extends createSystem({
       this.mode() === PuzzleMode.Home ||
       (!asked && !isReadAloudOn())
     ) {
-      return;
+      return false;
     }
     // The move is part of what to listen for. Its verb is in capitals on
     // the panel; spoken, it is a plain word (some voices spell capitals).
@@ -870,6 +1244,7 @@ export class PuzzleSystem extends createSystem({
       this.noVoice = !spoken;
       this.render();
     }
+    return spoken;
   }
 
   private onOrbPressed(orb: Entity): void {
@@ -881,10 +1256,13 @@ export class PuzzleSystem extends createSystem({
       this.isObject ||
       this.status() !== PuzzleStatus.Playing ||
       this.mode() === PuzzleMode.Home ||
-      this.puzzlePaused()
+      this.puzzlePaused() ||
+      this.phase() === RoundPhase.Reading
     ) {
       return;
     }
+    // Picked while RUSH was still naming them: the answer counts.
+    this.beginAnswering();
     const slot = orb.getValue(AnswerOrb, 'slot') ?? 0;
     if (orb.getValue(AnswerOrb, 'correct')) {
       this.orbFlash.delete(slot);
@@ -1034,12 +1412,16 @@ export class PuzzleSystem extends createSystem({
       'wrongMoves',
       (board.getValue(PuzzleBoard, 'wrongMoves') ?? 0) + 1,
     );
-    if (this.mode() === PuzzleMode.Run) {
-      stopSpeaking();
-      this.board!.setValue(PuzzleBoard, 'status', PuzzleStatus.WrongMove);
-      this.advanceIn = SOLVE_BEAT_SECONDS;
-    } else {
+    if (this.mode() === PuzzleMode.Tour) {
+      // The tour is for learning: say so and let them try again.
       this.wrongMoveShown = true;
+      return;
+    }
+    // One try: the right object with the wrong move loses the puzzle.
+    stopSpeaking();
+    this.board!.setValue(PuzzleBoard, 'status', PuzzleStatus.WrongMove);
+    if (this.mode() === PuzzleMode.Run) {
+      this.advanceIn = SOLVE_BEAT_SECONDS;
     }
   }
 
@@ -1049,13 +1431,18 @@ export class PuzzleSystem extends createSystem({
    * never pays; practice keeps its free retries, with the hint.
    */
   private onWrongPick(): void {
-    if (this.mode() !== PuzzleMode.Run) {
+    if (this.mode() === PuzzleMode.Tour) {
+      // The tour keeps free retries, with the hint.
       return;
     }
+    // One try: a wrong pick loses the puzzle and shows the answer. A run
+    // moves on; practice offers Try again.
     stopSpeaking();
     this.board!.setValue(PuzzleBoard, 'status', PuzzleStatus.WrongPick);
     this.revealCorrectOrb();
-    this.advanceIn = SOLVE_BEAT_SECONDS;
+    if (this.mode() === PuzzleMode.Run) {
+      this.advanceIn = SOLVE_BEAT_SECONDS;
+    }
   }
 
   /** The move line under the clue, with "New move!" when it is new. */
@@ -1247,7 +1634,10 @@ export class PuzzleSystem extends createSystem({
         PuzzleBoard,
         'score',
         (board.getValue(PuzzleBoard, 'score') ?? 0) +
-          this.puzzle.difficulty * POINTS_PER_DIFFICULTY,
+          solvePoints(
+            this.puzzle.difficulty,
+            board.getValue(PuzzleBoard, 'secondsLeft') ?? 0,
+          ),
       );
       board.setValue(
         PuzzleBoard,
@@ -1287,9 +1677,9 @@ export class PuzzleSystem extends createSystem({
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.Run);
     board.setValue(PuzzleBoard, 'score', 0);
     board.setValue(PuzzleBoard, 'solved', 0);
-    board.setValue(PuzzleBoard, 'secondsLeft', RUN_SECONDS);
-    // The run draws only from the chosen category.
+    // A set of puzzles from the chosen category, shuffled.
     this.runOrder = shuffled(categoryIndices(PUZZLES, this.category()));
+    this.runTotal = Math.min(RUN_PUZZLES, this.runOrder.length);
     this.runPointer = 0;
     this.startRound(this.runOrder[0]);
   }
@@ -1298,14 +1688,10 @@ export class PuzzleSystem extends createSystem({
   private advanceRun(): void {
     this.advanceIn = 0;
     this.runPointer += 1;
-    if (this.runPointer >= this.runOrder.length && this.dailyDay) {
-      // The Daily Challenge ends once all its puzzles are played.
+    // A run (or the Daily Challenge) ends once all its puzzles are played.
+    if (this.runPointer >= this.runTotal) {
       this.endRun();
       return;
-    }
-    if (this.runPointer >= this.runOrder.length) {
-      this.runOrder = shuffled(this.runOrder);
-      this.runPointer = 0;
     }
     this.startRound(this.runOrder[this.runPointer]);
   }
@@ -1316,7 +1702,6 @@ export class PuzzleSystem extends createSystem({
     stopSpeaking();
     this.advanceIn = 0;
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.RunOver);
-    board.setValue(PuzzleBoard, 'secondsLeft', 0);
     this.revealCorrectOrb();
     const score = board.getValue(PuzzleBoard, 'score') ?? 0;
     if (this.dailyDay) {
@@ -1348,8 +1733,8 @@ export class PuzzleSystem extends createSystem({
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.Run);
     board.setValue(PuzzleBoard, 'score', 0);
     board.setValue(PuzzleBoard, 'solved', 0);
-    board.setValue(PuzzleBoard, 'secondsLeft', RUN_SECONDS);
     this.runOrder = order;
+    this.runTotal = order.length;
     this.runPointer = 0;
     this.startRound(order[0]);
   }
@@ -1411,7 +1796,10 @@ export class PuzzleSystem extends createSystem({
     this.dailyDay = undefined;
     board.setValue(PuzzleBoard, 'mode', PuzzleMode.Home);
     board.setValue(PuzzleBoard, 'status', PuzzleStatus.Playing);
-    board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
+    // No clock at home: RUSH rests full size.
+    board.setValue(PuzzleBoard, 'answerSeconds', TOUR_CLOCK_SECONDS);
+    board.setValue(PuzzleBoard, 'secondsLeft', TOUR_CLOCK_SECONDS);
+    board.setValue(PuzzleBoard, 'phase', RoundPhase.Answering);
     board.setValue(PuzzleBoard, 'wrongAnswers', 0);
     board.setValue(PuzzleBoard, 'wrongMoves', 0);
     this.advanceIn = 0;
@@ -1421,6 +1809,8 @@ export class PuzzleSystem extends createSystem({
 
   /** Stows the tiles and orbs below the floor and puts the tray back. */
   private clearTable(): void {
+    this.endPops();
+    this.revealed.clear();
     this.settling.clear();
     this.orbFlash.clear();
     this.tileBySlot.forEach((tile, slot) =>
@@ -1492,7 +1882,9 @@ export class PuzzleSystem extends createSystem({
     }
     board.setValue(PuzzleBoard, 'tourStep', step);
     // RUSH stays full size: the clock only moves in the clock demo.
-    board.setValue(PuzzleBoard, 'secondsLeft', ROUND_SECONDS);
+    board.setValue(PuzzleBoard, 'answerSeconds', TOUR_CLOCK_SECONDS);
+    board.setValue(PuzzleBoard, 'secondsLeft', TOUR_CLOCK_SECONDS);
+    board.setValue(PuzzleBoard, 'phase', RoundPhase.Answering);
     this.tourSeconds = 0;
     this.advanceIn = 0;
     if (step === TourStep.Grab) {
@@ -1524,7 +1916,7 @@ export class PuzzleSystem extends createSystem({
       this.board!.setValue(
         PuzzleBoard,
         'secondsLeft',
-        ROUND_SECONDS * clockDemoFraction(this.tourSeconds),
+        TOUR_CLOCK_SECONDS * clockDemoFraction(this.tourSeconds),
       );
       this.renderTimer();
       if (clockDemoDone(this.tourSeconds, isSpeaking())) {
@@ -1698,18 +2090,14 @@ export class PuzzleSystem extends createSystem({
     const tour = inTour ? this.tourLines() : undefined;
     const tourStep = this.tourStep();
 
-    let statusText = tour
-      ? tour.status
-      : this.isVisual
-      ? this.moveText()
-      : this.isPattern
-        ? t('pattern.drop')
-        : this.isObject
-          ? t('object.drop')
-          : t('puzzle.instructionsOrbs');
-    const accent = CATEGORY_ACCENTS[puzzle.type as Category] ?? CATEGORY_ACCENTS[PuzzleCategory.All];
+    let statusText = tour ? tour.status : this.instruction();
+    const accent = this.accent();
     let statusColor = accent;
-    let detail = '';
+    // Practice's Try again shows the hint while the puzzle is in play.
+    let detail =
+      this.hintShown && status === PuzzleStatus.Playing
+        ? `${t('puzzle.hint')} ${puzzle.hint}`
+        : '';
     if (mode === PuzzleMode.RunOver && this.dailyDay) {
       const solved = board.getValue(PuzzleBoard, 'solved') ?? 0;
       const record = readDaily();
@@ -1717,7 +2105,7 @@ export class PuzzleSystem extends createSystem({
       statusColor = STATUS_COLORS.solved;
       detail =
         `${t('puzzle.score')}: ${score}. ` +
-        `${t('puzzle.solvedLabel')}: ${solved}/${this.runOrder.length}. ` +
+        `${t('puzzle.solvedLabel')}: ${solved}/${this.runTotal}. ` +
         `${t('daily.streak')}: ${currentStreak(record, this.dailyDay)}. ` +
         `${t('puzzle.best')}: ${record.bestScore}.`;
     } else if (mode === PuzzleMode.RunOver) {
@@ -1726,7 +2114,7 @@ export class PuzzleSystem extends createSystem({
       statusColor = STATUS_COLORS.timeUp;
       detail =
         `${t('puzzle.score')}: ${score}. ` +
-        `${t('puzzle.solvedLabel')}: ${solved}. ` +
+        `${t('puzzle.solvedLabel')}: ${solved}/${this.runTotal}. ` +
         `${t('puzzle.best')}: ${Math.max(score, readBestScore())}.`;
     } else if (status === PuzzleStatus.Solved) {
       statusText = t('puzzle.correct');
@@ -1755,22 +2143,44 @@ export class PuzzleSystem extends createSystem({
       detail = `${t('puzzle.hint')} ${puzzle.hint}`;
     }
 
+    // Which puzzle of the run, or the tour's step.
+    const place = { n: this.runPointer + 1, total: this.runTotal };
     this.elements.eyebrow?.setProperties({
       text: inTour
         ? fill(t('tour.eyebrow'), {
             n: tourStepNumber(tourStep),
             total: TOUR_STEP_COUNT,
           })
-        : t('puzzle.eyebrow'),
+        : mode === PuzzleMode.Run && this.dailyDay
+          ? fill(t('daily.eyebrow'), place)
+          : mode === PuzzleMode.Run
+            ? fill(t('run.eyebrow'), place)
+            : t('puzzle.eyebrow'),
     });
-    this.elements.prompt?.setProperties({ text: tour?.prompt ?? puzzle.prompt });
+    // While RUSH reads, the question types out a word at a time.
+    const typing =
+      !inTour &&
+      status === PuzzleStatus.Playing &&
+      (mode === PuzzleMode.Practice || mode === PuzzleMode.Run) &&
+      this.phase() === RoundPhase.Reading;
+    const shown = typing
+      ? this.typedParts()
+      : {
+          prompt: tour?.prompt ?? puzzle.prompt,
+          question: inTour ? '' : (puzzle.question ?? ''),
+          status: statusText,
+        };
+    this.shownTyped.prompt = shown.prompt;
+    this.shownTyped.question = shown.question;
+    this.shownTyped.status = shown.status;
+    this.elements.prompt?.setProperties({ text: shown.prompt || ' ' });
     this.elements.question?.setProperties({
-      text: puzzle.question ?? ' ',
-      display: puzzle.question && !inTour ? 'flex' : 'none',
+      text: shown.question || ' ',
+      display: shown.question ? 'flex' : 'none',
       color: accent,
     });
     this.elements.status?.setProperties({
-      text: statusText,
+      text: shown.status || ' ',
       color: statusColor,
     });
     this.elements.detail?.setProperties({
@@ -1807,7 +2217,15 @@ export class PuzzleSystem extends createSystem({
       text:
         mode === PuzzleMode.RunOver
           ? t('puzzle.runAgain')
-          : t('puzzle.startRun'),
+          : fill(t('puzzle.startRun'), { n: RUN_PUZZLES }),
+    });
+    // Practice: a lost puzzle can be tried again (with its hint).
+    const lost =
+      status === PuzzleStatus.TimeUp ||
+      status === PuzzleStatus.WrongPick ||
+      status === PuzzleStatus.WrongMove;
+    this.elements.retry?.setProperties({
+      display: mode === PuzzleMode.Practice && lost ? 'flex' : 'none',
     });
     // Next is always available in practice: on the desktop page the timer
     // never runs and tiles need hands, so a round there never ends. In a

@@ -23,9 +23,8 @@ import {
   PuzzleBoard,
   PuzzleMode,
   PuzzleStatus,
-  ROUND_SECONDS,
-  RUN_SECONDS,
 } from './puzzle-components.js';
+import { RoundPhase } from './round-flow.js';
 import {
   barSeconds,
   CUES,
@@ -101,7 +100,7 @@ export class SoundSystem extends createSystem({
   private playing?: LoopPlaying;
   // A level change is booked for this time on the audio clock.
   private switchAt = 0;
-  private mood: 'play' | 'soft' | 'off' = 'off';
+  private mood: 'play' | 'soft' | 'background' | 'off' = 'off';
   private ducked = false;
   private lastSpokeAt = -Infinity;
   private board?: Entity;
@@ -228,29 +227,37 @@ export class SoundSystem extends createSystem({
     }
     const time = context.currentTime;
 
-    // One gentle dip for the whole read-aloud, held through its pauses.
-    const speaking = isSpeaking();
-    if (speaking) this.lastSpokeAt = time;
-    const ducked = duckHeld(speaking, this.lastSpokeAt, time);
-    if (ducked !== this.ducked) {
-      this.ducked = ducked;
-      this.duckGain!.gain.setTargetAtTime(ducked ? DUCK.gain : 1, time, ducked ? 0.12 : 0.5);
-    }
-
+    // RUSH reading a question or naming its choices: the music sits in
+    // the background until the answer clock starts.
+    const reading =
+      board.getValue(PuzzleBoard, 'phase') !== RoundPhase.Answering;
     const mood = musicMood(
       this.now.mode,
       this.now.status,
       board.getValue(PuzzleBoard, 'paused') ?? false,
       isSoundOn(),
+      reading,
     );
     if (mood !== this.mood) {
       this.mood = mood;
       this.moodGain!.gain.setTargetAtTime(MOOD_GAIN[mood], time, mood === 'off' ? 0.3 : 0.25);
     }
 
+    // One gentle dip for any other read-aloud (Read it out, the tour),
+    // held through its pauses; in the background mood the music is already
+    // low, so it does not dip again.
+    const speaking = isSpeaking();
+    if (speaking) this.lastSpokeAt = time;
+    const ducked =
+      mood !== 'background' && duckHeld(speaking, this.lastSpokeAt, time);
+    if (ducked !== this.ducked) {
+      this.ducked = ducked;
+      this.duckGain!.gain.setTargetAtTime(ducked ? DUCK.gain : 1, time, ducked ? 0.12 : 0.5);
+    }
+
     const fraction = timeFraction(
       board.getValue(PuzzleBoard, 'secondsLeft') ?? 0,
-      this.now.mode === PuzzleMode.Run ? RUN_SECONDS : ROUND_SECONDS,
+      board.getValue(PuzzleBoard, 'answerSeconds') ?? 0,
     );
     this.followLevel(musicLevel(fraction, this.now.mode === PuzzleMode.Home), time);
   }
