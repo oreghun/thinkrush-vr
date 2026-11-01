@@ -3,13 +3,19 @@ import { test } from 'node:test';
 import {
   nextReadAloudSpeed,
   pickVoice,
+  RUSH_PITCH,
   sentences,
+  soundsFemale,
   speakableBlanks,
   type VoiceInfo,
 } from '../src/read-aloud.ts';
 
-const voice = (lang: string, localService: boolean, isDefault = false) =>
-  ({ lang, localService, default: isDefault }) as VoiceInfo;
+const voice = (
+  lang: string,
+  localService: boolean,
+  isDefault = false,
+  name = 'Voice',
+) => ({ lang, localService, default: isDefault, name }) as VoiceInfo;
 
 test('only on-device voices are used', () => {
   assert.equal(pickVoice([voice('en-US', false)], 'en'), -1);
@@ -29,6 +35,26 @@ test('the voice must speak the language', () => {
 test("the device's default voice wins among matches", () => {
   const voices = [voice('en-GB', true), voice('en-US', true, true)];
   assert.equal(pickVoice(voices, 'en'), 1);
+});
+
+test("RUSH prefers a woman's voice, still only on the device", () => {
+  const voices = [
+    voice('en-US', true, true, 'Daniel'),
+    voice('en-GB', true, false, 'Serena'),
+    voice('en-US', false, false, 'Online Female'),
+  ];
+  assert.equal(pickVoice(voices, 'en'), 1);
+  assert.equal(soundsFemale({ name: 'Microsoft Zira Desktop' }), true);
+  assert.equal(soundsFemale({ name: 'English United States Female' }), true);
+  assert.equal(soundsFemale({ name: 'Alex' }), false);
+  // A name that merely contains a woman's name is not enough.
+  assert.equal(soundsFemale({ name: 'Bavarian' }), false);
+  // Among two women's voices the default still wins.
+  assert.equal(
+    pickVoice([voice('en-GB', true, false, 'Kate'), voice('en-AU', true, true, 'Karen')], 'en'),
+    1,
+  );
+  assert.ok(RUSH_PITCH > 1 && RUSH_PITCH <= 2);
 });
 
 test('text is split into sentences', () => {

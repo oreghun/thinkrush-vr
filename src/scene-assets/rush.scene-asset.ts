@@ -11,13 +11,18 @@ import {
 } from '@iwsdk/core';
 
 /**
- * RUSH, the companion: a glowing sphere with two expressive eyes.
+ * RUSH, the companion: a glowing sphere with two expressive eyes and a
+ * mouth.
  *
  * Origin: the sphere's centre; +Z is the face (RushSystem turns it to the
  * player). Radius RUSH_RADIUS, plus a soft halo a little wider. Named parts
  * for RushSystem: Rush/Body, Rush/Halo, Rush/EyeL and Rush/EyeR, each eye
  * holding Open (the oval it squashes and scales), Shine (a highlight) and
- * Happy (an arc shown instead of Open when RUSH is pleased).
+ * Happy (an arc shown instead of Open when RUSH is pleased); and
+ * Rush/Mouth, holding Open (a dark oval RushSystem opens and closes as RUSH
+ * talks, with a Tongue inside) and Smile (an arc, flipped for a frown).
+ * The mouth group sits on the surface facing out: its local X/Y lie in the
+ * face, +Z points out of it.
  */
 export const RUSH_RADIUS = 0.09;
 
@@ -42,11 +47,17 @@ const eyeMaterial = new MeshStandardMaterial({
   roughness: 0.3,
 });
 const shineMaterial = new MeshBasicMaterial({ color: '#FFFFFF' });
+const tongueMaterial = new MeshStandardMaterial({
+  color: '#E2556A',
+  roughness: 0.5,
+});
 
 const bodyGeometry = new SphereGeometry(RUSH_RADIUS, 32, 24);
 const haloGeometry = new SphereGeometry(RUSH_RADIUS * 1.22, 24, 16);
 const ovalGeometry = new SphereGeometry(1, 16, 12);
 const arcGeometry = new TorusGeometry(0.0135, 0.0034, 6, 14, Math.PI);
+// The mouth's smile: a half ring, bowl side down once turned (a U).
+const smileGeometry = new TorusGeometry(0.016, 0.0032, 6, 16, Math.PI);
 
 // Eye centres on the face, as directions from the sphere's centre.
 const EYE_X = 0.33;
@@ -56,6 +67,12 @@ const FORWARD = new Vector3(0, 0, 1);
 export const EYE_WIDTH = 0.0135;
 export const EYE_HEIGHT = 0.02;
 export const EYE_DEPTH = 0.005;
+// The mouth sits below the eyes, a little under the face's middle.
+const MOUTH_Y = -0.22;
+// The open mouth's oval at its widest; RushSystem scales it from there.
+export const MOUTH_WIDTH = 0.022;
+export const MOUTH_HEIGHT = 0.014;
+export const MOUTH_DEPTH = 0.005;
 
 function createEye(side: 'L' | 'R'): Group {
   const eye = new Group();
@@ -89,6 +106,38 @@ function createEye(side: 'L' | 'R'): Group {
   return eye;
 }
 
+function createMouth(): Group {
+  const mouth = new Group();
+  mouth.name = 'Rush/Mouth';
+  const direction = new Vector3(0, MOUTH_Y, 1).normalize();
+  // On the surface, facing outward, like the eyes.
+  mouth.position.copy(direction).multiplyScalar(RUSH_RADIUS * 0.985);
+  mouth.quaternion.setFromUnitVectors(FORWARD, direction);
+
+  const open = new Mesh(ovalGeometry, eyeMaterial);
+  open.name = 'Open';
+  open.scale.set(MOUTH_WIDTH, MOUTH_HEIGHT, MOUTH_DEPTH);
+  open.visible = false;
+  // The tongue rests in the lower half, just proud of the dark oval. As a
+  // child of Open it opens and closes with it; its size and place are
+  // given in metres and divided by Open's scale.
+  const tongue = new Mesh(ovalGeometry, tongueMaterial);
+  tongue.name = 'Tongue';
+  tongue.scale.set(0.012, 0.0055, 0.0022);
+  tongue.position.set(0, -0.0068, 0.0032);
+  tongue.scale.divide(open.scale);
+  tongue.position.divide(open.scale);
+  open.add(tongue);
+
+  const smile = new Mesh(smileGeometry, eyeMaterial);
+  smile.name = 'Smile';
+  // Half a ring is an arch; turned over it is a smile.
+  smile.rotation.z = Math.PI;
+  smile.position.y = 0.006;
+  mouth.add(open, smile);
+  return mouth;
+}
+
 export function createRush(): Group {
   const rush = new Group();
   rush.name = 'Rush';
@@ -97,6 +146,6 @@ export function createRush(): Group {
   const halo = new Mesh(haloGeometry, haloMaterial);
   halo.name = 'Rush/Halo';
   halo.userData.iwsdkPreviewBounds = 'exclude';
-  rush.add(body, halo, createEye('L'), createEye('R'));
+  rush.add(body, halo, createEye('L'), createEye('R'), createMouth());
   return rush;
 }

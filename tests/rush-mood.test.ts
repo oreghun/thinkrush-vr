@@ -7,6 +7,8 @@ import {
   Mood,
   Reaction,
   reactionMood,
+  mouthShape,
+  talkOpenness,
   reactionTo,
   rushScale,
   timeFraction,
@@ -84,4 +86,33 @@ test('RUSH dozes while the game is paused', () => {
     baseMood({ puzzleIndex: 0, status: 'playing', mode: 'practice', wrongAnswers: 0, wrongMoves: 0, paused: true }),
     Mood.Sleepy,
   );
+});
+
+test('the mouth chatters while RUSH talks, never quite shut', () => {
+  let opened = 0;
+  let nearlyShut = 0;
+  for (let time = 0; time < 5; time += 0.01) {
+    const open = talkOpenness(time);
+    assert.ok(open >= 0.15 && open <= 1, `${time}: ${open}`);
+    if (open > 0.7) opened += 1;
+    if (open < 0.3) nearlyShut += 1;
+    // Talking shows the open mouth, not the smile.
+    const shape = mouthShape(Mood.Happy, true, time);
+    assert.equal(shape.smile, 0);
+    assert.equal(shape.open, open);
+  }
+  // It both opens wide and nearly closes: it reads as speech.
+  assert.ok(opened > 20 && nearlyShut > 20, `${opened} ${nearlyShut}`);
+});
+
+test('a quiet mouth shows the mood', () => {
+  assert.equal(mouthShape(Mood.Idle, false, 0).smile, 1);
+  assert.equal(mouthShape(Mood.Worried, false, 0).smile, -1);
+  const happy = mouthShape(Mood.Happy, false, 0);
+  assert.ok(happy.smile === 1 && happy.smileSize > 1);
+  // Surprised: a small round "o"; sleepy: a thin line.
+  const surprised = mouthShape(Mood.Surprised, false, 0);
+  assert.ok(surprised.open > 0.5 && surprised.width < 0.7 && surprised.smile === 0);
+  const sleepy = mouthShape(Mood.Sleepy, false, 0);
+  assert.ok(sleepy.open < 0.3 && sleepy.smile === 0);
 });

@@ -121,3 +121,47 @@ export function glowColor(fraction: number): [number, number, number] {
     GOLD[2] + (RED[2] - GOLD[2]) * t,
   ];
 }
+
+/**
+ * The mouth's shape. `open` is how far the dark oval is open (0 closed, 1
+ * fully), `width` its width as a share of the full mouth; `smile` shows
+ * the arc instead: 1 a smile, -1 a frown, 0 none; `smileSize` scales it.
+ */
+export interface MouthShape {
+  open: number;
+  width: number;
+  smile: number;
+  smileSize: number;
+}
+
+/**
+ * How open the mouth is while RUSH talks, `time` seconds in: two waves
+ * together give an uneven chatter of about five syllables a second, never
+ * quite shut while a word goes on.
+ */
+export function talkOpenness(time: number): number {
+  const syllable = 0.5 + 0.5 * Math.sin(time * 14);
+  const phrase = 0.55 + 0.45 * Math.sin(time * 4.3 + 1);
+  return Math.min(1, Math.max(0.15, 0.15 + 0.85 * syllable * phrase));
+}
+
+/** The mouth for a mood, or chattering while RUSH talks. */
+export function mouthShape(mood: MoodName, talking: boolean, time: number): MouthShape {
+  if (talking) {
+    return { open: talkOpenness(time), width: 1, smile: 0, smileSize: 1 };
+  }
+  switch (mood) {
+    case Mood.Happy:
+      return { open: 0, width: 1, smile: 1, smileSize: 1.3 };
+    case Mood.Worried:
+      return { open: 0, width: 1, smile: -1, smileSize: 0.8 };
+    case Mood.Surprised:
+      // A little round "o".
+      return { open: 0.85, width: 0.5, smile: 0, smileSize: 1 };
+    case Mood.Sleepy:
+      // A small flat line.
+      return { open: 0.16, width: 0.55, smile: 0, smileSize: 1 };
+    default:
+      return { open: 0, width: 1, smile: 1, smileSize: 1 };
+  }
+}
