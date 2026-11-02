@@ -13,16 +13,27 @@ export const BODY = {
   walkSpeed: 0.69,
   runSpeed: 2.43,
   /**
-   * Sitting down moves her hips 0.28 m back and 0.08 m to her right, and
-   * leaves her underside 0.20-0.24 m off the floor (measured on the posed
-   * model), below the stool's 0.36 m seat: she stands this far in front of
-   * the stool and rises this much as she sits, her feet then dangling a
-   * little above the floor (a small girl on a high stool).
+   * Sitting down moves her hips 0.28 m back and 0.08 m to her right. The
+   * seated clips tuck her feet back under a chair, which on the stool's
+   * thick dished seat (STOOL_HEIGHT at the rim, 0.375 m across) put her
+   * shins through it, so while she sits each knee straightens by sitKnee
+   * (radians about the knee's own x axis): her shins hang down with her
+   * feet a little in front of her knees, like a child's on a stool. She
+   * stands sitBack in front of the stool's middle before sitting, her hips
+   * landing 0.06 m in front of it (11 cm inside the rim), and rises sitLift
+   * as she sits (her toes then about 5 cm off the floor). Measured with
+   * three.js on the posed model and the stool as the scene turns it,
+   * through the whole seated loop: nothing of her goes into the stool for
+   * sitKnee 0.7 to 0.9.
    */
-  sitBack: 0.28,
+  sitBack: 0.34,
   sitSide: 0.08,
-  sitLift: 0.145,
+  sitLift: 0.078,
+  sitKnee: 0.85,
 } as const;
+
+/** The room stool's height (public/models/room/stool.glb), the sit's fit. */
+export const STOOL_HEIGHT = 0.288;
 
 /** The animation clip names in rush-body.glb, by what they are for. */
 export const CLIP = {

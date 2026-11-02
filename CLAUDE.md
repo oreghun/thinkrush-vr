@@ -97,7 +97,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-11-02, PRs 1-55 merged plus RUSH's body (6 answer orbs;
+As of 2026-11-02, PRs 1-57 merged (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -125,7 +125,8 @@ door; 50 English only for the competition; 51 the How to play tour and
 proverb gaps read as "blank"; 52 docs/headset-checklist.md and the
 owner's megaphone; 53 round timing: read, name, then a short answer
 clock; 54 RUSH's mouth, cheeky lines and voice; 55 the answer clock on
-every page; then RUSH's body):
+every page; 56 RUSH's body; 57 a first try at seating her on the stool,
+superseded by the sit below):
 
 Live on main
 
@@ -237,14 +238,26 @@ Live on main
   checks); SHOW_SPOT (0.72, -0.42) by the table's right edge for the SHOW
   move (her head about 0.65 m from a seated right shoulder; PuzzleSystem
   now measures SHOW from the head sphere: radius + 0.11 m); the stool
-  (scene node "stool"), where she sits after 6 s at home (sitSpot: 0.28 m
-  in front of it facing the room). Owner (2026-11-02): she first sat
-  inside the stool, raised a guessed 0.07 m. Measured on the posed model,
-  her underside is 0.20-0.24 m off the floor seated, so she now rises
-  0.145 m onto the 0.36 m seat (feet dangling a little), following the sit
-  clip: seatedShare eases the lift in while her hips drop (50-75% of
-  Stand_to_Sit, and the same backwards as she stands). Checked from a
-  headset placed by the stool: she sits on it.
+  (scene node "stool"), where she sits after 6 s at home. The sit
+  (owner, 2026-11-02: first inside the stool, then with her shins through
+  its front edge, then floating in front of it from the side): the seated
+  clips tuck her feet back under a chair, so on the stool's thick dished
+  seat her shins went through it. Now RushBodySystem straightens each knee
+  by BODY.sitKnee (0.85 rad about the knee's x axis, undone before every
+  mixer update so it never builds up) as far as she has sat, so her shins
+  hang down in front of the seat; she stands sitBack 0.34 m in front of
+  the stool's middle (sitSpot, facing the room), her hips landing 0.06 m in
+  front of it (11 cm inside the rim), and rises sitLift 0.078 m, both eased
+  in by seatedShare while her hips drop (50-75% of Stand_to_Sit, the same
+  backwards as she stands). The stool is now 80% of its first size
+  (0.288 m tall, STOOL_HEIGHT; a test checks the file), so her toes hang
+  about 5 cm off the floor. Fitted in Node with three.js (posed model, the
+  stool as the scene turns it, the whole seated loop: nothing of her
+  inside it for knee turns of 0.7-0.9 rad); checked in the emulator from
+  the side, the front and the seat, and standing again with straight legs.
+  Seen from the side, the bottom of her own ball head pokes out of the
+  glowing face sphere when she bends her head (dark jagged patch), and her
+  short neck is hidden: open, see Open questions.
   She walks at 0.69 m/s and runs at 2.43 m/s (the clips' measured foot
   speeds) when more than 1.5 m from the table; stands up by playing the sit
   backwards at 1.6x. Moves (CLIP): idle Happy_Sway_Standing (home, reading
@@ -704,6 +717,16 @@ Decisions
 
 Open questions (owner deciding, 2026-10-30)
 
+- RUSH's head (owner asked 2026-11-02 "Does she have a neck?"): her
+  design and model have a short neck (about 5 cm, 0.75-0.80 m), hidden
+  under the face sphere (bottom at 0.79 m), and the model's own ball
+  pokes out below the sphere when she bends her head. Offered: lift the
+  face sphere a little so the neck shows and shrink the model's ball
+  (head-bone scale, face counter-scaled) so nothing pokes out. The owner
+  also asked what a human cartoon face (a girl with eyes, brows and lips,
+  2026-11-02) would take: Meshy's rig has no face bones or blend shapes,
+  so the advice was code-built eyes, lids, brows and mouth on her head
+  bone with the painted ones covered, and a new home for the timer glow.
 - RUSH's body is built (2026-11-02, see Live on main). Still open: the
   owner confirms Meshy's terms cover the library motions (art/SOURCES.md),
   and checks her on the headset (docs/headset-checklist.md section 2). If

@@ -10,6 +10,7 @@ import {
   LoopRepeat,
   Mesh,
   type Object3D,
+  Quaternion,
   Vector3,
 } from '@iwsdk/core';
 import { Move } from './moves.js';
@@ -54,6 +55,9 @@ const STAND_UP_SPEED = 1.6;
 // Her head sphere is this much bigger than the model's own ball, so it
 // covers it.
 const HEAD_COVER = 1.04;
+// Her knee bones, which straighten while she sits (BODY.sitKnee).
+const KNEES = ['mixamorigLeftLeg', 'mixamorigRightLeg'];
+const KNEE_AXIS = new Vector3(1, 0, 0);
 
 type Activity = 'stand' | 'move' | 'sitDown' | 'sit' | 'standUp';
 
@@ -86,6 +90,11 @@ export class RushBodySystem extends createSystem({
   private yaw = 0;
   private lift = 0;
   private stool?: Spot;
+  private knees: Object3D[] = [];
+  // Each knee as the clips left it, before the sitting turn went on.
+  private readonly kneeBase = KNEES.map(() => new Quaternion());
+  private kneesTurned = false;
+  private readonly kneeTurn = new Quaternion();
   private readonly feet = new Vector3();
   private readonly scratch = new Vector3();
   private readonly view: BodyView = {
@@ -151,6 +160,9 @@ export class RushBodySystem extends createSystem({
       this.stool = { x: this.scratch.x, z: this.scratch.z };
     }
 
+    this.knees = KNEES.map((name) => model.getObjectByName(name)).filter(
+      (bone): bone is Object3D => bone !== undefined,
+    );
     this.mixer = new AnimationMixer(model);
     for (const [key, name] of Object.entries(CLIP) as [ClipKey, string][]) {
       const clip = AnimationClip.findByName(gltf.animations, name);
@@ -204,7 +216,9 @@ export class RushBodySystem extends createSystem({
         this.walk(goal, place, delta, event);
     }
     this.place(root);
+    this.unturnKnees();
     this.mixer.update(delta);
+    this.turnKnees();
     if (this.rush?.getValue(Rush, 'activity') !== this.activity) {
       this.rush?.setValue(Rush, 'activity', this.activity);
     }
@@ -262,6 +276,29 @@ export class RushBodySystem extends createSystem({
       return;
     }
     this.playMove(standingClip(this.view));
+  }
+
+  /**
+   * Straightens her knees as far as she has sat down (the share of the
+   * sitting lift she has), so her shins hang in front of the stool's seat
+   * instead of tucking back through it.
+   */
+  private turnKnees(): void {
+    const share = this.lift / BODY.sitLift;
+    if (share <= 0) return;
+    this.kneeTurn.setFromAxisAngle(KNEE_AXIS, -BODY.sitKnee * share);
+    this.knees.forEach((knee, index) => {
+      this.kneeBase[index].copy(knee.quaternion);
+      knee.quaternion.multiply(this.kneeTurn);
+    });
+    this.kneesTurned = true;
+  }
+
+  /** Takes last frame's knee turn off, so it never builds up. */
+  private unturnKnees(): void {
+    if (!this.kneesTurned) return;
+    this.knees.forEach((knee, index) => knee.quaternion.copy(this.kneeBase[index]));
+    this.kneesTurned = false;
   }
 
   private standUp(): void {
