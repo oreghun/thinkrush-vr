@@ -15,6 +15,7 @@ import { PanelSystem } from './panel.js';
 import { UITextSystem } from './ui-text.js';
 import { PuzzleSystem } from './puzzle.js';
 import { RushSystem } from './rush.js';
+import { RushBodySystem } from './rush-body.js';
 import { ScreenLookSystem } from './screen-look.js';
 import { FlatViewSystem } from './flat-view.js';
 import { SoundSystem } from './sound.js';
@@ -47,6 +48,7 @@ World.create(
   world.registerSystem(FlatViewSystem);
   world.registerSystem(PuzzleSystem);
   world.registerSystem(RushSystem);
+  world.registerSystem(RushBodySystem);
   world.registerSystem(SoundSystem);
   world.registerSystem(PauseGestureSystem);
   world.registerSystem(PerformanceSystem);

@@ -1,0 +1,342 @@
+import {
+  type AnimationAction,
+  AnimationClip,
+  AnimationMixer,
+  AssetManager,
+  createSystem,
+  type Entity,
+  Group,
+  LoopOnce,
+  LoopRepeat,
+  Mesh,
+  type Object3D,
+  Vector3,
+} from '@iwsdk/core';
+import { Move } from './moves.js';
+import { PuzzleBoard } from './puzzle-components.js';
+import { PUZZLES } from './puzzles.js';
+import { isSpeaking } from './read-aloud.js';
+import {
+  BODY,
+  type BodyView,
+  bodyEvent,
+  CLIP,
+  type ClipKey,
+  type EventView,
+  type Place,
+  REACTION_SECONDS,
+  reactionClip,
+  SHOW_SPOT,
+  shouldRun,
+  sitSpot,
+  type Spot,
+  STAGE_SPOT,
+  standingClip,
+  turnToward,
+  wantedPlace,
+  yawToward,
+} from './rush-body-plan.js';
+import { Rush } from './rush-component.js';
+import { timeFraction } from './rush-mood.js';
+import { RUSH_RADIUS } from './scene-assets/rush.scene-asset.js';
+
+// Moves blend into each other over this long, so she never snaps.
+const FADE = 0.3;
+// How fast she turns on the spot (radians a second), and how close to her
+// spot counts as there.
+const TURN_RATE = 5;
+const ARRIVED = 0.04;
+// She only steps forward while facing about the way she is going.
+const STEP_ANGLE = 0.6;
+// Standing up is sitting down played backwards, this much faster.
+const STAND_UP_SPEED = 1.6;
+// Her head sphere is this much bigger than the model's own ball, so it
+// covers it.
+const HEAD_COVER = 1.04;
+
+type Activity = 'stand' | 'move' | 'sitDown' | 'sit' | 'standUp';
+
+/**
+ * RUSH's body: the owner's rigged character (public/models/rush/), loaded
+ * in the background. Until it arrives (or if it never does) the floating
+ * RUSH plays as before. Once it is in, the floating RUSH's head parts (the
+ * glowing sphere, halo, eyes and mouth) become her head, riding the model's
+ * head bone, and this system walks her about and plays her moves from the
+ * board (src/rush-body-plan.ts): by the table during a puzzle, to the stool
+ * at home, within reach for the SHOW move, talking while she reads, a cheer,
+ * a dance, a shrug or a facepalm after each answer. She moves; the player's
+ * view never does.
+ */
+export class RushBodySystem extends createSystem({
+  rushes: { required: [Rush] },
+  boards: { required: [PuzzleBoard] },
+}) {
+  private rush?: Entity;
+  private mixer?: AnimationMixer;
+  private readonly actions = new Map<ClipKey, AnimationAction>();
+  private current?: AnimationAction;
+  private activity: Activity = 'stand';
+  private activityLeft = 0;
+  private reactionLeft = 0;
+  private homeSeconds = 0;
+  // A hello that came while she was getting up or on her way: she waves
+  // when she arrives.
+  private helloPending = false;
+  private yaw = 0;
+  private lift = 0;
+  private stool?: Spot;
+  private readonly feet = new Vector3();
+  private readonly scratch = new Vector3();
+  private readonly view: BodyView = {
+    mode: '',
+    phase: '',
+    status: '',
+    paused: false,
+    speaking: false,
+    fraction: 1,
+    showMove: false,
+    homeSeconds: 0,
+  };
+  private readonly seen: EventView = blankEvents();
+  private readonly now: EventView = blankEvents();
+
+  init(): void {
+    AssetManager.loadGLTFById('rush-body')
+      .then(() => this.embody())
+      // No body: the floating RUSH carries on.
+      .catch(() => undefined);
+  }
+
+  /** Puts RUSH's head on the body and starts her moves. */
+  private embody(): void {
+    const rush = this.queries.rushes.entities.values().next().value;
+    const root = rush?.object3D;
+    const gltf = AssetManager.getGLTF('rush-body');
+    if (!rush || !root || !gltf || this.mixer) return;
+    const model = gltf.scene;
+    const head = model.getObjectByName('mixamorigHead');
+    if (!head) return;
+    this.rush = rush;
+    rush.setValue(Rush, 'embodied', true);
+
+    // Her head: the floating RUSH's parts, sized to the model's ball head.
+    const face = new Group();
+    face.name = 'Rush/Face';
+    for (const part of [...root.children]) face.add(part);
+    face.position.set(0, BODY.headCenterY, 0);
+    face.scale.setScalar((BODY.headRadius * HEAD_COVER) / RUSH_RADIUS);
+
+    // Her feet go on the floor at her spot by the table, facing the seat.
+    root.scale.setScalar(1);
+    root.rotation.set(0, 0, 0);
+    this.feet.set(STAGE_SPOT.x, 0, STAGE_SPOT.z);
+    this.yaw = yawToward(STAGE_SPOT, { x: 0, z: 0 });
+    this.place(root);
+    model.traverse((object) => {
+      if (object instanceof Mesh) {
+        object.castShadow = true;
+        // Animated limbs reach outside the resting bounds.
+        object.frustumCulled = false;
+      }
+    });
+    root.add(model, face);
+    root.updateMatrixWorld(true);
+    // The face now rides the head bone, keeping where it is.
+    head.attach(face);
+
+    const stool = this.world.getSceneEntity('stool')?.object3D;
+    if (stool) {
+      stool.getWorldPosition(this.scratch);
+      this.stool = { x: this.scratch.x, z: this.scratch.z };
+    }
+
+    this.mixer = new AnimationMixer(model);
+    for (const [key, name] of Object.entries(CLIP) as [ClipKey, string][]) {
+      const clip = AnimationClip.findByName(gltf.animations, name);
+      if (clip) this.actions.set(key, this.mixer.clipAction(clip));
+    }
+    this.playMove('idle');
+  }
+
+  update(delta: number): void {
+    const root = this.rush?.object3D;
+    const board = this.queries.boards.entities.values().next().value;
+    if (!this.mixer || !root || !board) return;
+    this.read(board, delta);
+
+    let event = bodyEvent(this.seen, this.now);
+    copyEvents(this.now, this.seen);
+    if (event === 'hello' && this.activity !== 'stand') {
+      this.helloPending = true;
+      event = undefined;
+    }
+    if (this.view.mode === 'home') this.helloPending = false;
+    let place = wantedPlace(this.view);
+    // No stool in the scene: she waits by the table instead of sitting on air.
+    if (place === 'stool' && !this.stool) place = 'stage';
+    const goal = this.goal(place);
+
+    switch (this.activity) {
+      case 'sit':
+        if (place !== 'stool') this.standUp();
+        break;
+      case 'sitDown':
+      case 'standUp':
+        this.activityLeft -= delta;
+        // She rises onto the seat as she sits, and down again as she stands.
+        this.lift = this.activity === 'sitDown'
+          ? Math.min(BODY.sitLift, this.lift + (BODY.sitLift / 1.5) * delta)
+          : Math.max(0, this.lift - (BODY.sitLift / 0.8) * delta);
+        if (this.activityLeft <= 0) {
+          if (this.activity === 'sitDown') {
+            this.activity = 'sit';
+            this.playMove('sitting');
+          } else {
+            this.activity = 'stand';
+          }
+        }
+        break;
+      default:
+        this.walk(goal, place, delta, event);
+    }
+    this.place(root);
+    this.mixer.update(delta);
+    if (this.rush?.getValue(Rush, 'activity') !== this.activity) {
+      this.rush?.setValue(Rush, 'activity', this.activity);
+    }
+  }
+
+  /** Walks towards `goal`, then turns to face its way, then stands or sits. */
+  private walk(
+    goal: { x: number; z: number; yaw: number },
+    place: Place,
+    delta: number,
+    event: ReturnType<typeof bodyEvent>,
+  ): void {
+    const dx = goal.x - this.feet.x;
+    const dz = goal.z - this.feet.z;
+    const distance = Math.hypot(dx, dz);
+    if (distance > ARRIVED) {
+      const running = shouldRun(place, distance);
+      this.activity = 'move';
+      this.reactionLeft = 0;
+      this.playMove(running ? 'run' : 'walk');
+      const heading = Math.atan2(dx, dz);
+      this.yaw = turnToward(this.yaw, heading, TURN_RATE * delta);
+      if (Math.abs(Math.atan2(Math.sin(heading - this.yaw), Math.cos(heading - this.yaw))) < STEP_ANGLE) {
+        const step = Math.min(distance, (running ? BODY.runSpeed : BODY.walkSpeed) * delta);
+        this.feet.x += (dx / distance) * step;
+        this.feet.z += (dz / distance) * step;
+      }
+      return;
+    }
+    this.feet.x = goal.x;
+    this.feet.z = goal.z;
+    this.yaw = turnToward(this.yaw, goal.yaw, TURN_RATE * delta);
+    const facing = Math.abs(Math.atan2(Math.sin(goal.yaw - this.yaw), Math.cos(goal.yaw - this.yaw))) < 0.05;
+    if (place === 'stool' && facing) {
+      this.activity = 'sitDown';
+      const sit = this.actions.get('sitDown');
+      this.activityLeft = sit ? sit.getClip().duration : 0;
+      this.playMove('sitDown', true);
+      return;
+    }
+    this.activity = 'stand';
+    if (!event && this.helloPending) {
+      this.helloPending = false;
+      event = 'hello';
+    }
+    if (event) {
+      const key = reactionClip(event, Math.random());
+      const action = this.actions.get(key);
+      this.reactionLeft = Math.min(REACTION_SECONDS, action?.getClip().duration ?? 0);
+      this.playMove(key, true);
+      return;
+    }
+    if (this.reactionLeft > 0) {
+      this.reactionLeft -= delta;
+      return;
+    }
+    this.playMove(standingClip(this.view));
+  }
+
+  private standUp(): void {
+    this.activity = 'standUp';
+    const sit = this.actions.get('sitDown');
+    this.activityLeft = sit ? sit.getClip().duration / STAND_UP_SPEED : 0;
+    this.playMove('sitDown', true, -STAND_UP_SPEED);
+  }
+
+  /** Where `place` is, and which way she faces there. */
+  private goal(place: Place): { x: number; z: number; yaw: number } {
+    if (place === 'stool' && this.stool) {
+      return sitSpot(this.stool, STAGE_SPOT);
+    }
+    const spot = place === 'show' ? SHOW_SPOT : STAGE_SPOT;
+    return { x: spot.x, z: spot.z, yaw: yawToward(spot, { x: 0, z: 0 }) };
+  }
+
+  /** Plays a move, blending from the last; `once` holds its last frame. */
+  private playMove(key: ClipKey, once = false, speed = 1): void {
+    const next = this.actions.get(key);
+    if (!next || (next === this.current && !once)) return;
+    next.reset();
+    next.setLoop(once ? LoopOnce : LoopRepeat, Infinity);
+    next.clampWhenFinished = once;
+    next.timeScale = speed;
+    if (speed < 0) next.time = next.getClip().duration;
+    next.play();
+    if (this.current && this.current !== next) {
+      next.crossFadeFrom(this.current, FADE, false);
+    }
+    this.current = next;
+    this.rush?.setValue(Rush, 'move', key);
+  }
+
+  /** Sets her root from her feet, lift and turn (parent frame = world). */
+  private place(root: Object3D): void {
+    root.position.set(this.feet.x, this.lift, this.feet.z);
+    root.rotation.set(0, this.yaw, 0);
+  }
+
+  private read(board: Entity, delta: number): void {
+    const mode = String(board.getValue(PuzzleBoard, 'mode'));
+    const status = String(board.getValue(PuzzleBoard, 'status'));
+    const fraction =
+      mode === 'home' || mode === 'runOver'
+        ? 1
+        : timeFraction(
+            board.getValue(PuzzleBoard, 'secondsLeft') ?? 0,
+            board.getValue(PuzzleBoard, 'answerSeconds') ?? 0,
+          );
+    this.homeSeconds = mode === 'home' ? this.homeSeconds + delta : 0;
+    const view = this.view;
+    view.mode = mode;
+    view.phase = String(board.getValue(PuzzleBoard, 'phase'));
+    view.status = status;
+    view.paused = Boolean(board.getValue(PuzzleBoard, 'paused'));
+    view.speaking = isSpeaking();
+    view.fraction = fraction;
+    view.showMove =
+      board.getValue(PuzzleBoard, 'move') === Move.Show &&
+      PUZZLES[board.getValue(PuzzleBoard, 'puzzleIndex') ?? 0]?.type === 'visual';
+    view.homeSeconds = this.homeSeconds;
+    this.now.mode = mode;
+    this.now.status = status;
+    this.now.wrongAnswers = board.getValue(PuzzleBoard, 'wrongAnswers') ?? 0;
+    this.now.wrongMoves = board.getValue(PuzzleBoard, 'wrongMoves') ?? 0;
+    this.now.fraction = fraction;
+  }
+}
+
+function blankEvents(): EventView {
+  return { mode: 'home', status: 'playing', wrongAnswers: 0, wrongMoves: 0, fraction: 1 };
+}
+
+function copyEvents(from: EventView, to: EventView): void {
+  to.mode = from.mode;
+  to.status = from.status;
+  to.wrongAnswers = from.wrongAnswers;
+  to.wrongMoves = from.wrongMoves;
+  to.fraction = from.fraction;
+}

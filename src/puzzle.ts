@@ -91,6 +91,7 @@ import {
   fitImportedStand,
 } from './scene-assets/display-stand.scene-asset.js';
 import { BUILT_TABLE_PARTS } from './scene-assets/puzzle.scene-asset.js';
+import { RUSH_RADIUS } from './scene-assets/rush.scene-asset.js';
 import { createSwatch } from './scene-assets/pattern-board.scene-asset.js';
 import { shuffled } from './answer-order.js';
 import { PatternTable } from './pattern-play.js';
@@ -126,9 +127,11 @@ const TILE_FLOOR_Y = -0.044;
 // an answer.
 const LIFT_ABOVE_EYES = 0.1;
 const LIFT_SECONDS = 0.5;
-// Show counts once the held pick is this close to RUSH's centre for this
-// long. RUSH comes within reach for the show move (see RushSystem).
-const SHOW_DISTANCE = 0.2;
+// Show counts once the held pick is within this distance of RUSH's head
+// (beyond its surface: the floating RUSH's 9 cm sphere makes 0.2 m from its
+// centre) for this long. RUSH comes within reach for the show move (see
+// RushSystem, or RushBodySystem once she has a body).
+const SHOW_BEYOND_HEAD = 0.11;
 const SHOW_SECONDS = 0.6;
 // A released tile whose up axis points at least this far down was flipped.
 const FLIPPED_UP_Y = -0.5;
@@ -287,6 +290,8 @@ export class PuzzleSystem extends createSystem({
   private readonly answeredInHold = new Set<Entity>();
   private rush?: Entity;
   private readonly rushPosition = new Vector3();
+  private readonly rushScale = new Vector3();
+  private rushHead?: Object3D;
   private readonly headPosition = new Vector3();
   private readonly tileUp = new Vector3();
   private board?: Entity;
@@ -1362,15 +1367,18 @@ export class PuzzleSystem extends createSystem({
 
   /** Counts a held tile kept up close to RUSH for SHOW_SECONDS as a show. */
   private trackShow(tile: Entity, delta: number): void {
-    const rush = this.rush?.object3D;
-    if (!rush || this.answeredInHold.has(tile)) {
+    // RUSH's head: the glowing sphere, floating or on her body (the same
+    // object either way, so it is found once).
+    this.rushHead ??= this.rush?.object3D?.getObjectByName('Rush/Body');
+    const head = this.rushHead;
+    if (!head || this.answeredInHold.has(tile)) {
       this.showTime.delete(tile);
       return;
     }
-    rush.getWorldPosition(this.rushPosition);
-    if (
-      tile.object3D!.position.distanceTo(this.rushPosition) > SHOW_DISTANCE
-    ) {
+    head.getWorldPosition(this.rushPosition);
+    head.getWorldScale(this.rushScale);
+    const reach = RUSH_RADIUS * this.rushScale.x + SHOW_BEYOND_HEAD;
+    if (tile.object3D!.position.distanceTo(this.rushPosition) > reach) {
       this.showTime.delete(tile);
       return;
     }

@@ -34,7 +34,7 @@ const MARGIN = 3;
 
 /**
  * What must stay in frame: the screen at its Far stop (about 1 m wide, its
- * tall home page included), RUSH, the answer orbs, the four tiles on their
+ * tall home page included), RUSH's head, the answer orbs, the four tiles on their
  * stands and the tray or board in front of them.
  */
 export const MUST_SEE: readonly Vec3[] = [
@@ -42,8 +42,11 @@ export const MUST_SEE: readonly Vec3[] = [
   [0.5, 0.6, -1.4],
   [-0.5, 1.62, -1.4],
   [0.5, 1.62, -1.4],
+  // RUSH: her head by the table (src/rush-body-plan.ts STAGE_SPOT), which
+  // also covers the floating RUSH beside the screen until her body loads.
+  [0.6, 1.11, -1.0],
+  [0.66, 0.95, -1.0],
   [0.51, 0.98, -0.75],
-  [0.51, 1.07, -0.75],
   [-0.36, 0.72, -0.5],
   [0.36, 0.72, -0.5],
   [-0.36, 0.84, -0.5],

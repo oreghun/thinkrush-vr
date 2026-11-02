@@ -60,6 +60,9 @@ const SHOW_OFFSET = new Vector3(0.2, -0.2, -0.42);
 const GLIDE_RATE = 2.5;
 // The mouth eases between shapes this fast, so moods and words never snap.
 const MOUTH_RATE = 28;
+// With a body, the clock shows in her halo: it shrinks from its full size
+// to this share (just outside her head) as time runs out.
+const HALO_SMALLEST = 0.84;
 // Where the smile sits: a turned-over half ring (a smile) curves down from
 // its centre, an upright one (a frown) up, so each is set to the same line.
 const SMILE_Y = 0.006;
@@ -89,6 +92,7 @@ export class RushSystem extends createSystem({
   private mouthOpen?: Object3D;
   private mouthSmile?: Object3D;
   private mouthAmount = 0;
+  private halo?: Object3D;
   private mouthWidth = 1;
   // Where RUSH floats beside the panel, the spot it glides to for the
   // show move, and where it is now on the way between them.
@@ -140,6 +144,7 @@ export class RushSystem extends createSystem({
       this.material = body.material.clone();
       body.material = this.material;
     }
+    this.halo = object.getObjectByName('Rush/Halo');
     const mouth = object.getObjectByName('Rush/Mouth');
     this.mouthOpen = mouth?.getObjectByName('Open');
     this.mouthSmile = mouth?.getObjectByName('Smile');
@@ -206,9 +211,16 @@ export class RushSystem extends createSystem({
           );
     this.scale +=
       (rushScale(fraction) - this.scale) * (1 - Math.exp(-SCALE_RATE * delta));
-    object.scale.setScalar(this.scale);
+    if (this.rush?.getValue(Rush, 'embodied')) {
+      // With a body (RushBodySystem moves her), only her halo shrinks with
+      // the clock: 1 when full, HALO_SMALLEST when out.
+      const share = (this.scale - rushScale(0)) / (1 - rushScale(0));
+      this.halo?.scale.setScalar(HALO_SMALLEST + (1 - HALO_SMALLEST) * share);
+    } else {
+      object.scale.setScalar(this.scale);
+      this.move(object, delta);
+    }
     this.shine(fraction, mood);
-    this.move(object, delta);
     this.showEyes(mood, delta);
     this.showMouth(mood, delta);
   }

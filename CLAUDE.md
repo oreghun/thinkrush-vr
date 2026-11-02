@@ -97,7 +97,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-11-01, PRs 1-53 merged plus RUSH's mouth and voice (6 answer orbs;
+As of 2026-11-02, PRs 1-55 merged plus RUSH's body (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -124,7 +124,8 @@ sound is better now"); 48 the door and the horizon; 49 the band off the
 door; 50 English only for the competition; 51 the How to play tour and
 proverb gaps read as "blank"; 52 docs/headset-checklist.md and the
 owner's megaphone; 53 round timing: read, name, then a short answer
-clock; then RUSH's mouth, cheeky lines and voice):
+clock; 54 RUSH's mouth, cheeky lines and voice; 55 the answer clock on
+every page; then RUSH's body):
 
 Live on main
 
@@ -213,6 +214,49 @@ Live on main
   in the emulator: a smile at rest, a frown after a wrong pick, a thin
   line while paused; the chatter and the lines need a device voice (the
   emulator has none), so they wait for the headset.
+  Her body (2026-11-02; src/rush-body.ts RushBodySystem, rules in
+  src/rush-body-plan.ts with tests; model public/models/rush/rush-body.glb,
+  manifest id rush-body, background load): the owner's Meshy character, an
+  original ball-headed girl 1.1 m tall in a geometric-print tunic (front,
+  side and back views made with ChatGPT, then Meshy Image to 3D, a humanoid
+  auto-rig of 24 Mixamo-style bones, three.js names them mixamorigHead etc.,
+  and 18 library motions from the Meshy Agent, exported as one 24.8 MB GLB:
+  art/source/rush/). scripts/optimize-model.mjs (1024 px colour, flat
+  roughness) then scripts/compact-rig.mjs (keeps 15 moves, drops 5.4 MB of
+  unused accessors, rest-still tracks and TANGENT, pins four drifting moves
+  to Idle_3's spot) make it 1.84 MB. Until it loads, or if it fails, the
+  floating RUSH plays as before. Once in, Rush.embodied is set: the
+  floating RUSH's parts (glowing sphere, halo, eyes, mouth) are scaled to
+  her ball head (radius 0.154 m, centre 0.949 m, measured in Node) and ride
+  the head bone, covering the model's own ball; RushSystem then keeps to
+  her glow, eyes and mouth and shows the clock by shrinking her halo (to
+  0.84) instead of her, and RushBodySystem moves her (Rush.move and
+  Rush.activity show the current move for checks). Places: STAGE_SPOT
+  (0.6, -1.0), beside and just behind the table, facing the seat, her head
+  31 degrees right and 12 below eye level (in the glasses' view; a test
+  checks); SHOW_SPOT (0.72, -0.42) by the table's right edge for the SHOW
+  move (her head about 0.65 m from a seated right shoulder; PuzzleSystem
+  now measures SHOW from the head sphere: radius + 0.11 m); the stool
+  (scene node "stool"), where she sits after 6 s at home (sitSpot: 0.28 m
+  in front of it facing the room, raised 0.07 m onto the 0.36 m seat).
+  She walks at 0.69 m/s and runs at 2.43 m/s (the clips' measured foot
+  speeds) when more than 1.5 m from the table; stands up by playing the sit
+  backwards at 1.6x. Moves (CLIP): idle Happy_Sway_Standing (home, reading
+  without a voice), calm Idle_3 (clock running, paused), sassy
+  Hand_on_Hip_Gesture (under 35% of the clock), talk Talk_with_Hands_Open
+  (while speaking), wave on arriving from home, cheer Victory_Cheer or jump
+  Happy_jump_f on a solve, dance FunnyDancing_01 on a quick solve (60%+
+  left) and at a run's end, point Checkout_Gesture on a wrong pick,
+  facepalm Headache_Relief on a wrong move, shrug at time up; reactions
+  play 2.6 s at most, moves blend over 0.3 s. Point and laugh and a watch
+  check were not in the export; those two substitutes cover them.
+  Verified in the emulator: she walked to the stool and sat on it (seen
+  from the headset), stood up, ran and walked back and waved, played
+  idle, calm, sassy and shrug through a riddle, dance on a quick solve,
+  point on a wrong pick, walked to SHOW_SPOT and back; a visual puzzle
+  page draws 70 calls and 114k triangles with her (about 17k of them hers
+  and her shadow); no errors. The phone view keeps her head in frame
+  (MUST_SEE).
 - Room set (src/room-pieces.ts, public/models/room/, tests in
   tests/room-pieces.test.ts): the owner's Meshy pieces replace the IWSDK
   starter's Scandinavian decor (decor.scene-asset.ts is gone). Each was
@@ -654,16 +698,11 @@ Decisions
 
 Open questions (owner deciding, 2026-10-30)
 
-- RUSH with a body (owner, 2026-11-01: hands, a body, walking, sitting on
-  the stool, a funny cheeky cartoon girl). Plan agreed so far: the mouth
-  and lines first (done); then the owner makes an original character in
-  Meshy (RUSH's round glowing golden head and big eyes on a small cartoon
-  body, rigged, with idle, walk, sit, wave and cheer animations; check the
-  plan's ownership terms cover the animations), and the game has her
-  wander and sit on the stool at home but stand beside the screen during
-  a puzzle (she is the clock and must stay in view, Meta VR Glasses
-  included), with a glow ring as the timer instead of shrinking her. If
-  the body is not working well by about Nov 12, keep the sphere RUSH.
+- RUSH's body is built (2026-11-02, see Live on main). Still open: the
+  owner confirms Meshy's terms cover the library motions (art/SOURCES.md),
+  and checks her on the headset (docs/headset-checklist.md section 2). If
+  she does not work out on the Quest by about Nov 12, remove the
+  rush-body manifest entry: the floating RUSH comes back on its own.
 
 - Action twist follow-ups: moves for the answer orbs.
 
