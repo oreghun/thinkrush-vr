@@ -238,7 +238,13 @@ Live on main
   move (her head about 0.65 m from a seated right shoulder; PuzzleSystem
   now measures SHOW from the head sphere: radius + 0.11 m); the stool
   (scene node "stool"), where she sits after 6 s at home (sitSpot: 0.28 m
-  in front of it facing the room, raised 0.07 m onto the 0.36 m seat).
+  in front of it facing the room). Owner (2026-11-02): she first sat
+  inside the stool, raised a guessed 0.07 m. Measured on the posed model,
+  her underside is 0.20-0.24 m off the floor seated, so she now rises
+  0.145 m onto the 0.36 m seat (feet dangling a little), following the sit
+  clip: seatedShare eases the lift in while her hips drop (50-75% of
+  Stand_to_Sit, and the same backwards as she stands). Checked from a
+  headset placed by the stool: she sits on it.
   She walks at 0.69 m/s and runs at 2.43 m/s (the clips' measured foot
   speeds) when more than 1.5 m from the table; stands up by playing the sit
   backwards at 1.6x. Moves (CLIP): idle Happy_Sway_Standing (home, reading

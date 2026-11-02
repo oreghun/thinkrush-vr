@@ -8,6 +8,7 @@ import {
   CLIP,
   type EventView,
   reactionClip,
+  seatedShare,
   SHOW_SPOT,
   shouldRun,
   sitSpot,
@@ -130,4 +131,25 @@ test('turning takes the short way round', () => {
   const start = Math.PI - 0.1;
   const next = turnToward(start, -Math.PI + 0.1, 0.05);
   assert.ok(Math.abs(next - (start + 0.05)) < 1e-9, `${next}`);
+});
+
+test('she rises onto the seat only while her hips come down', () => {
+  // Standing at the start of the sit-down clip, seated at its end.
+  assert.equal(seatedShare(0), 0);
+  assert.equal(seatedShare(0.4), 0);
+  assert.equal(seatedShare(1), 1);
+  assert.equal(seatedShare(0.9), 1);
+  // Smoothly in between, never going back down.
+  let last = 0;
+  for (let p = 0; p <= 1; p += 0.01) {
+    const share = seatedShare(p);
+    assert.ok(share >= last - 1e-12 && share <= 1, `${p}: ${share}`);
+    last = share;
+  }
+  // The measured underside (0.20-0.24 m seated) plus the lift sits within
+  // a couple of centimetres of the stool's 0.36 m seat.
+  for (const underside of [0.2, 0.237]) {
+    const gap = underside + BODY.sitLift - 0.36;
+    assert.ok(Math.abs(gap) <= 0.03, `underside ${underside}: ${gap.toFixed(3)} m from the seat`);
+  }
 });

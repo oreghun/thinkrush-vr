@@ -26,6 +26,7 @@ import {
   type Place,
   REACTION_SECONDS,
   reactionClip,
+  seatedShare,
   SHOW_SPOT,
   shouldRun,
   sitSpot,
@@ -181,21 +182,24 @@ export class RushBodySystem extends createSystem({
         if (place !== 'stool') this.standUp();
         break;
       case 'sitDown':
-      case 'standUp':
+      case 'standUp': {
         this.activityLeft -= delta;
-        // She rises onto the seat as she sits, and down again as she stands.
-        this.lift = this.activity === 'sitDown'
-          ? Math.min(BODY.sitLift, this.lift + (BODY.sitLift / 1.5) * delta)
-          : Math.max(0, this.lift - (BODY.sitLift / 0.8) * delta);
+        // She rises onto the seat as her hips come down (and the reverse as
+        // she stands), following the clip, so she never hovers or sinks.
+        const sit = this.actions.get('sitDown');
+        const length = sit?.getClip().duration ?? 1;
+        this.lift = BODY.sitLift * seatedShare((sit?.time ?? 0) / length);
         if (this.activityLeft <= 0) {
           if (this.activity === 'sitDown') {
             this.activity = 'sit';
             this.playMove('sitting');
           } else {
             this.activity = 'stand';
+            this.lift = 0;
           }
         }
         break;
+      }
       default:
         this.walk(goal, place, delta, event);
     }
