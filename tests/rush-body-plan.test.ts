@@ -15,6 +15,7 @@ import {
   STAGE_SPOT,
   standingClip,
   STOOL_AFTER_SECONDS,
+  STOOL_HEIGHT,
   turnToward,
   wantedPlace,
   yawToward,
@@ -146,10 +147,21 @@ test('she rises onto the seat only while her hips come down', () => {
     assert.ok(share >= last - 1e-12 && share <= 1, `${p}: ${share}`);
     last = share;
   }
-  // The measured underside (0.20-0.24 m seated) plus the lift sits within
-  // a couple of centimetres of the stool's 0.36 m seat.
-  for (const underside of [0.2, 0.237]) {
-    const gap = underside + BODY.sitLift - 0.36;
-    assert.ok(Math.abs(gap) <= 0.03, `underside ${underside}: ${gap.toFixed(3)} m from the seat`);
+});
+
+test('the stool is the size her sit was fitted to', () => {
+  // sitBack and sitLift were measured against this stool: a resized stool
+  // needs them measured again (see BODY).
+  const glb = readFileSync(new URL('../public/models/room/stool.glb', import.meta.url));
+  const json = JSON.parse(glb.subarray(20, 20 + glb.readUInt32LE(12)).toString('utf8'));
+  let height = 0;
+  for (const node of json.nodes) {
+    if (node.mesh === undefined) continue;
+    const scale = node.scale?.[1] ?? 1;
+    for (const primitive of json.meshes[node.mesh].primitives) {
+      const position = json.accessors[primitive.attributes.POSITION];
+      height = Math.max(height, (position.max[1] - position.min[1]) * scale);
+    }
   }
+  assert.ok(Math.abs(height - STOOL_HEIGHT) < 0.003, `stool is ${height.toFixed(3)} m tall`);
 });
