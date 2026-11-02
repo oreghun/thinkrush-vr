@@ -70,8 +70,8 @@ you can click around in.
 > floating ball until her body has loaded). Her glow turns red and her halo
 > shrinks as time runs out, she talks with her hands while she reads, gets
 > impatient as the clock runs low, and reacts to every answer with a cheer,
-> a silly dance, a shrug or a facepalm. At home she strolls over to the
-> stool in the corner and sits down; pick a world and she runs back. Her
+> a silly dance, a shrug or a facepalm. At home she strolls over to her
+> patterned pouf in the corner and sits down; pick a world and she runs back. Her
 > mouth moves while she talks and shows her mood (a grin, a frown, a
 > surprised "o", a sleepy line), and after each answer she has a cheeky
 > word for you ("Ooh, smarty pants!", "Tick tock, too slow!").

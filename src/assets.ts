@@ -24,6 +24,7 @@ import { createObjectBoard } from './scene-assets/object-board.scene-asset.js';
 import { createRoom } from './scene-assets/room.scene-asset.js';
 import { createHorizon } from './scene-assets/horizon.scene-asset.js';
 import { createRush } from './scene-assets/rush.scene-asset.js';
+import { createPouf } from './scene-assets/pouf.scene-asset.js';
 import {
   createStage,
   createStudioFloor,
@@ -79,6 +80,8 @@ export default defineAssets({
   },
   'answer-orb': createAnswerOrb(),
   rush: createRush(),
+  // RUSH's seat at home, built in code (src/scene-assets/pouf.scene-asset.ts).
+  pouf: createPouf(),
   // RUSH's body: the owner's rigged Meshy character with her moves
   // (art/SOURCES.md; optimize-model.mjs then compact-rig.mjs). Loaded in the
   // background: the floating RUSH plays until it arrives (src/rush-body.ts).

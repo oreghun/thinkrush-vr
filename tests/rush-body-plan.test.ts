@@ -14,12 +14,12 @@ import {
   sitSpot,
   STAGE_SPOT,
   standingClip,
-  STOOL_AFTER_SECONDS,
-  STOOL_HEIGHT,
+  SEAT_AFTER_SECONDS,
   turnToward,
   wantedPlace,
   yawToward,
 } from '../src/rush-body-plan.ts';
+import { POUF, POUF_PROFILE } from '../src/pouf-shape.ts';
 
 const view = (change: Partial<BodyView> = {}): BodyView => ({
   mode: 'practice',
@@ -44,19 +44,19 @@ test('every move the game asks for is in the model file', () => {
   }
 });
 
-test('at home she strolls to the stool; in a puzzle she stands by the table', () => {
+test('at home she strolls to her seat; in a puzzle she stands by the table', () => {
   assert.equal(wantedPlace(view({ mode: 'home', homeSeconds: 1 })), 'stage');
-  assert.equal(wantedPlace(view({ mode: 'home', homeSeconds: STOOL_AFTER_SECONDS })), 'stool');
+  assert.equal(wantedPlace(view({ mode: 'home', homeSeconds: SEAT_AFTER_SECONDS })), 'seat');
   for (const mode of ['practice', 'run', 'tour', 'runOver']) {
     assert.equal(wantedPlace(view({ mode })), 'stage', mode);
   }
   // SHOW: she comes within reach, only while the puzzle is in play.
   assert.equal(wantedPlace(view({ showMove: true })), 'show');
   assert.equal(wantedPlace(view({ showMove: true, status: 'solved' })), 'stage');
-  // She runs back to the table, but strolls to the stool.
+  // She runs back to the table, but strolls to her seat.
   assert.equal(shouldRun('stage', 5), true);
   assert.equal(shouldRun('stage', 0.5), false);
-  assert.equal(shouldRun('stool', 5), false);
+  assert.equal(shouldRun('seat', 5), false);
 });
 
 test('she talks while speaking, gets impatient as the clock runs low', () => {
@@ -114,12 +114,12 @@ test('she never stands inside the table', () => {
   assert.ok(reach <= 0.7, `head ${reach.toFixed(2)} m from the shoulder`);
 });
 
-test('to sit she stands in front of the stool, facing away from it', () => {
-  const stool = { x: 4, z: -3 };
+test('to sit she stands in front of her seat, facing away from it', () => {
+  const seat = { x: 4, z: -3 };
   const toward = { x: 0, z: -3 };
-  const spot = sitSpot(stool, toward);
-  // Facing -X (towards the room), about sitBack ahead of the stool.
-  assert.ok(Math.abs(spot.yaw - yawToward(stool, toward)) < 1e-9);
+  const spot = sitSpot(seat, toward);
+  // Facing -X (towards the room), about sitBack ahead of the seat.
+  assert.ok(Math.abs(spot.yaw - yawToward(seat, toward)) < 1e-9);
   assert.ok(Math.abs(spot.x - (4 - BODY.sitBack)) < 1e-9, `${spot.x}`);
   // Shifted to her left, so her hips (which go to her right) land on it.
   assert.ok(Math.abs(spot.z - (-3 - BODY.sitSide)) < 1e-9, `${spot.z}`);
@@ -149,19 +149,18 @@ test('she rises onto the seat only while her hips come down', () => {
   }
 });
 
-test('the stool is the size her sit was fitted to', () => {
-  // sitBack and sitLift were measured against this stool: a resized stool
-  // needs them measured again (see BODY).
-  const glb = readFileSync(new URL('../public/models/room/stool.glb', import.meta.url));
-  const json = JSON.parse(glb.subarray(20, 20 + glb.readUInt32LE(12)).toString('utf8'));
-  let height = 0;
-  for (const node of json.nodes) {
-    if (node.mesh === undefined) continue;
-    const scale = node.scale?.[1] ?? 1;
-    for (const primitive of json.meshes[node.mesh].primitives) {
-      const position = json.accessors[primitive.attributes.POSITION];
-      height = Math.max(height, (position.max[1] - position.min[1]) * scale);
-    }
-  }
-  assert.ok(Math.abs(height - STOOL_HEIGHT) < 0.003, `stool is ${height.toFixed(3)} m tall`);
+test('the pouf is the seat her sit was fitted to', () => {
+  // sitBack, sitLift and sitKnee were fitted to this pouf (see BODY): a
+  // different seat needs them fitted again.
+  assert.deepEqual(POUF, { radius: 0.22, height: 0.24 });
+  // Its top is its highest point and its foot sits inside its widest part,
+  // so her tucked feet have room under the bulge.
+  const tops = POUF_PROFILE.map(([, up]) => up);
+  assert.equal(Math.max(...tops), 1);
+  const footRadius = POUF_PROFILE[1][0];
+  assert.ok(footRadius < Math.max(...POUF_PROFILE.map(([across]) => across)));
+  // She settles into the cushion a little, never more than a soft seat gives.
+  assert.ok(BODY.sitLift <= 0 && BODY.sitLift >= -0.03);
+  // She stands clear of the pouf before sitting down onto it.
+  assert.ok(BODY.sitBack > POUF.radius + 0.1);
 });

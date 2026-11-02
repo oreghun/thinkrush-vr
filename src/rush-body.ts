@@ -67,7 +67,7 @@ type Activity = 'stand' | 'move' | 'sitDown' | 'sit' | 'standUp';
  * RUSH plays as before. Once it is in, the floating RUSH's head parts (the
  * glowing sphere, halo, eyes and mouth) become her head, riding the model's
  * head bone, and this system walks her about and plays her moves from the
- * board (src/rush-body-plan.ts): by the table during a puzzle, to the stool
+ * board (src/rush-body-plan.ts): by the table during a puzzle, to her pouf
  * at home, within reach for the SHOW move, talking while she reads, a cheer,
  * a dance, a shrug or a facepalm after each answer. She moves; the player's
  * view never does.
@@ -89,7 +89,9 @@ export class RushBodySystem extends createSystem({
   private helloPending = false;
   private yaw = 0;
   private lift = 0;
-  private stool?: Spot;
+  private seat?: Spot;
+  // How far she has sat down: 0 standing, 1 seated (follows the clip).
+  private seated = 0;
   private knees: Object3D[] = [];
   // Each knee as the clips left it, before the sitting turn went on.
   private readonly kneeBase = KNEES.map(() => new Quaternion());
@@ -154,10 +156,10 @@ export class RushBodySystem extends createSystem({
     // The face now rides the head bone, keeping where it is.
     head.attach(face);
 
-    const stool = this.world.getSceneEntity('stool')?.object3D;
-    if (stool) {
-      stool.getWorldPosition(this.scratch);
-      this.stool = { x: this.scratch.x, z: this.scratch.z };
+    const seat = this.world.getSceneEntity('pouf')?.object3D;
+    if (seat) {
+      seat.getWorldPosition(this.scratch);
+      this.seat = { x: this.scratch.x, z: this.scratch.z };
     }
 
     this.knees = KNEES.map((name) => model.getObjectByName(name)).filter(
@@ -185,31 +187,33 @@ export class RushBodySystem extends createSystem({
     }
     if (this.view.mode === 'home') this.helloPending = false;
     let place = wantedPlace(this.view);
-    // No stool in the scene: she waits by the table instead of sitting on air.
-    if (place === 'stool' && !this.stool) place = 'stage';
+    // No seat in the scene: she waits by the table instead of sitting on air.
+    if (place === 'seat' && !this.seat) place = 'stage';
     const goal = this.goal(place);
 
     switch (this.activity) {
       case 'sit':
-        if (place !== 'stool') this.standUp();
+        if (place !== 'seat') this.standUp();
         break;
       case 'sitDown':
       case 'standUp': {
         this.activityLeft -= delta;
-        // She rises onto the seat as her hips come down (and the reverse as
-        // she stands), following the clip, so she never hovers or sinks.
+        // She settles onto the seat as her hips come down (and the reverse
+        // as she stands), following the clip, so she never hovers or sinks.
         const sit = this.actions.get('sitDown');
         const length = sit?.getClip().duration ?? 1;
-        this.lift = BODY.sitLift * seatedShare((sit?.time ?? 0) / length);
+        this.seated = seatedShare((sit?.time ?? 0) / length);
         if (this.activityLeft <= 0) {
           if (this.activity === 'sitDown') {
             this.activity = 'sit';
+            this.seated = 1;
             this.playMove('sitting');
           } else {
             this.activity = 'stand';
-            this.lift = 0;
+            this.seated = 0;
           }
         }
+        this.lift = BODY.sitLift * this.seated;
         break;
       }
       default:
@@ -252,7 +256,7 @@ export class RushBodySystem extends createSystem({
     this.feet.z = goal.z;
     this.yaw = turnToward(this.yaw, goal.yaw, TURN_RATE * delta);
     const facing = Math.abs(Math.atan2(Math.sin(goal.yaw - this.yaw), Math.cos(goal.yaw - this.yaw))) < 0.05;
-    if (place === 'stool' && facing) {
+    if (place === 'seat' && facing) {
       this.activity = 'sitDown';
       const sit = this.actions.get('sitDown');
       this.activityLeft = sit ? sit.getClip().duration : 0;
@@ -279,14 +283,12 @@ export class RushBodySystem extends createSystem({
   }
 
   /**
-   * Straightens her knees as far as she has sat down (the share of the
-   * sitting lift she has), so her shins hang in front of the stool's seat
-   * instead of tucking back through it.
+   * Straightens her knees as far as she has sat down, so her tucked-back
+   * feet clear the side of her seat.
    */
   private turnKnees(): void {
-    const share = this.lift / BODY.sitLift;
-    if (share <= 0) return;
-    this.kneeTurn.setFromAxisAngle(KNEE_AXIS, -BODY.sitKnee * share);
+    if (this.seated <= 0) return;
+    this.kneeTurn.setFromAxisAngle(KNEE_AXIS, -BODY.sitKnee * this.seated);
     this.knees.forEach((knee, index) => {
       this.kneeBase[index].copy(knee.quaternion);
       knee.quaternion.multiply(this.kneeTurn);
@@ -310,8 +312,8 @@ export class RushBodySystem extends createSystem({
 
   /** Where `place` is, and which way she faces there. */
   private goal(place: Place): { x: number; z: number; yaw: number } {
-    if (place === 'stool' && this.stool) {
-      return sitSpot(this.stool, STAGE_SPOT);
+    if (place === 'seat' && this.seat) {
+      return sitSpot(this.seat, STAGE_SPOT);
     }
     const spot = place === 'show' ? SHOW_SPOT : STAGE_SPOT;
     return { x: spot.x, z: spot.z, yaw: yawToward(spot, { x: 0, z: 0 }) };
