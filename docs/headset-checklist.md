@@ -36,8 +36,8 @@ Report: the lowest fps and the most "late" you saw, and where.
 
 ## 2. RUSH's body
 
-- [ ] At home she walks to the stool in the corner and sits on it (not in
-      the air, not sunk into it).
+- [ ] At home she walks to her patterned pouf in the corner and sits on it,
+      feet on the floor (not floating above it, from the side too).
 - [ ] Picking a world: she stands up, runs back beside the table and waves.
 - [ ] Beside the table her head is in view and does not hide the screen.
 - [ ] She talks with her hands while the question is read, puts a hand on

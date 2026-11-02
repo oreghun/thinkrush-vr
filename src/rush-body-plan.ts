@@ -13,27 +13,25 @@ export const BODY = {
   walkSpeed: 0.69,
   runSpeed: 2.43,
   /**
-   * Sitting down moves her hips 0.28 m back and 0.08 m to her right. The
-   * seated clips tuck her feet back under a chair, which on the stool's
-   * thick dished seat (STOOL_HEIGHT at the rim, 0.375 m across) put her
-   * shins through it, so while she sits each knee straightens by sitKnee
-   * (radians about the knee's own x axis): her shins hang down with her
-   * feet a little in front of her knees, like a child's on a stool. She
-   * stands sitBack in front of the stool's middle before sitting, her hips
-   * landing 0.06 m in front of it (11 cm inside the rim), and rises sitLift
-   * as she sits (her toes then about 5 cm off the floor). Measured with
-   * three.js on the posed model and the stool as the scene turns it,
-   * through the whole seated loop: nothing of her goes into the stool for
-   * sitKnee 0.7 to 0.9.
+   * Her seat at home is the pouf (src/pouf-shape.ts). Her sitting moves
+   * were recorded on a chair about her own seat height, so she plays them
+   * as they are, feet on the floor; on the wooden stool (dished, rim higher
+   * than its middle) only her thighs met the rim and she floated from the
+   * side. Sitting down moves her hips 0.28 m back and 0.08 m to her right,
+   * so she stands sitBack in front of the pouf's middle (her hips land
+   * 0.11 m in front of it), settles sitLift into the cushion (it reads as
+   * soft) and straightens each knee by sitKnee (radians about the knee's
+   * own x axis) so her tucked-back feet clear the pouf's side. Fitted with
+   * three.js on the posed model through the whole seated loop: her bottom
+   * rests on or 2-6 cm into the cushion (deepest for the moment she lands),
+   * her thighs at most 2.7 cm above it while she hugs her knees, and
+   * nothing of her legs or feet goes into it.
    */
-  sitBack: 0.34,
+  sitBack: 0.4,
   sitSide: 0.08,
-  sitLift: 0.078,
-  sitKnee: 0.85,
+  sitLift: -0.02,
+  sitKnee: 0.7,
 } as const;
-
-/** The room stool's height (public/models/room/stool.glb), the sit's fit. */
-export const STOOL_HEIGHT = 0.288;
 
 /** The animation clip names in rush-body.glb, by what they are for. */
 export const CLIP = {
@@ -65,8 +63,8 @@ export const STAGE_SPOT = { x: 0.6, z: -1.0 };
 /** For the SHOW move: beside the table's right edge, within a seated reach. */
 export const SHOW_SPOT = { x: 0.72, z: -0.42 };
 
-/** At home she strolls to the stool after this long. */
-export const STOOL_AFTER_SECONDS = 6;
+/** At home she strolls to her seat after this long. */
+export const SEAT_AFTER_SECONDS = 6;
 /** Farther than this from where she must be during a puzzle, she runs. */
 export const RUN_FARTHER_THAN = 1.5;
 /** With less than this share of the clock left she gets impatient. */
@@ -74,7 +72,7 @@ export const IMPATIENT_SHARE = 0.35;
 /** A reaction plays this long at most, then blends back. */
 export const REACTION_SECONDS = 2.6;
 
-export type Place = 'stage' | 'show' | 'stool';
+export type Place = 'stage' | 'show' | 'seat';
 
 /** What the body planner reads from the board each frame. */
 export interface BodyView {
@@ -95,7 +93,7 @@ export interface BodyView {
 /** Where she should be. */
 export function wantedPlace(view: BodyView): Place {
   if (view.mode === 'home') {
-    return view.homeSeconds >= STOOL_AFTER_SECONDS ? 'stool' : 'stage';
+    return view.homeSeconds >= SEAT_AFTER_SECONDS ? 'seat' : 'stage';
   }
   const inPlay =
     (view.mode === 'practice' || view.mode === 'run') && view.status === 'playing';
@@ -104,7 +102,7 @@ export function wantedPlace(view: BodyView): Place {
 
 /** Whether she hurries: away from where a puzzle needs her, and far. */
 export function shouldRun(place: Place, distance: number): boolean {
-  return place !== 'stool' && distance > RUN_FARTHER_THAN;
+  return place !== 'seat' && distance > RUN_FARTHER_THAN;
 }
 
 /** The move she plays standing at her place when nothing else is going on. */
@@ -213,17 +211,17 @@ export function turnToward(current: number, target: number, step: number): numbe
 }
 
 /**
- * Where she stands to sit on a stool at `stool`, facing towards `facing`,
+ * Where she stands to sit on a seat at `seat`, facing towards `facing`,
  * and that facing: sitting down then lands her hips on the seat.
  */
-export function sitSpot(stool: Spot, facing: Spot): { x: number; z: number; yaw: number } {
-  const yaw = yawToward(stool, facing);
+export function sitSpot(seat: Spot, facing: Spot): { x: number; z: number; yaw: number } {
+  const yaw = yawToward(seat, facing);
   const ahead = { x: Math.sin(yaw), z: Math.cos(yaw) };
   // Her right-hand side, when facing that way.
   const right = { x: Math.cos(yaw), z: -Math.sin(yaw) };
   return {
-    x: stool.x + ahead.x * BODY.sitBack - right.x * BODY.sitSide,
-    z: stool.z + ahead.z * BODY.sitBack - right.z * BODY.sitSide,
+    x: seat.x + ahead.x * BODY.sitBack - right.x * BODY.sitSide,
+    z: seat.z + ahead.z * BODY.sitBack - right.z * BODY.sitSide,
     yaw,
   };
 }

@@ -126,7 +126,7 @@ proverb gaps read as "blank"; 52 docs/headset-checklist.md and the
 owner's megaphone; 53 round timing: read, name, then a short answer
 clock; 54 RUSH's mouth, cheeky lines and voice; 55 the answer clock on
 every page; 56 RUSH's body; 57 a first try at seating her on the stool,
-superseded by the sit below):
+superseded by her pouf below):
 
 Live on main
 
@@ -238,23 +238,33 @@ Live on main
   checks); SHOW_SPOT (0.72, -0.42) by the table's right edge for the SHOW
   move (her head about 0.65 m from a seated right shoulder; PuzzleSystem
   now measures SHOW from the head sphere: radius + 0.11 m); the stool
-  (scene node "stool"), where she sits after 6 s at home. The sit
-  (owner, 2026-11-02: first inside the stool, then with her shins through
-  its front edge, then floating in front of it from the side): the seated
-  clips tuck her feet back under a chair, so on the stool's thick dished
-  seat her shins went through it. Now RushBodySystem straightens each knee
-  by BODY.sitKnee (0.85 rad about the knee's x axis, undone before every
-  mixer update so it never builds up) as far as she has sat, so her shins
-  hang down in front of the seat; she stands sitBack 0.34 m in front of
-  the stool's middle (sitSpot, facing the room), her hips landing 0.06 m in
-  front of it (11 cm inside the rim), and rises sitLift 0.078 m, both eased
-  in by seatedShare while her hips drop (50-75% of Stand_to_Sit, the same
-  backwards as she stands). The stool is now 80% of its first size
-  (0.288 m tall, STOOL_HEIGHT; a test checks the file), so her toes hang
-  about 5 cm off the floor. Fitted in Node with three.js (posed model, the
-  stool as the scene turns it, the whole seated loop: nothing of her
-  inside it for knee turns of 0.7-0.9 rad); checked in the emulator from
-  the side, the front and the seat, and standing again with straight legs.
+  her pouf (scene node "pouf"), where she sits after 6 s at home
+  (SEAT_AFTER_SECONDS). The seat (owner, 2026-11-02): on the wooden stool
+  she first sat inside it, then had her shins through its front edge, then
+  floated in front of it and above it from the side; her sitting moves
+  were recorded on a chair (thighs sloping a little, feet tucked back, a
+  knee hug from 4 to 10 s of the loop), and the stool is dished (rim higher
+  than its middle), so only her thighs met it. The owner chose a soft seat
+  built in code: src/scene-assets/pouf.scene-asset.ts (manifest id pouf),
+  shape in src/pouf-shape.ts (POUF 0.22 m radius, 0.24 m tall,
+  POUF_PROFILE a lathe profile: narrow foot, full side, domed cushion), a
+  kitenge-style print (orange, ink, gold, teal, cream from pattern-art's
+  kitenge colours) in a 64 x 256 DataTexture repeated 8 times round, one
+  lathe mesh of 880 triangles, one draw call, no shadow (a ContactShadow
+  node). It stands in the cabinet corner at (1.0, 0, 0.75) in the group,
+  0.12 m clear of the wooden stool, which stays as decor at its first size.
+  RushBodySystem reads the "pouf" node; she stands sitBack 0.4 m in front
+  of its middle (sitSpot, facing the stage), settles sitLift -0.02 m into
+  the cushion and straightens each knee by sitKnee 0.7 rad (about the
+  knee's x axis, undone before every mixer update so it never builds up)
+  so her tucked-back feet clear its side, all eased in by seatedShare
+  while her hips drop (50-75% of Stand_to_Sit, backwards as she stands).
+  Fitted in Node with three.js on the posed model through the whole loop:
+  her bottom on or 2-6 cm into the cushion (deepest the moment she lands),
+  thighs at most 2.7 cm above it during the knee hug, no leg or foot
+  inside. Checked in the emulator from the side, the front and the seat,
+  and standing again (walk back, wave). If it does not convince on the
+  headset, the owner can make a seat in Meshy instead.
   Seen from the side, the bottom of her own ball head pokes out of the
   glowing face sphere when she bends her head (dark jagged patch), and her
   short neck is hidden: open, see Open questions.
@@ -284,7 +294,8 @@ Live on main
   in the background. Scene groups "pottery-corner" (left, where the
   starter's gallery set stood: low table with a small clay pot on it, a
   clay pot, a basket, a snake plant) and "cabinet-corner" (right: cabinet
-  with a small pot on top, a snake plant, the stool), each piece with a
+  with a small pot on top, a snake plant, the stool, and RUSH's code-built
+  pouf beside it), each piece with a
   ContactShadow node. The low table was meant to be the play table but
   came out coffee-table height (my prompt said "low"), so it dresses a
   corner.
