@@ -14,12 +14,14 @@ export const BODY = {
   runSpeed: 2.43,
   /**
    * Sitting down moves her hips 0.28 m back and 0.08 m to her right, and
-   * leaves them lower than the stool's seat: she stands this far in front
-   * of the stool and rises this much as she sits.
+   * leaves her underside 0.20-0.24 m off the floor (measured on the posed
+   * model), below the stool's 0.36 m seat: she stands this far in front of
+   * the stool and rises this much as she sits, her feet then dangling a
+   * little above the floor (a small girl on a high stool).
    */
   sitBack: 0.28,
   sitSide: 0.08,
-  sitLift: 0.07,
+  sitLift: 0.145,
 } as const;
 
 /** The animation clip names in rush-body.glb, by what they are for. */
@@ -164,6 +166,21 @@ export function reactionClip(event: BodyEvent, random: number): ClipKey {
     default:
       return 'wave';
   }
+}
+
+// In the sit-down clip her hips drop between these shares of its length.
+const DROP_START = 0.5;
+const DROP_END = 0.75;
+
+/**
+ * How much of the sitting lift she has `progress` (0 to 1) through the
+ * sit-down clip: none while she still stands, all once her hips have come
+ * down, eased in between, so she rises onto the seat as she lowers onto it
+ * (and the same backwards as she stands up).
+ */
+export function seatedShare(progress: number): number {
+  const t = Math.min(1, Math.max(0, (progress - DROP_START) / (DROP_END - DROP_START)));
+  return t * t * (3 - 2 * t);
 }
 
 export interface Spot {
