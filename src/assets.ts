@@ -79,6 +79,15 @@ export default defineAssets({
   },
   'answer-orb': createAnswerOrb(),
   rush: createRush(),
+  // RUSH's body: the owner's rigged Meshy character with her moves
+  // (art/SOURCES.md; optimize-model.mjs then compact-rig.mjs). Loaded in the
+  // background: the floating RUSH plays until it arrives (src/rush-body.ts).
+  'rush-body': {
+    url: publicAssetUrl('models/rush/rush-body.glb'),
+    type: AssetType.GLTF,
+    priority: 'background',
+    name: 'RUSH Body',
+  },
   // Loaded in the background so the game starts fast; a miniature still
   // loading shows its code-built version for that round.
   ...Object.fromEntries(

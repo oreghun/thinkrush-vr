@@ -34,21 +34,36 @@ Read it for a few seconds in each place:
 Good: fps close to the display rate (72), and "late" at 0 most seconds.
 Report: the lowest fps and the most "late" you saw, and where.
 
-## 2. How to play (the tour)
+## 2. RUSH's body
+
+- [ ] At home she walks to the stool in the corner and sits on it (not in
+      the air, not sunk into it).
+- [ ] Picking a world: she stands up, runs back beside the table and waves.
+- [ ] Beside the table her head is in view and does not hide the screen.
+- [ ] She talks with her hands while the question is read, puts a hand on
+      her hip as the clock runs low, shrugs at time up, cheers or dances on
+      a solve, gestures after a wrong pick, holds her head after a wrong move.
+- [ ] Her face (eyes, mouth) stays on her head through every move, and her
+      halo shrinks and turns red with the clock.
+- [ ] SHOW move: she comes to the table's right edge, close enough to show
+      her the object.
+- [ ] Frame rate with her walking (the `?fps` line).
+
+## 3. How to play (the tour)
 
 - [ ] Entering VR for the first time starts the tour on its own.
 - [ ] The voice reads every step, and RUSH pulses while it speaks.
 - [ ] Step 1: picking up any object moves on.
 - [ ] Step 2: dropping the right object on the tray says Correct.
 - [ ] Step 3: pointing at the right orb and pinching solves the riddle.
-- [ ] Step 4: RUSH shrinks and turns red, the music speeds up, then RUSH
-      grows back.
+- [ ] Step 4: RUSH's glow (her halo) shrinks and turns red, the music speeds
+      up, then it comes back.
 - [ ] Step 5: turning a palm up shows the Paused page; palm up again ends the
       tour on the home page.
 - [ ] Skip tour works with a real pinch.
 - [ ] Entering VR again does not start the tour; How to play replays it.
 
-## 3. Hands
+## 4. Hands
 
 - [ ] Fix-it Workshop: turning a piece and letting it go at the gap snaps it
       in; an unturned right piece asks you to TURN it.
@@ -59,13 +74,13 @@ Report: the lowest fps and the most "late" you saw, and where.
 - [ ] Palm-up pause works during a normal puzzle too, and not while holding
       a tile.
 
-## 4. Voice
+## 5. Voice
 
 - [ ] The home page's Read aloud button shows a pace (Slow, Normal or Fast),
       not "No voice on this device".
 - [ ] A proverb (Wisdom Courtyard) reads its gap as "blank".
 
-## 5. Demo video
+## 6. Demo video
 
 Once the frame rate looks good, record from the shot list in
 `docs/demo-video.md`. Check the competition's video length and hosting rules
