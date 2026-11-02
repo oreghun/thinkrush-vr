@@ -45,6 +45,8 @@ Report: the lowest fps and the most "late" you saw, and where.
       a solve, gestures after a wrong pick, holds her head after a wrong move.
 - [ ] Her face (eyes, mouth) stays on her head through every move, and her
       halo shrinks and turns red with the clock.
+- [ ] A short neck shows under her head, and nothing dark pokes out of the
+      bottom of her glowing head when she bends it (look from the side).
 - [ ] SHOW move: she comes to the table's right edge, close enough to show
       her the object.
 - [ ] Frame rate with her walking (the `?fps` line).

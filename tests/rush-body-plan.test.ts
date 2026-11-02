@@ -6,6 +6,7 @@ import {
   type BodyView,
   bodyEvent,
   CLIP,
+  FACE_CENTER_Y,
   type EventView,
   reactionClip,
   seatedShare,
@@ -93,7 +94,7 @@ test('she reacts to each answer with a move', () => {
 
 test('by the table her head stays in view on Meta VR Glasses', () => {
   // Seated eyes at 1.15 m, looking straight ahead (-Z).
-  const head = { x: STAGE_SPOT.x, y: BODY.headCenterY, z: STAGE_SPOT.z };
+  const head = { x: STAGE_SPOT.x, y: FACE_CENTER_Y, z: STAGE_SPOT.z };
   const across = (Math.atan2(head.x, -head.z) * 180) / Math.PI;
   const down = (Math.atan2(head.y - 1.15, -head.z) * 180) / Math.PI;
   assert.ok(Math.abs(across) <= 34, `${across.toFixed(1)} degrees across (37 is the edge)`);
@@ -110,7 +111,7 @@ test('she never stands inside the table', () => {
   }
   // SHOW is within a seated reach: her head within 0.65 m of the right shoulder.
   const shoulder = { x: 0.18, y: 0.98, z: -0.05 };
-  const reach = Math.hypot(SHOW_SPOT.x - shoulder.x, BODY.headCenterY - shoulder.y, SHOW_SPOT.z - shoulder.z);
+  const reach = Math.hypot(SHOW_SPOT.x - shoulder.x, FACE_CENTER_Y - shoulder.y, SHOW_SPOT.z - shoulder.z);
   assert.ok(reach <= 0.7, `head ${reach.toFixed(2)} m from the shoulder`);
 });
 
