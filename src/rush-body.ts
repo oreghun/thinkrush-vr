@@ -58,6 +58,7 @@ const HEAD_COVER = 1.04;
 // Her knee bones, which straighten while she sits (BODY.sitKnee).
 const KNEES = ['mixamorigLeftLeg', 'mixamorigRightLeg'];
 const KNEE_AXIS = new Vector3(1, 0, 0);
+const WORLD_SCALE = new Vector3();
 
 type Activity = 'stand' | 'move' | 'sitDown' | 'sit' | 'standUp';
 
@@ -97,6 +98,12 @@ export class RushBodySystem extends createSystem({
   private readonly kneeBase = KNEES.map(() => new Quaternion());
   private kneesTurned = false;
   private readonly kneeTurn = new Quaternion();
+  // Her head bone, raised up her neck (BODY.neckRaise) each frame after the
+  // clips have set it, and where the clips left it.
+  private head?: Object3D;
+  private readonly headBase = new Vector3();
+  private headRaised = false;
+  private headRaiseLocal = 0;
   private readonly feet = new Vector3();
   private readonly scratch = new Vector3();
   private readonly view: BodyView = {
@@ -155,6 +162,13 @@ export class RushBodySystem extends createSystem({
     root.updateMatrixWorld(true);
     // The face now rides the head bone, keeping where it is.
     head.attach(face);
+    // Her own ball head shrinks inside the face, which keeps its size; the
+    // head bone rises up the neck (in the neck bone's units).
+    face.position.divideScalar(BODY.headShrink);
+    face.scale.divideScalar(BODY.headShrink);
+    head.parent?.getWorldScale(WORLD_SCALE);
+    this.headRaiseLocal = BODY.neckRaise / (WORLD_SCALE.y || 1);
+    this.head = head;
 
     const seat = this.world.getSceneEntity('pouf')?.object3D;
     if (seat) {
@@ -220,9 +234,9 @@ export class RushBodySystem extends createSystem({
         this.walk(goal, place, delta, event);
     }
     this.place(root);
-    this.unturnKnees();
+    this.restorePose();
     this.mixer.update(delta);
-    this.turnKnees();
+    this.adjustPose();
     if (this.rush?.getValue(Rush, 'activity') !== this.activity) {
       this.rush?.setValue(Rush, 'activity', this.activity);
     }
@@ -283,10 +297,18 @@ export class RushBodySystem extends createSystem({
   }
 
   /**
-   * Straightens her knees as far as she has sat down, so her tucked-back
-   * feet clear the side of her seat.
+   * Adjusts the pose the clips set: her neck shows (the head bone raised,
+   * her own ball shrunk inside the face), and her knees straighten as far
+   * as she has sat down, so her tucked-back feet clear the side of her seat.
    */
-  private turnKnees(): void {
+  private adjustPose(): void {
+    const head = this.head;
+    if (head) {
+      this.headBase.copy(head.position);
+      head.position.y += this.headRaiseLocal;
+      head.scale.setScalar(BODY.headShrink);
+      this.headRaised = true;
+    }
     if (this.seated <= 0) return;
     this.kneeTurn.setFromAxisAngle(KNEE_AXIS, -BODY.sitKnee * this.seated);
     this.knees.forEach((knee, index) => {
@@ -296,8 +318,12 @@ export class RushBodySystem extends createSystem({
     this.kneesTurned = true;
   }
 
-  /** Takes last frame's knee turn off, so it never builds up. */
-  private unturnKnees(): void {
+  /** Takes last frame's adjustments off, so they never build up. */
+  private restorePose(): void {
+    if (this.headRaised && this.head) {
+      this.head.position.copy(this.headBase);
+      this.headRaised = false;
+    }
     if (!this.kneesTurned) return;
     this.knees.forEach((knee, index) => knee.quaternion.copy(this.kneeBase[index]));
     this.kneesTurned = false;

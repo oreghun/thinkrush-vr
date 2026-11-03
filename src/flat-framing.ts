@@ -44,7 +44,7 @@ export const MUST_SEE: readonly Vec3[] = [
   [0.5, 1.62, -1.4],
   // RUSH: her head by the table (src/rush-body-plan.ts STAGE_SPOT), which
   // also covers the floating RUSH beside the screen until her body loads.
-  [0.6, 1.11, -1.0],
+  [0.6, 1.16, -1.0],
   [0.66, 0.95, -1.0],
   [0.51, 0.98, -0.75],
   [-0.36, 0.72, -0.5],

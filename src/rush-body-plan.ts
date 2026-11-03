@@ -9,6 +9,18 @@ export const BODY = {
   /** Centre and radius of her ball head, standing: the face goes there. */
   headCenterY: 0.949,
   headRadius: 0.154,
+  /**
+   * Her short neck (about 4 cm, collar 0.76 m to the ball's foot 0.80 m)
+   * hid under the glowing face sphere, and the foot of her own ball, which
+   * bends with the neck, poked out of it (a dark jagged patch from the
+   * side). So her head bone moves neckRaise up her neck, which stretches
+   * the neck and carries the face up with it, and her own ball shrinks to
+   * headShrink about the head bone, inside the face. Measured in three.js
+   * over every move: nothing of the ball pokes out (0.03 m showed too
+   * little neck), and the sphere's foot is at 0.83 m, 7 cm above her collar.
+   */
+  neckRaise: 0.045,
+  headShrink: 0.8,
   /** Ground speed of the walk and run clips, so her feet do not slide. */
   walkSpeed: 0.69,
   runSpeed: 2.43,
@@ -32,6 +44,9 @@ export const BODY = {
   sitLift: -0.02,
   sitKnee: 0.7,
 } as const;
+
+/** The height of her face sphere's centre, standing (the neck raised). */
+export const FACE_CENTER_Y = BODY.headCenterY + BODY.neckRaise;
 
 /** The animation clip names in rush-body.glb, by what they are for. */
 export const CLIP = {
