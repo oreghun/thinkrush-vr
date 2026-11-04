@@ -1,52 +1,47 @@
 // RUSH with a body (the owner's rigged Meshy character): where she should
-// be and which move she plays, worked out from the puzzle board. Her face,
-// glow and voice stay those of the floating RUSH; this decides the body.
+// be and which move she plays, worked out from the puzzle board. Her voice
+// stays the floating RUSH's; this decides the body.
 //
 // No runtime imports, so Node's test runner can check it.
 
-/** Measured from public/models/rush/rush-body.glb (1.1 m tall, faces +Z). */
+/**
+ * Measured from public/models/rush/rush-body.glb: an original cartoon girl
+ * 1.1 m tall to the top of her hair puffs, facing +Z.
+ */
 export const BODY = {
-  /** Centre and radius of her ball head, standing: the face goes there. */
-  headCenterY: 0.949,
-  headRadius: 0.154,
   /**
-   * Her short neck (about 4 cm, collar 0.76 m to the ball's foot 0.80 m)
-   * hid under the glowing face sphere, and the foot of her own ball, which
-   * bends with the neck, poked out of it (a dark jagged patch from the
-   * side). So her head bone moves neckRaise up her neck, which stretches
-   * the neck and carries the face up with it, and her own ball shrinks to
-   * headShrink about the head bone, inside the face. Measured in three.js
-   * over every move: nothing of the ball pokes out (0.03 m showed too
-   * little neck), and the sphere's foot is at 0.83 m, 7 cm above her collar.
+   * Her head without the hair puffs (chin 0.82 m, about 0.25 m front to
+   * back): the centre and radius of a ball that stands for it. The SHOW
+   * move is measured from it.
    */
-  neckRaise: 0.045,
-  headShrink: 0.8,
+  headCenterY: 0.93,
+  headRadius: 0.13,
+  /** The top of her hair. */
+  topY: 1.1,
   /** Ground speed of the walk and run clips, so her feet do not slide. */
-  walkSpeed: 0.69,
-  runSpeed: 2.43,
+  walkSpeed: 0.84,
+  runSpeed: 2.95,
   /**
    * Her seat at home is the pouf (src/pouf-shape.ts). Her sitting moves
-   * were recorded on a chair about her own seat height, so she plays them
-   * as they are, feet on the floor; on the wooden stool (dished, rim higher
-   * than its middle) only her thighs met the rim and she floated from the
-   * side. Sitting down moves her hips 0.28 m back and 0.08 m to her right,
-   * so she stands sitBack in front of the pouf's middle (her hips land
-   * 0.11 m in front of it), settles sitLift into the cushion (it reads as
-   * soft) and straightens each knee by sitKnee (radians about the knee's
-   * own x axis) so her tucked-back feet clear the pouf's side. Fitted with
+   * were recorded on a chair (thighs nearly level, feet tucked back), so a
+   * soft seat at her own seat height fits them. Sitting down moves her hips
+   * 0.40 m back and 0.13 m to her right, so she stands sitBack in front of
+   * the pouf's middle, rises sitLift as she sits and straightens each knee
+   * by sitKnee (radians about the knee's own x axis) so her tucked-back
+   * feet clear the pouf's side and her toes stay on the floor. Fitted with
    * three.js on the posed model through the whole seated loop: her bottom
-   * rests on or 2-6 cm into the cushion (deepest for the moment she lands),
-   * her thighs at most 2.7 cm above it while she hugs her knees, and
-   * nothing of her legs or feet goes into it.
+   * rests on the cushion (0.1 cm into it to 0.3 cm above), her thighs at
+   * most 2.7 cm above it while she hugs her knees, nothing of her legs or
+   * feet goes into it, and her toes touch the floor.
    */
-  sitBack: 0.4,
-  sitSide: 0.08,
-  sitLift: -0.02,
-  sitKnee: 0.7,
+  sitBack: 0.46,
+  sitSide: 0.13,
+  sitLift: 0.025,
+  sitKnee: 0.3,
 } as const;
 
-/** The height of her face sphere's centre, standing (the neck raised). */
-export const FACE_CENTER_Y = BODY.headCenterY + BODY.neckRaise;
+/** The height of her head's centre, standing. */
+export const HEAD_CENTER_Y = BODY.headCenterY;
 
 /** The animation clip names in rush-body.glb, by what they are for. */
 export const CLIP = {
@@ -61,7 +56,7 @@ export const CLIP = {
   cheer: 'Victory_Cheer',
   jump: 'Happy_jump_f',
   shrug: 'Shrug',
-  dance: 'FunnyDancing_01',
+  dance: 'FunnyDancing_03',
   point: 'Checkout_Gesture',
   facepalm: 'Headache_Relief',
   sassy: 'Hand_on_Hip_Gesture',

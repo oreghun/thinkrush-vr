@@ -1367,8 +1367,9 @@ export class PuzzleSystem extends createSystem({
 
   /** Counts a held tile kept up close to RUSH for SHOW_SECONDS as a show. */
   private trackShow(tile: Entity, delta: number): void {
-    // RUSH's head: the glowing sphere, floating or on her body (the same
-    // object either way, so it is found once).
+    // RUSH's head: the glowing sphere when she floats, or the hidden ball
+    // the same size as her head riding her body (the same object either
+    // way, so it is found once).
     this.rushHead ??= this.rush?.object3D?.getObjectByName('Rush/Body');
     const head = this.rushHead;
     if (!head || this.answeredInHold.has(tile)) {

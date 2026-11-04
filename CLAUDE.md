@@ -45,6 +45,8 @@ Live build: https://oreghun.github.io/thinkrush-vr/
   Orbs are always available; voice is optional.
 - RUSH: a glowing sphere companion with expressive eyes that presents puzzles and
   reacts to answers. RUSH is also the timer: it shrinks and the music speeds up as time runs out.
+  (Superseded: RUSH is now a cartoon girl with no glow; the screen clock, the
+  music and her acting show the time. See Decisions, RUSH without a glow.)
 - Runs are 10 puzzles (about 4 minutes), each with its own short answer
   clock (owner, 2026-11-01: see Decisions, Round timing). Daily Challenge
   plus streaks bring players back.
@@ -97,7 +99,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-11-02, PRs 1-59 merged (6 answer orbs;
+As of 2026-11-04, PRs 1-60 merged (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -126,7 +128,8 @@ proverb gaps read as "blank"; 52 docs/headset-checklist.md and the
 owner's megaphone; 53 round timing: read, name, then a short answer
 clock; 54 RUSH's mouth, cheeky lines and voice; 55 the answer clock on
 every page; 56 RUSH's body; 57 and 58 first tries at seating her on the
-stool, superseded by 59 her pouf; then her neck):
+stool, superseded by 59 her pouf; 60 her neck (on the first body); then the
+new RUSH, a cartoon girl without a glow):
 
 Live on main
 
@@ -215,86 +218,75 @@ Live on main
   in the emulator: a smile at rest, a frown after a wrong pick, a thin
   line while paused; the chatter and the lines need a device voice (the
   emulator has none), so they wait for the headset.
-  Her body (2026-11-02; src/rush-body.ts RushBodySystem, rules in
-  src/rush-body-plan.ts with tests; model public/models/rush/rush-body.glb,
-  manifest id rush-body, background load): the owner's Meshy character, an
-  original ball-headed girl 1.1 m tall in a geometric-print tunic (front,
-  side and back views made with ChatGPT, then Meshy Image to 3D, a humanoid
-  auto-rig of 24 Mixamo-style bones, three.js names them mixamorigHead etc.,
-  and 18 library motions from the Meshy Agent, exported as one 24.8 MB GLB:
-  art/source/rush/). scripts/optimize-model.mjs (1024 px colour, flat
-  roughness) then scripts/compact-rig.mjs (keeps 15 moves, drops 5.4 MB of
-  unused accessors, rest-still tracks and TANGENT, pins four drifting moves
-  to Idle_3's spot) make it 1.84 MB. Until it loads, or if it fails, the
-  floating RUSH plays as before. Once in, Rush.embodied is set: the
-  floating RUSH's parts (glowing sphere, halo, eyes, mouth) are scaled to
-  her ball head (radius 0.154 m, centre 0.949 m, measured in Node) and ride
-  the head bone, covering the model's own ball. Her neck (owner asked
-  2026-11-02 "Does she have a neck?"; her design has a short one): it hid
-  under the face sphere, and the foot of her own ball, which bends with
-  the neck, poked out of the sphere (a dark jagged patch from the side).
-  Now, each frame after the clips (RushBodySystem.adjustPose, undone in
-  restorePose before the next mixer update, like the knee turn), her head
-  bone moves BODY.neckRaise 0.045 m up her neck, stretching it and carrying
-  the face up (FACE_CENTER_Y 0.994 m), and scales to BODY.headShrink 0.8, so
-  her own ball sits inside the face (the face is counter-scaled to keep its
-  size). Measured in three.js over every move: nothing of her ball pokes
-  out; the sphere's foot is at 0.83 m, 7 cm above her collar. Checked in
-  the emulator standing (front and side: a neck shows) and seated (no
-  patch); MUST_SEE's head top went to 1.16 m. RushSystem then keeps to
-  her glow, eyes and mouth and shows the clock by shrinking her halo (to
-  0.84) instead of her, and RushBodySystem moves her (Rush.move and
-  Rush.activity show the current move for checks). Places: STAGE_SPOT
-  (0.6, -1.0), beside and just behind the table, facing the seat, her head
-  31 degrees right and 12 below eye level (in the glasses' view; a test
-  checks); SHOW_SPOT (0.72, -0.42) by the table's right edge for the SHOW
-  move (her head about 0.65 m from a seated right shoulder; PuzzleSystem
-  now measures SHOW from the head sphere: radius + 0.11 m); the stool
-  her pouf (scene node "pouf"), where she sits after 6 s at home
-  (SEAT_AFTER_SECONDS). The seat (owner, 2026-11-02): on the wooden stool
-  she first sat inside it, then had her shins through its front edge, then
-  floated in front of it and above it from the side; her sitting moves
-  were recorded on a chair (thighs sloping a little, feet tucked back, a
-  knee hug from 4 to 10 s of the loop), and the stool is dished (rim higher
-  than its middle), so only her thighs met it. The owner chose a soft seat
-  built in code: src/scene-assets/pouf.scene-asset.ts (manifest id pouf),
-  shape in src/pouf-shape.ts (POUF 0.22 m radius, 0.24 m tall,
-  POUF_PROFILE a lathe profile: narrow foot, full side, domed cushion), a
-  kitenge-style print (orange, ink, gold, teal, cream from pattern-art's
-  kitenge colours) in a 64 x 256 DataTexture repeated 8 times round, one
-  lathe mesh of 880 triangles, one draw call, no shadow (a ContactShadow
-  node). It stands in the cabinet corner at (1.0, 0, 0.75) in the group,
-  0.12 m clear of the wooden stool, which stays as decor at its first size.
-  RushBodySystem reads the "pouf" node; she stands sitBack 0.4 m in front
-  of its middle (sitSpot, facing the stage), settles sitLift -0.02 m into
-  the cushion and straightens each knee by sitKnee 0.7 rad (about the
-  knee's x axis, undone before every mixer update so it never builds up)
-  so her tucked-back feet clear its side, all eased in by seatedShare
-  while her hips drop (50-75% of Stand_to_Sit, backwards as she stands).
-  Fitted in Node with three.js on the posed model through the whole loop:
-  her bottom on or 2-6 cm into the cushion (deepest the moment she lands),
-  thighs at most 2.7 cm above it during the knee hug, no leg or foot
-  inside. Checked in the emulator from the side, the front and the seat,
-  and standing again (walk back, wave). If it does not convince on the
-  headset, the owner can make a seat in Meshy instead.
-  She walks at 0.69 m/s and runs at 2.43 m/s (the clips' measured foot
+  Her body (src/rush-body.ts RushBodySystem, rules in src/rush-body-plan.ts
+  with tests; model public/models/rush/rush-body.glb, manifest id rush-body,
+  background load). Since 2026-11-04 it is the new RUSH: an original cartoon
+  girl, 1.1 m tall to the top of her two hair puffs (yellow headbands, gold
+  hoops, yellow T-shirt under an open orange vest with yellow zigzags, teal
+  belt and cargo trousers, orange and teal sneakers), drawn in ChatGPT from
+  the owner's design as a front, side and back turnaround, then Meshy
+  Multi-Image to 3D (remeshed to 10,425 triangles), a humanoid auto-rig of
+  24 bones (three.js names them mixamorigHead etc.; a headfront bone marks
+  the front of her face) and 18 library motions in one 19.4 MB GLB
+  (art/source/rush/rush-girl-*). scripts/optimize-model.mjs (1024 px colour,
+  flat roughness 0.6) then scripts/compact-rig.mjs (keeps 15 moves, drops
+  unused data, still tracks and TANGENT, pins Big_Wave_Hello,
+  FunnyDancing_03, Happy_jump_f and Victory_Cheer to Idle_3's spot) make it
+  2.43 MB. The first body (a ball-headed girl, 2026-11-02, with the glowing
+  sphere as her head, a halo for the clock and a stretched neck) is
+  retired; its sources stay in art/source/rush/rush-body-*.
+  No glow (owner, 2026-11-03, see Decisions): once she loads, Rush.embodied
+  is set and the floating RUSH's parts (sphere, halo, eyes, mouth) become a
+  hidden ball the size of her head (BODY.headCenterY 0.93 m, headRadius
+  0.13 m: her head without the puffs, chin at 0.82 m) riding her head bone;
+  PuzzleSystem measures the SHOW move from it (radius + 0.11 m). RushSystem
+  does nothing visual while she is embodied. She keeps her painted face for
+  now (big brown eyes, a smile); moving eyelids and a mouth are the next PR
+  (see Open questions). Until the body loads, or if it fails, the floating
+  glowing RUSH plays as before, still shrinking as the timer.
+  Places: STAGE_SPOT (0.6, -1.0), beside and just behind the table, facing
+  the seat, her head 31 degrees right and 12 below eye level (in the
+  glasses' view; a test checks); SHOW_SPOT (0.72, -0.42) by the table's
+  right edge for the SHOW move (her head about 0.65 m from a seated right
+  shoulder); her pouf (scene node "pouf"), where she sits after 6 s at home
+  (SEAT_AFTER_SECONDS). The pouf (built in code, owner's choice
+  2026-11-02, after the wooden stool left her inside it, then her shins
+  through its edge, then floating above it: her sitting moves were recorded
+  on a chair, and the stool is dished): src/scene-assets/pouf.scene-asset.ts
+  (manifest id pouf), shape in src/pouf-shape.ts (POUF 0.22 m radius, now
+  0.30 m tall for the new RUSH's longer legs; POUF_PROFILE a lathe profile:
+  narrow foot, full side, domed cushion), a kitenge-style print (orange,
+  ink, gold, teal, cream from pattern-art's kitenge colours) in a 64 x 256
+  DataTexture repeated 8 times round, one lathe mesh of 880 triangles, one
+  draw call, no shadow (a ContactShadow node). It stands in the cabinet
+  corner at (1.0, 0, 0.75) in the group, 0.12 m clear of the wooden stool,
+  which stays as decor. Sitting down moves her hips 0.40 m back and 0.13 m
+  to her right, so she stands sitBack 0.46 m in front of the pouf's middle
+  (sitSpot, facing the stage, sitSide 0.13), rises sitLift 0.025 m and
+  straightens each knee by sitKnee 0.3 rad (about the knee's x axis,
+  undone before every mixer update so it never builds up) so her
+  tucked-back feet clear its side and her toes stay on the floor, all
+  eased in by seatedShare while her hips drop (50-75% of Stand_to_Sit,
+  backwards as she stands). Fitted in Node with three.js on the posed model
+  through the whole loop: her bottom 0.1 cm into the cushion to 0.3 cm
+  above it, thighs at most 2.7 cm above it during the knee hug, no leg or
+  foot inside, toes on the floor.
+  She walks at 0.84 m/s and runs at 2.95 m/s (the clips' measured foot
   speeds) when more than 1.5 m from the table; stands up by playing the sit
   backwards at 1.6x. Moves (CLIP): idle Happy_Sway_Standing (home, reading
   without a voice), calm Idle_3 (clock running, paused), sassy
   Hand_on_Hip_Gesture (under 35% of the clock), talk Talk_with_Hands_Open
   (while speaking), wave on arriving from home, cheer Victory_Cheer or jump
-  Happy_jump_f on a solve, dance FunnyDancing_01 on a quick solve (60%+
+  Happy_jump_f on a solve, dance FunnyDancing_03 on a quick solve (60%+
   left) and at a run's end, point Checkout_Gesture on a wrong pick,
   facepalm Headache_Relief on a wrong move, shrug at time up; reactions
-  play 2.6 s at most, moves blend over 0.3 s. Point and laugh and a watch
-  check were not in the export; those two substitutes cover them.
-  Verified in the emulator: she walked to the stool and sat on it (seen
-  from the headset), stood up, ran and walked back and waved, played
-  idle, calm, sassy and shrug through a riddle, dance on a quick solve,
-  point on a wrong pick, walked to SHOW_SPOT and back; a visual puzzle
-  page draws 70 calls and 114k triangles with her (about 17k of them hers
-  and her shadow); no errors. The phone view keeps her head in frame
-  (MUST_SEE).
+  play 2.6 s at most, moves blend over 0.3 s. A watch check was made
+  separately in Meshy but is not in the export; the hip pose covers
+  impatience. Verified in the emulator (new RUSH, 2026-11-04): she loaded,
+  walked to the pouf and sat on it (side, front and seat views, no glow),
+  stood up, came back and waved, and stood beside the table through a
+  riddle in view of the seat. The phone view keeps her head in frame
+  (MUST_SEE: hair top 1.1 m).
 - Room set (src/room-pieces.ts, public/models/room/, tests in
   tests/room-pieces.test.ts): the owner's Meshy pieces replace the IWSDK
   starter's Scandinavian decor (decor.scene-asset.ts is gone). Each was
@@ -627,6 +619,17 @@ Live on main
 
 Decisions
 
+- RUSH without a glow (owner, 2026-11-03): the new RUSH is a cartoon girl
+  with her own head, and nothing on her glows. The answer clock shows on
+  the screen (every page), the music speeds up as it runs out, and her
+  acting carries it: calm while the clock runs, a hand on her hip under
+  35%, a shrug at time up. The tour's clock step now says "Keep an eye on
+  the clock on the screen. When time runs low, the music speeds up."
+  If players miss the clock on the Quest, a light strip along the table's
+  front edge that drains with the clock is the fallback idea. This
+  supersedes "RUSH is also the timer" in Game design. The floating RUSH
+  (shown only until her body loads, or if it fails) still shrinks.
+
 - Swahili after the competition (owner, 2026-10-31): the game ships English
   only; Swahili work starts after the submission and Meta's review.
   LANGUAGE_CHOICE = false in src/i18n/index.ts hides the home page's
@@ -737,16 +740,19 @@ Decisions
 
 Open questions (owner deciding, 2026-10-30)
 
-- A human cartoon face for RUSH (owner asked 2026-11-02, with a picture
-  of a girl with eyes, brows and lips): Meshy's rig has no face bones or
-  blend shapes, so the advice was code-built eyes, lids, brows and mouth
-  on her head bone with the painted ones covered, and a new home for the
-  timer glow. Not started.
-- RUSH's body is built (2026-11-02, see Live on main). Still open: the
-  owner confirms Meshy's terms cover the library motions (art/SOURCES.md),
-  and checks her on the headset (docs/headset-checklist.md section 2). If
-  she does not work out on the Quest by about Nov 12, remove the
-  rush-body manifest entry: the floating RUSH comes back on its own.
+- RUSH's face (next PR): Meshy's rig has no face bones or blend shapes,
+  and her eyes and mouth are painted on, so the plan (owner agreed
+  2026-11-03, no Blender) is skin-coloured lids built in code that close
+  over her painted eyes (blinks, sleepy eyes), and her painted mouth
+  covered in the texture with a code-built mouth in its place (smile,
+  frown, "o", talking while she reads), all riding her head bone and
+  driven by the moods RushSystem already works out.
+- RUSH's body (the new girl, 2026-11-04, see Live on main). Still open:
+  the owner confirms Meshy's terms cover the library motions
+  (art/SOURCES.md), and checks her on the headset
+  (docs/headset-checklist.md section 2). If she does not work out on the
+  Quest by about Nov 12, remove the rush-body manifest entry: the floating
+  RUSH comes back on its own.
 
 - Action twist follow-ups: moves for the answer orbs.
 

@@ -6,7 +6,7 @@ import {
   type BodyView,
   bodyEvent,
   CLIP,
-  FACE_CENTER_Y,
+  HEAD_CENTER_Y,
   type EventView,
   reactionClip,
   seatedShare,
@@ -94,7 +94,7 @@ test('she reacts to each answer with a move', () => {
 
 test('by the table her head stays in view on Meta VR Glasses', () => {
   // Seated eyes at 1.15 m, looking straight ahead (-Z).
-  const head = { x: STAGE_SPOT.x, y: FACE_CENTER_Y, z: STAGE_SPOT.z };
+  const head = { x: STAGE_SPOT.x, y: HEAD_CENTER_Y, z: STAGE_SPOT.z };
   const across = (Math.atan2(head.x, -head.z) * 180) / Math.PI;
   const down = (Math.atan2(head.y - 1.15, -head.z) * 180) / Math.PI;
   assert.ok(Math.abs(across) <= 34, `${across.toFixed(1)} degrees across (37 is the edge)`);
@@ -111,7 +111,7 @@ test('she never stands inside the table', () => {
   }
   // SHOW is within a seated reach: her head within 0.65 m of the right shoulder.
   const shoulder = { x: 0.18, y: 0.98, z: -0.05 };
-  const reach = Math.hypot(SHOW_SPOT.x - shoulder.x, FACE_CENTER_Y - shoulder.y, SHOW_SPOT.z - shoulder.z);
+  const reach = Math.hypot(SHOW_SPOT.x - shoulder.x, HEAD_CENTER_Y - shoulder.y, SHOW_SPOT.z - shoulder.z);
   assert.ok(reach <= 0.7, `head ${reach.toFixed(2)} m from the shoulder`);
 });
 
@@ -153,15 +153,15 @@ test('she rises onto the seat only while her hips come down', () => {
 test('the pouf is the seat her sit was fitted to', () => {
   // sitBack, sitLift and sitKnee were fitted to this pouf (see BODY): a
   // different seat needs them fitted again.
-  assert.deepEqual(POUF, { radius: 0.22, height: 0.24 });
+  assert.deepEqual(POUF, { radius: 0.22, height: 0.3 });
   // Its top is its highest point and its foot sits inside its widest part,
   // so her tucked feet have room under the bulge.
   const tops = POUF_PROFILE.map(([, up]) => up);
   assert.equal(Math.max(...tops), 1);
   const footRadius = POUF_PROFILE[1][0];
   assert.ok(footRadius < Math.max(...POUF_PROFILE.map(([across]) => across)));
-  // She settles into the cushion a little, never more than a soft seat gives.
-  assert.ok(BODY.sitLift <= 0 && BODY.sitLift >= -0.03);
+  // She rises or settles only a little: the pouf is cut to her seat height.
+  assert.ok(Math.abs(BODY.sitLift) <= 0.03);
   // She stands clear of the pouf before sitting down onto it.
   assert.ok(BODY.sitBack > POUF.radius + 0.1);
 });
