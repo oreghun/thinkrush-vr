@@ -65,16 +65,15 @@ you can click around in.
 > guessing through the choices never pays. You sit in a clay-walled room with a beamed ceiling,
 > a plank door, and two windows looking out on hills and acacia trees
 > against the evening sky, all built in code.
-> RUSH, your companion, is the timer: a little cartoon girl with a glowing
-> golden ball for a head, who stands beside the table (she starts as a
-> floating ball until her body has loaded). Her glow turns red and her halo
-> shrinks as time runs out, she talks with her hands while she reads, gets
-> impatient as the clock runs low, and reacts to every answer with a cheer,
-> a silly dance, a shrug or a facepalm. At home she strolls over to her
-> patterned pouf in the corner and sits down; pick a world and she runs back. Her
-> mouth moves while she talks and shows her mood (a grin, a frown, a
-> surprised "o", a sleepy line), and after each answer she has a cheeky
-> word for you ("Ooh, smarty pants!", "Tick tock, too slow!").
+> RUSH, your companion, is a cartoon girl with two big hair puffs who
+> stands beside the table (a glowing floating ball stands in for her until
+> she has loaded). The clock on the screen counts each answer down and the
+> music speeds up as it runs out, while RUSH talks with her hands as she
+> reads, gets impatient as the clock runs low, and reacts to every answer
+> with a cheer, a silly dance, a shrug or a facepalm. At home she strolls
+> over to her patterned pouf in the corner and sits down; pick a world and
+> she runs back. After each answer she has a cheeky word for you ("Ooh,
+> smarty pants!", "Tick tock, too slow!").
 
 ## Run it locally
 

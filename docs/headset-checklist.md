@@ -43,10 +43,8 @@ Report: the lowest fps and the most "late" you saw, and where.
 - [ ] She talks with her hands while the question is read, puts a hand on
       her hip as the clock runs low, shrugs at time up, cheers or dances on
       a solve, gestures after a wrong pick, holds her head after a wrong move.
-- [ ] Her face (eyes, mouth) stays on her head through every move, and her
-      halo shrinks and turns red with the clock.
-- [ ] A short neck shows under her head, and nothing dark pokes out of the
-      bottom of her glowing head when she bends it (look from the side).
+- [ ] She looks right up close: face, hair puffs and earrings hold their
+      shape through every move, and nothing glows on her.
 - [ ] SHOW move: she comes to the table's right edge, close enough to show
       her the object.
 - [ ] Frame rate with her walking (the `?fps` line).
@@ -54,12 +52,12 @@ Report: the lowest fps and the most "late" you saw, and where.
 ## 3. How to play (the tour)
 
 - [ ] Entering VR for the first time starts the tour on its own.
-- [ ] The voice reads every step, and RUSH pulses while it speaks.
+- [ ] The voice reads every step, and RUSH talks with her hands while it speaks.
 - [ ] Step 1: picking up any object moves on.
 - [ ] Step 2: dropping the right object on the tray says Correct.
 - [ ] Step 3: pointing at the right orb and pinching solves the riddle.
-- [ ] Step 4: RUSH's glow (her halo) shrinks and turns red, the music speeds
-      up, then it comes back.
+- [ ] Step 4: the clock on the screen runs down, the music speeds up, then
+      the clock comes back.
 - [ ] Step 5: turning a palm up shows the Paused page; palm up again ends the
       tour on the home page.
 - [ ] Skip tour works with a real pinch.

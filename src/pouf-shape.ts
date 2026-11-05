@@ -4,8 +4,8 @@
 //
 // No runtime imports.
 
-/** Size in metres: 44 cm across at its widest, 24 cm tall in the middle. */
-export const POUF = { radius: 0.22, height: 0.24 } as const;
+/** Size in metres: 44 cm across at its widest, 30 cm tall in the middle. */
+export const POUF = { radius: 0.22, height: 0.3 } as const;
 
 /**
  * The pouf's side seen in section, from the middle of its base out and up

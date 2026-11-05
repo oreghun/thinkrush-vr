@@ -52,26 +52,24 @@ const ARRIVED = 0.04;
 const STEP_ANGLE = 0.6;
 // Standing up is sitting down played backwards, this much faster.
 const STAND_UP_SPEED = 1.6;
-// Her head sphere is this much bigger than the model's own ball, so it
-// covers it.
-const HEAD_COVER = 1.04;
 // Her knee bones, which straighten while she sits (BODY.sitKnee).
 const KNEES = ['mixamorigLeftLeg', 'mixamorigRightLeg'];
 const KNEE_AXIS = new Vector3(1, 0, 0);
-const WORLD_SCALE = new Vector3();
 
 type Activity = 'stand' | 'move' | 'sitDown' | 'sit' | 'standUp';
 
 /**
  * RUSH's body: the owner's rigged character (public/models/rush/), loaded
  * in the background. Until it arrives (or if it never does) the floating
- * RUSH plays as before. Once it is in, the floating RUSH's head parts (the
- * glowing sphere, halo, eyes and mouth) become her head, riding the model's
- * head bone, and this system walks her about and plays her moves from the
- * board (src/rush-body-plan.ts): by the table during a puzzle, to her pouf
- * at home, within reach for the SHOW move, talking while she reads, a cheer,
- * a dance, a shrug or a facepalm after each answer. She moves; the player's
- * view never does.
+ * RUSH plays as before. Once it is in, she is a cartoon girl with her own
+ * head and face, and no glow (owner, 2026-11-03: the screen clock, the
+ * music and her acting show the time). The floating RUSH's parts stay as a
+ * hidden ball riding her head bone, sized to her head, which the SHOW move
+ * is measured from. This system walks her about and plays her moves from
+ * the board (src/rush-body-plan.ts): by the table during a puzzle, to her
+ * pouf at home, within reach for the SHOW move, talking while she reads, a
+ * cheer, a dance, a shrug or a facepalm after each answer. She moves; the
+ * player's view never does.
  */
 export class RushBodySystem extends createSystem({
   rushes: { required: [Rush] },
@@ -98,12 +96,6 @@ export class RushBodySystem extends createSystem({
   private readonly kneeBase = KNEES.map(() => new Quaternion());
   private kneesTurned = false;
   private readonly kneeTurn = new Quaternion();
-  // Her head bone, raised up her neck (BODY.neckRaise) each frame after the
-  // clips have set it, and where the clips left it.
-  private head?: Object3D;
-  private readonly headBase = new Vector3();
-  private headRaised = false;
-  private headRaiseLocal = 0;
   private readonly feet = new Vector3();
   private readonly scratch = new Vector3();
   private readonly view: BodyView = {
@@ -138,12 +130,14 @@ export class RushBodySystem extends createSystem({
     this.rush = rush;
     rush.setValue(Rush, 'embodied', true);
 
-    // Her head: the floating RUSH's parts, sized to the model's ball head.
+    // The floating RUSH's parts become a hidden ball the size of her head,
+    // riding it: the SHOW move is measured from it (Rush/Body).
     const face = new Group();
     face.name = 'Rush/Face';
     for (const part of [...root.children]) face.add(part);
     face.position.set(0, BODY.headCenterY, 0);
-    face.scale.setScalar((BODY.headRadius * HEAD_COVER) / RUSH_RADIUS);
+    face.scale.setScalar(BODY.headRadius / RUSH_RADIUS);
+    face.visible = false;
 
     // Her feet go on the floor at her spot by the table, facing the seat.
     root.scale.setScalar(1);
@@ -160,15 +154,8 @@ export class RushBodySystem extends createSystem({
     });
     root.add(model, face);
     root.updateMatrixWorld(true);
-    // The face now rides the head bone, keeping where it is.
+    // The ball now rides the head bone, keeping where it is.
     head.attach(face);
-    // Her own ball head shrinks inside the face, which keeps its size; the
-    // head bone rises up the neck (in the neck bone's units).
-    face.position.divideScalar(BODY.headShrink);
-    face.scale.divideScalar(BODY.headShrink);
-    head.parent?.getWorldScale(WORLD_SCALE);
-    this.headRaiseLocal = BODY.neckRaise / (WORLD_SCALE.y || 1);
-    this.head = head;
 
     const seat = this.world.getSceneEntity('pouf')?.object3D;
     if (seat) {
@@ -297,18 +284,10 @@ export class RushBodySystem extends createSystem({
   }
 
   /**
-   * Adjusts the pose the clips set: her neck shows (the head bone raised,
-   * her own ball shrunk inside the face), and her knees straighten as far
-   * as she has sat down, so her tucked-back feet clear the side of her seat.
+   * Adjusts the pose the clips set: her knees straighten as far as she has
+   * sat down, so her tucked-back feet clear the side of her seat.
    */
   private adjustPose(): void {
-    const head = this.head;
-    if (head) {
-      this.headBase.copy(head.position);
-      head.position.y += this.headRaiseLocal;
-      head.scale.setScalar(BODY.headShrink);
-      this.headRaised = true;
-    }
     if (this.seated <= 0) return;
     this.kneeTurn.setFromAxisAngle(KNEE_AXIS, -BODY.sitKnee * this.seated);
     this.knees.forEach((knee, index) => {
@@ -320,10 +299,6 @@ export class RushBodySystem extends createSystem({
 
   /** Takes last frame's adjustments off, so they never build up. */
   private restorePose(): void {
-    if (this.headRaised && this.head) {
-      this.head.position.copy(this.headBase);
-      this.headRaised = false;
-    }
     if (!this.kneesTurned) return;
     this.knees.forEach((knee, index) => knee.quaternion.copy(this.kneeBase[index]));
     this.kneesTurned = false;
