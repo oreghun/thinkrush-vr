@@ -11,5 +11,8 @@ export const Rush = createComponent('Rush', {
   // The body's current move (a CLIP key) and what she is doing (walking,
   // sitting...), for debugging and checks; written only when they change.
   move: { type: Types.String, default: '' },
+  // Her mood (a Mood name), worked out by RushSystem, shown on her face by
+  // RushBodySystem once she has her body.
+  mood: { type: Types.String, default: 'idle' },
   activity: { type: Types.String, default: '' },
 });

@@ -208,7 +208,11 @@ export class RushSystem extends createSystem({
       (rushScale(fraction) - this.scale) * (1 - Math.exp(-SCALE_RATE * delta));
     if (this.rush?.getValue(Rush, 'embodied')) {
       // With a body (RushBodySystem moves her) she has her own head and no
-      // glow: these parts are a hidden marker on it, nothing to show.
+      // glow: these parts are a hidden marker on it. Her face shows the
+      // mood, which RushBodySystem reads from here.
+      if (this.rush.getValue(Rush, 'mood') !== mood) {
+        this.rush.setValue(Rush, 'mood', mood);
+      }
       return;
     }
     object.scale.setScalar(this.scale);

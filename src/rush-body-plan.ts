@@ -18,6 +18,12 @@ export const BODY = {
   headRadius: 0.13,
   /** The top of her hair. */
   topY: 1.1,
+  /**
+   * Her mouth's skin moves with her head and a little with her neck (its
+   * head weight averages 0.91, measured on the model): her code-built mouth
+   * is placed this share of the way from her neck's motion to her head's.
+   */
+  mouthHeadShare: 0.9,
   /** Ground speed of the walk and run clips, so her feet do not slide. */
   walkSpeed: 0.84,
   runSpeed: 2.95,

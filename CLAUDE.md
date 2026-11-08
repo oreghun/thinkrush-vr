@@ -99,7 +99,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-11-04, PRs 1-60 merged (6 answer orbs;
+As of 2026-11-08, PRs 1-61 merged (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -128,8 +128,8 @@ proverb gaps read as "blank"; 52 docs/headset-checklist.md and the
 owner's megaphone; 53 round timing: read, name, then a short answer
 clock; 54 RUSH's mouth, cheeky lines and voice; 55 the answer clock on
 every page; 56 RUSH's body; 57 and 58 first tries at seating her on the
-stool, superseded by 59 her pouf; 60 her neck (on the first body); then the
-new RUSH, a cartoon girl without a glow):
+stool, superseded by 59 her pouf; 60 her neck (on the first body); 61 the
+new RUSH, a cartoon girl without a glow; then her moving face):
 
 Live on main
 
@@ -239,11 +239,47 @@ Live on main
   is set and the floating RUSH's parts (sphere, halo, eyes, mouth) become a
   hidden ball the size of her head (BODY.headCenterY 0.93 m, headRadius
   0.13 m: her head without the puffs, chin at 0.82 m) riding her head bone;
-  PuzzleSystem measures the SHOW move from it (radius + 0.11 m). RushSystem
-  does nothing visual while she is embodied. She keeps her painted face for
-  now (big brown eyes, a smile); moving eyelids and a mouth are the next PR
-  (see Open questions). Until the body loads, or if it fails, the floating
-  glowing RUSH plays as before, still shrinking as the timer.
+  PuzzleSystem measures the SHOW move from it (radius + 0.11 m). While she
+  is embodied, RushSystem shows nothing itself: it writes her mood to
+  Rush.mood, and her face shows it. Until the body loads, or if it fails,
+  the floating glowing RUSH plays as before, still shrinking as the timer.
+  Her face (2026-11-08; src/rush-face.ts GirlFace, fitted data in
+  src/rush-face-shape.ts with tests): Meshy gives no face rig and her eyes
+  and smile were painted on. scripts/paint-face.mjs painted the smile out
+  of her texture (each texel under the lips and teeth, found by drawing
+  her face's triangles into the texture, filled from the skin around by
+  repeated averaging over face texels only, plus two texels into the
+  margin where filtering reads; JPEG 90; run once after optimizing her),
+  so her carved lips now read as a soft closed smile. scripts/fit-face.mjs
+  (run after it) writes src/rush-face-shape.ts: for each eye a lid, a 12 x
+  8 grid over an ellipse (centre x +-0.0485, y 0.916, half-sizes 0.0305 x
+  0.027 m) bridged over the smooth skin around the eye (a quadratic fitted
+  to a ring of her face outside it: her coarse mesh sculpts the eyes and
+  lips, so a patch that followed it shaded as a lumpy smudge) and domed
+  3.5 mm off it, its top edge tucked 0.5 mm into her skin and its bottom
+  edge 0.8 mm proud; a check fails if her face rises through a lid over
+  the paint (it stays 2.3-2.6 mm under). Each lid samples one texel, the
+  spot closest to the median skin in a ring round the eye, through her own
+  material (so the same light), times 0.93; a lash line is a dark band
+  (0.1) along its bottom edge, 30% of a row deep; an "open" morph slides
+  every point to the top of its column, and lidOpenness(mood) in
+  rush-mood.ts sets it: open 1 (idle, surprised), 0.82 happy, 0.78
+  worried, 0.42 sleepy, shut for 0.12 s every 2.5-5.5 s (a blink), eased
+  at 30/s; a lid hides when fully open. The lids ride her head bone (face
+  head weight 0.97-1). Her mouth is built in code (open oval 2.9 x 1.8 cm
+  with teeth and a tongue; a lip arc of radius 1.6 cm flattened to 45%,
+  smile or frown) at (x -0.0015, y 0.851), 1 mm in front of her carved
+  lips (6.1 mm out from the smooth skin), shaped by mouthShape(mood,
+  talking) as the floating mouth was (chatter while isSpeaking(), smile,
+  bigger smile, frown, "o", thin line), eased at 28/s; it is placed each
+  frame between two markers on her head and neck bones,
+  BODY.mouthHeadShare 0.9 of the way to the head (her mouth's skin is 0.91
+  head-weighted), so it stays on her lips when she bends her neck. Up to 5
+  more draw calls (lids only while closing). Verified in the emulator: a
+  sleepy face at time up, a smile when calm and sassy, the face following
+  her head; close-ups of every mood rendered in Chromium (blink, sleepy,
+  worried frown, "o", talking open). The talking mouth needs a device
+  voice (the emulator has none), so it waits for the headset.
   Places: STAGE_SPOT (0.6, -1.0), beside and just behind the table, facing
   the seat, her head 31 degrees right and 12 below eye level (in the
   glasses' view; a test checks); SHOW_SPOT (0.72, -0.42) by the table's
@@ -740,13 +776,9 @@ Decisions
 
 Open questions (owner deciding, 2026-10-30)
 
-- RUSH's face (next PR): Meshy's rig has no face bones or blend shapes,
-  and her eyes and mouth are painted on, so the plan (owner agreed
-  2026-11-03, no Blender) is skin-coloured lids built in code that close
-  over her painted eyes (blinks, sleepy eyes), and her painted mouth
-  covered in the texture with a code-built mouth in its place (smile,
-  frown, "o", talking while she reads), all riding her head bone and
-  driven by the moods RushSystem already works out.
+- RUSH's face is built (2026-11-08, see Live on main). Ideas if wanted:
+  lip shapes from the speech's word boundaries, and eyes that look at the
+  player (her irises are painted, so it would mean code-built irises).
 - RUSH's body (the new girl, 2026-11-04, see Live on main). Still open:
   the owner confirms Meshy's terms cover the library motions
   (art/SOURCES.md), and checks her on the headset
@@ -824,6 +856,10 @@ Working notes
   over 800 in xr run-sequence). Prove the logic with a ray click from a
   controller held 0.7 m or more from the screen (closer, touch takes over
   and the ray stops pressing), and leave the fingertip tap to the Quest.
+- RUSH's model pipeline, in order: scripts/optimize-model.mjs, then
+  scripts/compact-rig.mjs (moves), then scripts/paint-face.mjs (smile out
+  of the texture), then scripts/fit-face.mjs (lids and mouth data; it
+  fails if a lid would let her face through). A new model needs all four.
 - Script edits must assert their match: one silent no-op left MovablePanel
   out of components.ts and every scene load failed with "not present in the
   active component catalog". Components must be declared in system-free
