@@ -9,8 +9,10 @@ import {
   LoopOnce,
   LoopRepeat,
   Mesh,
-  type Object3D,
+  MeshStandardMaterial,
+  Object3D,
   Quaternion,
+  SkinnedMesh,
   Vector3,
 } from '@iwsdk/core';
 import { Move } from './moves.js';
@@ -39,7 +41,8 @@ import {
   yawToward,
 } from './rush-body-plan.js';
 import { Rush } from './rush-component.js';
-import { timeFraction } from './rush-mood.js';
+import { GirlFace } from './rush-face.js';
+import { type MoodName, timeFraction } from './rush-mood.js';
 import { RUSH_RADIUS } from './scene-assets/rush.scene-asset.js';
 
 // Moves blend into each other over this long, so she never snaps.
@@ -98,6 +101,17 @@ export class RushBodySystem extends createSystem({
   private readonly kneeTurn = new Quaternion();
   private readonly feet = new Vector3();
   private readonly scratch = new Vector3();
+  // Her moving face (lids, mouth), and two markers that ride her head and
+  // neck at the mouth's place: the mouth sits between them each frame.
+  private girl?: GirlFace;
+  private readonly mouthOnHead = new Object3D();
+  private readonly mouthOnNeck = new Object3D();
+  private readonly headPoint = new Vector3();
+  private readonly neckPoint = new Vector3();
+  private readonly headTurn = new Quaternion();
+  private readonly neckTurn = new Quaternion();
+  private readonly rootTurn = new Quaternion();
+  private faceTime = 0;
   private readonly view: BodyView = {
     mode: '',
     phase: '',
@@ -156,6 +170,25 @@ export class RushBodySystem extends createSystem({
     root.updateMatrixWorld(true);
     // The ball now rides the head bone, keeping where it is.
     head.attach(face);
+
+    // Her moving face, built at rest like the ball: the lids ride her head
+    // bone; the mouth is placed each frame between her head and neck.
+    let skin: MeshStandardMaterial | undefined;
+    model.traverse((object) => {
+      if (object instanceof SkinnedMesh && object.material instanceof MeshStandardMaterial) {
+        skin = object.material;
+      }
+    });
+    const neck = model.getObjectByName('mixamorigNeck');
+    if (skin && neck) {
+      const girl = new GirlFace(skin);
+      root.add(...girl.lids, girl.mouth, this.mouthOnHead, this.mouthOnNeck);
+      root.updateMatrixWorld(true);
+      for (const lid of girl.lids) head.attach(lid);
+      head.attach(this.mouthOnHead);
+      neck.attach(this.mouthOnNeck);
+      this.girl = girl;
+    }
 
     const seat = this.world.getSceneEntity('pouf')?.object3D;
     if (seat) {
@@ -224,6 +257,7 @@ export class RushBodySystem extends createSystem({
     this.restorePose();
     this.mixer.update(delta);
     this.adjustPose();
+    this.showFace(root, delta);
     if (this.rush?.getValue(Rush, 'activity') !== this.activity) {
       this.rush?.setValue(Rush, 'activity', this.activity);
     }
@@ -295,6 +329,30 @@ export class RushBodySystem extends createSystem({
       knee.quaternion.multiply(this.kneeTurn);
     });
     this.kneesTurned = true;
+  }
+
+  /**
+   * Places her mouth where her skin there is (it moves with her head and a
+   * little with her neck: BODY.mouthHeadShare), and shows her mood and
+   * talking on her face.
+   */
+  private showFace(root: Object3D, delta: number): void {
+    const girl = this.girl;
+    if (!girl) return;
+    this.faceTime += delta;
+    this.mouthOnHead.getWorldPosition(this.headPoint);
+    this.mouthOnHead.getWorldQuaternion(this.headTurn);
+    this.mouthOnNeck.getWorldPosition(this.neckPoint);
+    this.mouthOnNeck.getWorldQuaternion(this.neckTurn);
+    const share = BODY.mouthHeadShare;
+    girl.mouth.position.lerpVectors(this.neckPoint, this.headPoint, share);
+    root.worldToLocal(girl.mouth.position);
+    root.getWorldQuaternion(this.rootTurn).invert();
+    girl.mouth.quaternion
+      .slerpQuaternions(this.neckTurn, this.headTurn, share)
+      .premultiply(this.rootTurn);
+    const mood = String(this.rush?.getValue(Rush, 'mood') ?? 'idle') as MoodName;
+    girl.update(mood, isSpeaking(), this.faceTime, delta);
   }
 
   /** Takes last frame's adjustments off, so they never build up. */

@@ -4,6 +4,7 @@ import {
   baseMood,
   type BoardView,
   glowColor,
+  lidOpenness,
   Mood,
   Reaction,
   reactionMood,
@@ -115,4 +116,14 @@ test('a quiet mouth shows the mood', () => {
   assert.ok(surprised.open > 0.5 && surprised.width < 0.7 && surprised.smile === 0);
   const sleepy = mouthShape(Mood.Sleepy, false, 0);
   assert.ok(sleepy.open < 0.3 && sleepy.smile === 0);
+});
+
+test("the girl's lids follow the mood, and only sleepy ones droop far", () => {
+  assert.equal(lidOpenness(Mood.Idle), 1);
+  assert.equal(lidOpenness(Mood.Surprised), 1);
+  for (const mood of [Mood.Happy, Mood.Worried]) {
+    const open = lidOpenness(mood);
+    assert.ok(open > 0.6 && open < 1, `${mood}: ${open}`);
+  }
+  assert.ok(lidOpenness(Mood.Sleepy) < 0.5);
 });

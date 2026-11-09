@@ -72,8 +72,10 @@ you can click around in.
 > reads, gets impatient as the clock runs low, and reacts to every answer
 > with a cheer, a silly dance, a shrug or a facepalm. At home she strolls
 > over to her patterned pouf in the corner and sits down; pick a world and
-> she runs back. After each answer she has a cheeky word for you ("Ooh,
-> smarty pants!", "Tick tock, too slow!").
+> she runs back. She blinks, her eyes droop when she's sleepy, and her mouth
+> moves while she talks and shows her mood (a grin, a frown, a surprised
+> "o"). After each answer she has a cheeky word for you ("Ooh, smarty
+> pants!", "Tick tock, too slow!").
 
 ## Run it locally
 

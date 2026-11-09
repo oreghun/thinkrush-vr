@@ -165,3 +165,21 @@ export function mouthShape(mood: MoodName, talking: boolean, time: number): Mout
       return { open: 0, width: 1, smile: 1, smileSize: 1 };
   }
 }
+
+/**
+ * How open her eyelids are for a mood (1 open, 0 shut), on the girl's
+ * painted eyes: her lids can only cover them, so surprise stays fully open
+ * and a pleased smile narrows them a little.
+ */
+export function lidOpenness(mood: MoodName): number {
+  switch (mood) {
+    case Mood.Happy:
+      return 0.82;
+    case Mood.Worried:
+      return 0.78;
+    case Mood.Sleepy:
+      return 0.42;
+    default:
+      return 1;
+  }
+}

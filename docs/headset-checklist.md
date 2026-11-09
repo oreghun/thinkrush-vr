@@ -45,6 +45,11 @@ Report: the lowest fps and the most "late" you saw, and where.
       a solve, gestures after a wrong pick, holds her head after a wrong move.
 - [ ] She looks right up close: face, hair puffs and earrings hold their
       shape through every move, and nothing glows on her.
+- [ ] Her face: she blinks every few seconds, her eyes droop when paused or
+      at time up, her mouth smiles at rest, frowns after a wrong pick, makes
+      an "o" after a wrong move, and opens and closes while she reads aloud
+      (needs the headset's voice). The lids and mouth stay on her face as she
+      moves and bends her head; no old painted smile shows.
 - [ ] SHOW move: she comes to the table's right edge, close enough to show
       her the object.
 - [ ] Frame rate with her walking (the `?fps` line).
