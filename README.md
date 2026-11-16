@@ -1,11 +1,13 @@
 # ThinkRush VR
 
 ThinkRush VR is a seated, hands-first puzzle game for Meta Quest and Meta VR
-Glasses. You sit at a virtual table and solve quick visual puzzles, riddles,
-proverbs and _mafumbo_ (cryptic stories) by pinching, grabbing and poking with
-your hands. No controllers are needed. The game is free, in English with
-Swahili as a second language, and runs in the browser with Meta's
-[Immersive Web SDK](https://iwsdk.dev) (IWSDK).
+Glasses. You sit at a table in a clay-walled studio while RUSH, a cheeky
+cartoon host, reads each puzzle aloud, names the choices and reacts to every
+answer. You answer with your hands: pinch an object and pick it up, point at
+an orb and pinch, turn a piece until it fits. No controllers are needed. The
+game is free, in English, and runs in the browser with Meta's
+[Immersive Web SDK](https://iwsdk.dev) (IWSDK). A Swahili edition comes after
+the competition.
 
 It is an entry for the Meta VR Start Developer Competition 2026 (Gaming track,
 New Experience division).
@@ -14,68 +16,99 @@ New Experience division).
 
 On a Quest, open that link in the Browser and choose **Enter VR**. With hand
 tracking turned on in the headset's settings, put the controllers down and the
-game switches to your hands. On a computer, the same link shows a 3D preview
-you can click around in.
+game switches to your hands. The first time you enter VR, a short tour shows
+you how to play. On a computer, the same link shows a 3D preview you can click
+around in (the pieces on the table need hands, so those puzzles run out of
+time there).
 
-> Status: 60 English draft puzzles are playable, one at a time: ten each of
-> visual puzzles, riddles, proverbs, mafumbo stories, patterns and objects. One glass screen,
-> floating above the table, opens on the home page: pick
-> a world (visual, riddles, proverbs or mafumbo) and the same screen turns
-> into the puzzle page; its Home button comes back. A visual puzzle
-> puts four objects on the table under a clue such as "Three of these let
-> you in. Which one keeps you out?" Pick the one it points to, then do the
-> move the screen asks for: drop it on the tray, flip it over, lift it
-> above your head, or show it to RUSH, who comes within reach for that. The right object with the wrong move is "Right answer,
-> wrong move!", so read (or listen) carefully. New moves arrive one at a
-> time. The objects are built in code and stand on identical wooden display
-> stands, all at one size; abstract ones, like a password, appear as a word
-> card set into the stand. Pattern puzzles ("Complete the pattern") lay a
-> strip of six cloth pieces on a small lectern where the tray stands, with
-> one gap; the four stands carry candidate pieces, and you drop the right
-> one in the gap. Every pattern is drawn in code in five families (kitenge-
-> and kanga-inspired, beadwork, tessellation, weave, abstract) and each
-> board is dealt fresh from the puzzle's rule. Object puzzles ("Complete the
-> giraffe") stand a little figure built of blocks on the lectern with a
-> chunk missing; the four stands carry candidate chunks, shown turned. Pick
-> the right one, turn it to fit and let it go at the gap: it snaps in.
-> Riddles, proverbs and mafumbo use three answer orbs you
-> point at and pinch. Ten Swahili methali drafts are kept separately in
-> `content/methali-drafts.json` for fluent-language review and are not loaded
-> into gameplay yet. Next puzzle (always available) steps through the bank, and a
-> Category button narrows browsing and runs to one puzzle type. Each puzzle
-> plays the same way: the question types out word by word while RUSH reads
-> it (the music drops to a background level), then the choices appear one
-> at a time while RUSH names them, and the moment RUSH stops, a short answer
-> clock starts: 10 seconds for the orbs, 15 for a picture puzzle, 20 for a
-> pattern or a missing piece. Time up, a wrong pick, or the right pick with
-> the wrong move loses the puzzle; in practice, **Try again** replays it
-> with its hint. The clock starts on its own on any page, in VR or not (on
-> a flat page the pieces on the table need hands, so those puzzles run
-> out of time). In VR the screen floats
-> about 1.4 m away, sized so its text reads easily. Press **Closer** to
-> bring it within reach and tap its buttons with a fingertip; press **Push
-> back** to send it back. A new puzzle sends it back on its own. On a flat
-> screen, drag empty space to look around. On a phone held upright the view steps back so the screen and
-> the table still fit. Each new puzzle
-> is read aloud by a voice built into your device (see "Read aloud" below).
-> Press Start a 10-puzzle run for a
-> scored set of shuffled puzzles: each moves on by itself, Skip gives one
-> up, a solve scores its difficulty times ten plus a point for every second
-> left, and your best score stays on your device. One pick per puzzle, so
-> guessing through the choices never pays. You sit in a clay-walled room with a beamed ceiling,
-> a plank door, and two windows looking out on hills and acacia trees
-> against the evening sky, all built in code.
-> RUSH, your companion, is a cartoon girl with two big hair puffs who
-> stands beside the table (a glowing floating ball stands in for her until
-> she has loaded). The clock on the screen counts each answer down and the
-> music speeds up as it runs out, while RUSH talks with her hands as she
-> reads, gets impatient as the clock runs low, and reacts to every answer
-> with a cheer, a silly dance, a shrug or a facepalm. At home she strolls
-> over to her patterned pouf in the corner and sits down; pick a world and
-> she runs back. She blinks, her eyes droop when she's sleepy, and her mouth
-> moves while she talks and shows her mood (a grin, a frown, a surprised
-> "o"). After each answer she has a cheeky word for you ("Ooh, smarty
-> pants!", "Tick tock, too slow!").
+## How it plays
+
+Pick a world on the home screen. There are six worlds and 60 English
+puzzles, ten in each:
+
+- **Riddle Garden**, **Wisdom Courtyard** (proverbs) and **Mystery Chamber**
+  (_mafumbo_, short cryptic stories): point at one of three floating answer
+  orbs and pinch.
+- **Object Studio**: four 3D objects stand on the table under a clue such as
+  "Three of these let you in. Which one keeps you out?" Pick up the one it
+  points to. Abstract answers, like a password, stand on the table as word
+  cards.
+- **Pattern Loom** ("Complete the pattern"): a strip of six fabric pieces
+  with one gap; drop the right piece in the gap. Every pattern is drawn in
+  code in five families (kitenge- and kanga-inspired, beadwork, tessellation,
+  weave, abstract), and each board is dealt fresh from the puzzle's rule.
+- **Fix-it Workshop** ("Complete the giraffe"): a little figure built of
+  blocks has a chunk missing. Find the right chunk among four, turn it until
+  it fits and let it go at the gap: it snaps in.
+
+**The twist.** Object Studio puzzles ask for a move with your pick: drop it
+on the tray, flip it over, lift it above your head, or show it to RUSH, who
+comes within reach for that. The right object with the wrong move is "Right
+answer, wrong move!", so listen carefully. New moves arrive one at a time.
+
+**The clock.** Every puzzle plays the same way: the question types out word
+by word while RUSH reads it, the choices appear one at a time while she names
+them, and then a short answer clock starts on the screen: 10 seconds for the
+orbs, 15 for Object Studio, 20 for a pattern or a missing piece. The music
+speeds up as it runs out. Time up, a wrong pick, or the right pick with the
+wrong move loses the puzzle; in practice, **Try again** replays it with its
+hint.
+
+**Ways to play.** Practise one puzzle at a time (**Next puzzle** steps
+through the bank and **Category** narrows it to one world), press **Start a
+10-puzzle run** for a scored set of shuffled puzzles (a solve scores its
+difficulty times ten plus a point for every second left, Skip gives one up,
+and your best score stays on your device), or play the **Daily Challenge**
+(below). One pick per puzzle, so guessing through the choices never pays.
+
+**The screen** floats about 1.4 m away in VR, sized so its text reads easily.
+Press **Closer** to bring it within reach and tap its buttons with a
+fingertip; **Push back** sends it back, and so does a new puzzle. On a flat
+screen, drag empty space to look around; on a phone held upright the view
+steps back so the screen and the table still fit.
+
+## Hands
+
+Everything works with bare hands, seated, within arm's reach:
+
+- **Pinch to grab** the objects, pattern pieces and figure chunks on the
+  table.
+- **Moves**: drop it on the tray, flip it (let go of it upside down), lift it
+  (hold it above your head) or show it (hold it up to RUSH's face). Each is
+  checked from the object's real position and angle, with short holds, so
+  looking closely at an object never counts as lifting it.
+- **Turn to fit**: in Fix-it Workshop the right chunk only snaps in once it
+  is turned the right way round; let it go nearby at the wrong angle and RUSH
+  tells you to turn it.
+- **Point and pinch** at the answer orbs and the screen's buttons. On Meta VR
+  Glasses, look at them and pinch with either hand.
+- **Palm up** to pause (see Pause below).
+
+Controllers work too, but nothing needs them.
+
+## RUSH
+
+RUSH is a cartoon girl with two big hair puffs who stands beside the table.
+She talks with her hands as she reads, puts a hand on her hip as the clock
+runs low, and reacts to every answer with a cheer, a silly dance, a shrug or
+a facepalm. At home she strolls over to her patterned pouf in the corner and
+sits down; pick a world and she runs back. She blinks, her eyes droop when
+she's sleepy, and her mouth moves while she talks and shows her mood (a grin,
+a frown, a surprised "o"). After each answer she has a cheeky word for you
+("Ooh, smarty pants!", "Tick tock, too slow!"). Until her model has loaded, a
+small glowing ball stands in for her.
+
+## The room and the art
+
+You sit in a clay-walled room with a beamed ceiling, a plank door, and two
+windows looking out on hills and acacia and baobab trees against the evening
+sky. The room, the horizon, the patterns, the block figures, RUSH's pouf and
+the VR hands are built in code, and all music and sound is synthesized in
+code. RUSH (from the owner's own character design), the play table, the
+display stands, the furniture in the room's corners and the 3D objects are
+models the project owner generated with Meshy on a plan that grants
+ownership, then optimized for the headset; each is listed in
+[art/SOURCES.md](art/SOURCES.md).
 
 ## Run it locally
 
@@ -126,9 +159,9 @@ server stays at `/`.
 ## Languages
 
 All interface text lives in `src/i18n/en.json` (English, primary) and
-`src/i18n/sw.json` (Swahili). Code reads it with `t(key)` from `src/i18n`, and
-`setLanguage('sw')` switches language; the home page has a toggle button.
-The choice is saved in the browser.
+`src/i18n/sw.json` (Swahili). Code reads it with `t(key)` from `src/i18n`.
+When the language choice is on, `setLanguage('sw')` switches language from a
+home page button, and the choice is saved in the browser.
 
 For the competition the game is **English only**: `LANGUAGE_CHOICE` in
 `src/i18n/index.ts` is `false`, which hides the language button and always
@@ -154,25 +187,31 @@ plus optional `version` and `notes`. Each puzzle has:
 | ------------- | ---------------------------------------------------------------------------- |
 | `id`          | Unique string, e.g. `en-riddle-01`                                           |
 | `lang`        | `en` or `sw`                                                                 |
-| `type`        | `visual`, `riddle`, `proverb` or `mafumbo`                                   |
+| `type`        | `visual`, `riddle`, `proverb`, `mafumbo`, `pattern` or `object`              |
 | `prompt`      | The puzzle text (for mafumbo, the story)                                     |
 | `question`    | Mafumbo only: asked after the story                                          |
 | `answer`      | The correct answer                                                           |
-| `accepted`    | Extra spoken answers that count as correct, or `[]`                          |
+| `accepted`    | Other wordings of the answer, or `[]` (answers are never spoken in v1)       |
 | `options`     | 3 different answers for the orbs, correct one first (the game shuffles them) |
 | `tiles`       | Visual only: the 4 objects on the table, one of them the answer              |
-| `answer_mode` | `grab` (visual), `voice+orbs` or `orbs`                                      |
+| `family`      | Pattern only: `kitenge`, `beadwork`, `tessellation`, `weave` or `abstract`   |
+| `rule`        | Pattern only: the logic of the strip, e.g. `repeat-2` or `mirror`            |
+| `figure`      | Object only: the block figure, e.g. `giraffe` or `dhow`                      |
+| `answer_mode` | `grab` (visual, pattern, object), `voice+orbs` or `orbs`                     |
 | `hint`        | A short hint                                                                 |
 | `explanation` | Shown after answering                                                        |
 | `subtitle_en` | English subtitle; required when `lang` is `sw`, otherwise `null`             |
 | `difficulty`  | `1` (easiest) to `5` (hardest)                                               |
 | `status`      | `draft` or `tested`                                                          |
 
-Visual puzzles use `tiles` with `options: []` and `answer_mode: "grab"`; the
-other types use 3 `options` and no `tiles`. Text must use plain ASCII
-punctuation (straight quotes, no long dashes), because the game font has no
-other characters. `npm run validate` (and every build) checks all of this, plus
-unique ids and the `subtitle_en` rule, and names the field to fix.
+Visual puzzles use `tiles` with `options: []` and `answer_mode: "grab"`.
+Pattern and object puzzles name a `family` and `rule`, or a `figure`, with
+`answer: "generated"` and `options: []`: the game deals the board. Riddles,
+proverbs and mafumbo use 3 `options` and no `tiles`; the orbs show in both
+orb modes. Text must use plain ASCII punctuation (straight quotes, no long
+dashes), because the game font has no other characters. `npm run validate`
+(and every build) checks all of this, plus unique ids and the `subtitle_en`
+rule, and names the field to fix.
 
 ## Read aloud
 
@@ -217,9 +256,9 @@ every choice in turn doesn't pay either.
 
 The first time a device enters VR from the home page, RUSH runs a short
 tour that you play rather than read (`src/tour.ts`): pick up an object,
-drop the odd one out on the tray, point at an orb and pinch, watch RUSH
-shrink and redden as the clock (the music speeds up with it), then turn a
-palm up to pause and again to carry on. Each step waits for you to do it;
+drop your pick on the tray, point at an orb and pinch, watch the clock on
+the screen run out as the music speeds up, then turn a palm up to pause and
+again to carry on. Each step waits for you to do it;
 the pause step ends on its own after 15 seconds. Every line is read aloud
 and shown on the screen, no clock runs and mistakes cost nothing. **Skip
 tour** leaves at any time. The home page's **How to play** button replays
@@ -244,8 +283,8 @@ The game asks for gaze tracking (optionally), so on Meta VR Glasses you look
 at a screen button or an orb and pinch with either hand to
 use it; the puzzle pieces on the table are picked up with your hands as on
 a Quest. The glasses see less of the world (37 degrees to each side, 25 up,
-43 down), so the screen sits a little low and RUSH close beside it: seated
-and glancing down at the table, the puzzle page, RUSH (the timer) and the
+43 down), so the screen sits a little low and RUSH stands just beside the
+table: seated and glancing down at the table, the puzzle page, RUSH and the
 pieces are all in view at once. To check it in the emulator, set
 `dev.emulator.device` to `metaVRGlasses` in `iwsdk.config.json`.
 
@@ -253,12 +292,13 @@ pieces are all in view at once. To check it in the emulator, set
 
 Turn either hand palm up, open, in front of you and hold it for a moment:
 the game pauses. The screen shows **Paused** with **Resume**, **Home** and
-the settings (sound, read aloud, language); the clock, music and voice stop
-and RUSH dozes. Palm up again (or Resume) carries on. With controllers, the
-menu button does the same; on a flat page, Escape. Taking the headset off
-mid-puzzle also pauses it, so nothing is lost while you are away. The
-gesture ignores a hand that is pinching, holding a puzzle piece (flipping
-one turns the palm up) or resting low on the table (`src/palm.ts`).
+the settings (Enter or Exit VR, read aloud, sound); the clock, music and
+voice stop and RUSH waits, sleepy-eyed. Palm up again (or Resume) carries
+on. With controllers, the menu button does the same; on a flat page,
+Escape. Taking the headset off mid-puzzle also pauses it, so nothing is
+lost while you are away. The gesture ignores a hand that is pinching,
+holding a puzzle piece (flipping one turns the palm up) or resting low on
+the table (`src/palm.ts`).
 
 ## Sound
 
@@ -271,20 +311,21 @@ in code (`scripts/generate-chime.mjs`).
 
 - A light groove on a five-note scale (plucked kalimba-like notes, a
   shaker, a low and a high hand drum, with a soft room echo) plays during
-  puzzles. RUSH is the timer and the music is its heartbeat: as the clock
-  runs down it moves from calm (92 beats a minute) to middle (112, the low
-  drum joins) to urgent (134, the slap joins). Home has a calmer version.
+  puzzles. The music follows the answer clock: as it runs down it moves from
+  calm (92 beats a minute) to middle (112, the low drum joins) to urgent
+  (134, the slap joins). Home has a calmer version.
 - The music is rendered once, when the game starts, into four seamless
   loops that play on the browser's audio engine, so a busy moment in the
   game can never cut a note. It changes level only on a bar line, and it
   never stops dead: after an answer it plays on softly, and it fades out
   only when paused, at a run's summary or with sound off.
-- RUSH has a voice: a little hop for a new puzzle, a cheer after the solve
-  chime, an "uh-oh" for a wrong answer, a "huh?" for the right object with
-  the wrong move, a yawn when time runs out and a fanfare at the end of a
-  run. It comes from RUSH's side of your view.
-- The music dips while a puzzle is read aloud, so every word is clear, and
-  stays down through the pauses between sentences.
+- RUSH has little sound cues: a bright call for a new puzzle, a cheer after
+  the solve chime, an "uh-oh" for a wrong answer, a "huh?" for the right
+  object with the wrong move, a yawn when time runs out and a fanfare at
+  the end of a run. They come from RUSH's side of your view.
+- While RUSH reads a puzzle and names its choices, the music drops to a
+  background level so every word is clear; it comes back up when the answer
+  clock starts.
 - Sound pauses with the game when the headset is taken off. The home page's
   **Sound on / Sound off** button switches it all, and the choice is saved.
 
@@ -298,9 +339,9 @@ The full list is in [CLAUDE.md](CLAUDE.md). In short:
   grants ownership (listed in `art/SOURCES.md`). No brand names, logos or
   real people.
   The answer chime (`public/audio/chime.wav`) is synthesized by
-  `scripts/generate-chime.mjs`, and every model is built in code, including
-  the VR hands and controllers (`src/input-visuals.ts`), which IWSDK would
-  otherwise download from a CDN.
+  `scripts/generate-chime.mjs`. The VR hands and controllers are built in
+  code (`src/input-visuals.ts`), which IWSDK would otherwise download from a
+  CDN, so the game makes no outside requests while it runs.
 - Keep the build under 20 MB. The build fails above that.
 
 ## Performance
@@ -335,7 +376,8 @@ src/index.ts              entry point: creates the world, registers systems
 src/i18n/                 en.json, sw.json and the t() helper
 src/ui-text.ts            fills UIKitML text from src/i18n
 src/input-visuals.ts      code-built hands and controllers for VR
-src/puzzle.ts             gameplay: tiles, tray, answer orbs, timer, progression
+src/puzzle.ts             gameplay: tiles, tray, answer orbs, answer clock, progression
+src/round-flow.ts         each puzzle's phases: reading, naming the choices, the answer clock (tested)
 src/movable-panel.ts      the screen's two stops (Far, and Near within reach) and its glide
 src/screen-look.ts        drag-to-look camera for flat screens
 src/screen-stops.ts       beckoning the screen: its Far and Near stops (tests in tests/)
@@ -352,14 +394,18 @@ src/pause-gesture.ts      the palm-up pause (gesture logic in src/palm.ts, teste
 src/puzzles.ts            typed access to content/puzzles.json
 src/tile-models.ts        which visual tiles get a miniature (tests in tests/)
 src/moves.ts              the action twist: which move to ask for, and judging it
-src/rush.ts               RUSH the companion (moods and timer in src/rush-mood.ts)
-src/rush-body.ts          RUSH's body: her moves and walks (rules in src/rush-body-plan.ts, tested)
+src/rush.ts               RUSH's moods and her floating stand-in (mood rules in src/rush-mood.ts, tested)
+src/rush-body.ts          RUSH's body: her moves, walks and sitting (rules in src/rush-body-plan.ts, tested)
+src/rush-face.ts          RUSH's blinking eyelids and talking mouth (fitted data in src/rush-face-shape.ts)
+src/flat-view.ts          frames the flat page for any window shape, phones included
+src/performance.ts        72 Hz in VR and the ?fps readout (timing in src/frame-stats.ts, tested)
 public/models/            imported models, optimized (see art/SOURCES.md); room/ holds the corner set dressing
 art/                      originals of imported models and how they were made
 src/read-aloud.ts         reads puzzles aloud with on-device voices only
 src/assets.ts             asset manifest; models are built in src/scene-assets/
 scripts/                  content check, build size check, chime generator,
-                          model optimizer, rigged-character compactor
+                          model optimizer, rigged-character compactor, and
+                          RUSH's face tools (paint-face, fit-face)
 iwsdk.config.json         IWSDK settings: XR mode, hand tracking, features
 ```
 
