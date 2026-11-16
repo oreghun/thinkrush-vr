@@ -99,7 +99,7 @@ Live build: https://oreghun.github.io/thinkrush-vr/
 Whoever works on the repo updates this section when a PR merges or a
 decision changes. Newest facts win.
 
-As of 2026-11-08, PRs 1-61 merged (6 answer orbs;
+As of 2026-11-16, PRs 1-62 merged (6 answer orbs;
 7 Next always visible on the desktop page, where tiles need hands; 8 movable
 panels and drag-to-look; 9 the 3-minute run loop; 10 the category picker and
 desktop fixes; 11-17, by the owner: ten English drafts per puzzle type,
@@ -129,7 +129,8 @@ owner's megaphone; 53 round timing: read, name, then a short answer
 clock; 54 RUSH's mouth, cheeky lines and voice; 55 the answer clock on
 every page; 56 RUSH's body; 57 and 58 first tries at seating her on the
 stool, superseded by 59 her pouf; 60 her neck (on the first body); 61 the
-new RUSH, a cartoon girl without a glow; then her moving face):
+new RUSH, a cartoon girl without a glow; 62 her moving face; then the
+README rewritten for judges):
 
 Live on main
 
@@ -654,6 +655,21 @@ Live on main
   the headset.
 
 Decisions
+
+- Submission and freeze (2026-11-16, from the Devpost rules and overview
+  pages): IWSDK entries submit a link to the live build (GitHub Pages is
+  named; no APK or Store build); a demo video under 3 minutes, public on
+  YouTube or Vimeo (headset or emulator footage both allowed; no AI-made
+  video carrying the pitch); and the form: name, tagline (140 characters),
+  track Gaming, division New Experience (first commit 2026-10-29),
+  a description of about 500 words (inspiration, how it was built, future
+  plans), an optional hand-interactions answer and a target launch date. The
+  submitter must be a Meta VR Start member by the time of submission. The
+  entry is judged as it stands at the deadline (Nov 18, 2026, 12:00 PT, 23:00
+  in Kenya) and must stay playable until winners are announced (about Dec 11):
+  merge nothing to main in that window, since every push to main redeploys
+  the live link. Post-competition work (Swahili first) waits on branches.
+  The owner registered and started the Devpost project on 2026-11-16.
 
 - RUSH without a glow (owner, 2026-11-03): the new RUSH is a cartoon girl
   with her own head, and nothing on her glows. The answer clock shows on
